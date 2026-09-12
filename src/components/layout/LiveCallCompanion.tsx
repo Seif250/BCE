@@ -56,11 +56,12 @@ export const LiveCallCompanion: React.FC<LiveCallCompanionProps> = ({
     if (dob) {
       calculation = evaluateStudent({
         dob,
+        selectedProgram: 'auto',
         registrationType: 'New',
-        termCount: 1,
+        numberOfTerms: 1,
         siblingCount: 1,
-        isYoungest: false,
-        summerCampsSelected: [],
+        isYoungestSibling: false,
+        selectedCamps: [],
         isStarterLevel: false,
       });
     }
@@ -69,7 +70,7 @@ export const LiveCallCompanion: React.FC<LiveCallCompanionProps> = ({
   }
 
   const quickAnswerText = calculation
-    ? calculation.quickCustomerAnswer[language]
+    ? (language === 'ar' ? calculation.quickCustomerAnswerAr : calculation.quickCustomerAnswerEn)
     : '';
 
   return (
@@ -153,18 +154,18 @@ export const LiveCallCompanion: React.FC<LiveCallCompanionProps> = ({
                     {language === 'ar' ? 'السن المحسوب:' : 'Calculated Age:'}
                   </span>
                   <strong className="text-sm font-black text-slate-900">
-                    {calculation.age.years} {language === 'ar' ? 'سنة' : 'years'} ({calculation.age.months} {language === 'ar' ? 'شهر' : 'mos'})
+                    {calculation.ageYears} {language === 'ar' ? 'سنة' : 'years'} ({calculation.ageMonths} {language === 'ar' ? 'شهر' : 'mos'})
                   </strong>
                 </div>
 
                 <span
                   className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                    calculation.placementTestRequired
+                    calculation.placementTest.required
                       ? 'bg-amber-50 text-amber-900 border-amber-200'
                       : 'bg-emerald-50 text-emerald-900 border-emerald-200'
                   }`}
                 >
-                  {calculation.placementTestRequired
+                  {calculation.placementTest.required
                     ? (language === 'ar' ? 'امتحان 200 ج' : '200 EGP PT')
                     : (language === 'ar' ? 'بدون امتحان (معفي)' : 'No PT Needed')}
                 </span>
@@ -173,14 +174,14 @@ export const LiveCallCompanion: React.FC<LiveCallCompanionProps> = ({
               <div className="space-y-1 text-slate-700 text-[11px]">
                 <div className="flex justify-between">
                   <span className="text-slate-500">{language === 'ar' ? 'المرحلة:' : 'Stage:'}</span>
-                  <strong className="text-bc-navy-900">{calculation.ageGroup ? calculation.ageGroup.name : 'N/A'}</strong>
+                  <strong className="text-bc-navy-900">{calculation.ageGroup}</strong>
                 </div>
 
                 <div className="flex justify-between">
                   <span className="text-slate-500">{language === 'ar' ? 'السعر الرسمي:' : 'Standard Fee:'}</span>
                   <strong className="text-emerald-700 font-extrabold text-xs">
-                    {calculation.pricing.basePrice !== null
-                      ? `${calculation.pricing.basePrice.toLocaleString()} ${language === 'ar' ? 'جنيه' : 'EGP'}`
+                    {calculation.basePrice !== null
+                      ? `${calculation.basePrice.toLocaleString()} ${language === 'ar' ? 'جنيه' : 'EGP'}`
                       : (language === 'ar' ? 'حسب الباقة' : 'Per package')}
                   </strong>
                 </div>
