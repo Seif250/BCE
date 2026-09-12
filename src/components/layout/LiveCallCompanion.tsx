@@ -297,19 +297,19 @@ export const LiveCallCompanion: React.FC<LiveCallCompanionProps> = ({
           <div className="space-y-1 text-[11px] text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
             <div className="flex justify-between border-b border-slate-200/60 pb-1">
               <span>{language === 'ar' ? 'العجوزة (AGU):' : 'Agouza:'}</span>
-              <strong className="text-slate-900">10:00 AM – 7:00 PM</strong>
+              <strong className="text-slate-900">{language === 'ar' ? '١٠:٠٠ ص – ٧:٠٠ م' : '10:00 AM – 7:00 PM'}</strong>
             </div>
             <div className="flex justify-between border-b border-slate-200/60 pb-1 pt-1">
               <span>{language === 'ar' ? 'سيتي ستارز (CTS):' : 'City Stars:'}</span>
-              <strong className="text-slate-900">1:00 PM – 8:00 PM</strong>
+              <strong className="text-slate-900">{language === 'ar' ? '١:٠٠ م – ٨:٠٠ م' : '1:00 PM – 8:00 PM'}</strong>
             </div>
             <div className="flex justify-between border-b border-slate-200/60 pb-1 pt-1">
               <span>{language === 'ar' ? 'التجمع وأكتوبر:' : 'New Cairo & Oct:'}</span>
-              <strong className="text-slate-900">12:00 PM – 7:00 PM</strong>
+              <strong className="text-slate-900">{language === 'ar' ? '١٢:٠٠ م – ٧:٠٠ م' : '12:00 PM – 7:00 PM'}</strong>
             </div>
             <div className="flex justify-between pt-1">
               <span>{language === 'ar' ? 'الإسكندرية (KLS):' : 'Alexandria:'}</span>
-              <strong className="text-slate-900">11:00 AM – 6:00 PM</strong>
+              <strong className="text-slate-900">{language === 'ar' ? '١١:٠٠ ص – ٦:٠٠ م' : '11:00 AM – 6:00 PM'}</strong>
             </div>
           </div>
         </div>

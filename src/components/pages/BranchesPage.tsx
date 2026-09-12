@@ -169,73 +169,79 @@ export const BranchesPage: React.FC = () => {
 
       {/* Branch Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredBranches.map((branch) => (
-          <div
-            key={branch.id}
-            className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4 hover:shadow-md transition-shadow flex flex-col justify-between"
-          >
-            <div className="space-y-3">
-              {/* Header */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[10px] font-mono font-bold bg-bc-navy-50 text-bc-navy-900 px-2 py-0.5 rounded border border-bc-navy-200">
-                    {branch.code}
-                  </span>
-                  <h3 className="text-base font-extrabold text-slate-900 mt-1">{branch.name}</h3>
-                </div>
+        {filteredBranches.map((branch) => {
+          const branchName = language === 'ar' && branch.nameAr ? branch.nameAr : branch.name;
+          const branchAddress = language === 'ar' && branch.addressAr ? branch.addressAr : branch.address;
+          const branchHours = language === 'ar' && branch.workingHoursAr ? branch.workingHoursAr : branch.workingHours;
+          const branchDays = language === 'ar' && branch.workingDaysAr ? branch.workingDaysAr : branch.workingDays;
 
-                <span
-                  className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${
-                    branch.customerServiceAvailable
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      : 'bg-rose-50 text-rose-800 border-rose-200'
-                  }`}
-                >
-                  {branch.customerServiceAvailable
-                    ? (language === 'ar' ? 'مكتب خدمة عملاء نشط' : 'CS Desk Active')
-                    : (language === 'ar' ? 'بدون مكتب خدمة عملاء' : 'No CS Desk')}
-                </span>
-              </div>
+          return (
+            <div
+              key={branch.id}
+              className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 space-y-4 hover:shadow-md transition-all flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold bg-bc-navy-50 text-bc-navy-900 px-2 py-0.5 rounded border border-bc-navy-200">
+                      {branch.code}
+                    </span>
+                    <h3 className="text-base font-extrabold text-slate-900 mt-1">{branchName}</h3>
+                  </div>
 
-              {/* Address with one-click copy */}
-              <div className="text-xs text-slate-700 flex items-start space-x-2 rtl:space-x-reverse bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <span className="block font-medium leading-relaxed">{branch.address}</span>
-                  <button
-                    onClick={() => handleCopy(branch.address, `addr-${branch.id}`)}
-                    className="mt-1.5 text-bc-teal-700 hover:text-bc-teal-900 font-bold inline-flex items-center space-x-1 rtl:space-x-reverse text-[11px]"
+                  <span
+                    className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${
+                      branch.customerServiceAvailable
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        : 'bg-rose-50 text-rose-800 border-rose-200'
+                    }`}
                   >
-                    {copiedId === `addr-${branch.id}` ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{common.copied}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>{pt.cardLabels.copyAddress}</span>
-                      </>
-                    )}
-                  </button>
+                    {branch.customerServiceAvailable
+                      ? (language === 'ar' ? 'مكتب خدمة عملاء نشط' : 'CS Desk Active')
+                      : (language === 'ar' ? 'بدون مكتب خدمة عملاء' : 'No CS Desk')}
+                  </span>
                 </div>
-              </div>
 
-              {/* Working Hours & Days */}
-              <div className="space-y-1.5 text-xs text-slate-700 pt-1">
-                <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                  <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                  <span>
-                    <strong className="text-slate-900">{pt.cardLabels.hours}</strong> {branch.workingHours}
-                  </span>
+                {/* Address with one-click copy */}
+                <div className="text-xs text-slate-700 flex items-start space-x-2 rtl:space-x-reverse bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <span className="block font-medium leading-relaxed">{branchAddress}</span>
+                    <button
+                      onClick={() => handleCopy(branchAddress, `addr-${branch.id}`)}
+                      className="mt-1.5 text-bc-teal-700 hover:text-bc-teal-900 font-bold inline-flex items-center space-x-1 rtl:space-x-reverse text-[11px]"
+                    >
+                      {copiedId === `addr-${branch.id}` ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{common.copied}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{pt.cardLabels.copyAddress}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                  <span>
-                    <strong className="text-slate-900">{pt.cardLabels.days}</strong> {branch.workingDays}
-                  </span>
+
+                {/* Working Hours & Days */}
+                <div className="space-y-1.5 text-xs text-slate-700 pt-1">
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <span>
+                      <strong className="text-slate-900">{pt.cardLabels.hours}</strong> {branchHours}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <span>
+                      <strong className="text-slate-900">{pt.cardLabels.days}</strong> {branchDays}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
               {/* Personnel (Manager & Senior Teachers) */}
               {(branch.manager || branch.adultSeniorTeacher) && (
@@ -288,7 +294,8 @@ export const BranchesPage: React.FC = () => {
               </div>
             )}
           </div>
-        ))}
+        );
+      })}
       </div>
     </div>
   );

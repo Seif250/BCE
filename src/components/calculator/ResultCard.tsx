@@ -473,15 +473,20 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
 
           {result.branchInfo ? (
             <div className="text-xs space-y-1.5 text-slate-700">
-              <div className="font-black text-slate-900 text-sm">{result.branchInfo.name}</div>
-              <div>
-                <strong>{t.branchLocationLabel}:</strong> {result.branchInfo.address}
+              <div className="font-black text-slate-900 text-sm">
+                {language === 'ar' && result.branchInfo.nameAr ? result.branchInfo.nameAr : result.branchInfo.name}
               </div>
               <div>
-                <strong>{t.branchHoursLabel}:</strong> {result.branchInfo.workingHours}
+                <strong>{t.branchLocationLabel}:</strong>{' '}
+                {language === 'ar' && result.branchInfo.addressAr ? result.branchInfo.addressAr : result.branchInfo.address}
               </div>
               <div>
-                <strong>{t.branchDaysLabel}:</strong> {result.branchInfo.workingDays}
+                <strong>{t.branchHoursLabel}:</strong>{' '}
+                {language === 'ar' && result.branchInfo.workingHoursAr ? result.branchInfo.workingHoursAr : result.branchInfo.workingHours}
+              </div>
+              <div>
+                <strong>{t.branchDaysLabel}:</strong>{' '}
+                {language === 'ar' && result.branchInfo.workingDaysAr ? result.branchInfo.workingDaysAr : result.branchInfo.workingDays}
               </div>
               {result.branchInfo.manager && (
                 <div className="text-slate-500 text-[11px]">

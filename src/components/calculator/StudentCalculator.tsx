@@ -322,7 +322,7 @@ export const StudentCalculator: React.FC = () => {
               >
                 {BRANCHES.map((b) => (
                   <option key={b.id} value={b.id}>
-                    {b.name}
+                    {language === 'ar' && b.nameAr ? b.nameAr : b.name}
                   </option>
                 ))}
               </select>

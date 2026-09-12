@@ -24,14 +24,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
         <div className="flex items-center justify-between h-16">
           {/* Brand & Logo (Official British Council Styling) */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0">
-            {/* Iconic British Council 4-dot Grid Emblem */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-bc-navy-900 to-bc-navy-800 border border-bc-teal-500/40 p-2 flex items-center justify-center shadow-md flex-shrink-0 group hover:border-bc-teal-400 transition-colors">
-              <div className="grid grid-cols-2 gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-bc-teal-400 animate-pulse"></div>
-                <div className="w-2 h-2 rounded-full bg-bc-teal-300"></div>
-                <div className="w-2 h-2 rounded-full bg-bc-teal-300"></div>
-                <div className="w-2 h-2 rounded-full bg-white"></div>
-              </div>
+            {/* Iconic British Council Official Logo Image */}
+            <div className="relative flex-shrink-0">
+              <img
+                src="/bc-logo.png"
+                alt="British Council"
+                className="w-10 h-10 rounded-xl object-contain shadow-md border border-white/20 hover:scale-105 transition-transform"
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-bc-navy-950 rounded-full animate-pulse"></span>
             </div>
 
             <div>

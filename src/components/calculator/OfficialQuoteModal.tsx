@@ -38,9 +38,11 @@ export const OfficialQuoteModal: React.FC<OfficialQuoteModalProps> = ({
         {/* Top Control Bar (Hidden when printing) */}
         <div className="bg-bc-navy-900 text-white p-4 flex items-center justify-between print:hidden">
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <span className="w-7 h-7 rounded-lg bg-bc-teal-500 text-bc-navy-950 font-black flex items-center justify-center text-sm">
-              BC
-            </span>
+            <img
+              src="/bc-logo.png"
+              alt="BC"
+              className="w-8 h-8 rounded-lg object-contain shadow flex-shrink-0"
+            />
             <div>
               <h2 className="text-sm font-bold text-white">
                 {language === 'ar' ? 'عرض سعر رسمي معتمد للعميل' : 'Official Course Quotation'}
@@ -73,25 +75,18 @@ export const OfficialQuoteModal: React.FC<OfficialQuoteModalProps> = ({
           {/* Header of Quotation */}
           <div className="flex items-start justify-between border-b-2 border-bc-navy-800 pb-5">
             <div className="space-y-1">
-              {/* British Council 4-dot brand icon */}
-              <div className="flex items-center space-x-2.5 rtl:space-x-reverse mb-2">
-                <div className="grid grid-cols-2 gap-1 w-6 h-6 bg-bc-navy-900 p-1 rounded-md">
-                  <div className="w-1.5 h-1.5 rounded-full bg-bc-teal-400"></div>
-                  <div className="w-1.5 h-1.5 rounded-full bg-bc-teal-400"></div>
-                  <div className="w-1.5 h-1.5 rounded-full bg-bc-teal-400"></div>
-                  <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                </div>
-                <div>
-                  <h1 className="text-lg font-black tracking-tight text-bc-navy-900 leading-tight">
-                    BRITISH COUNCIL
-                  </h1>
-                  <span className="text-xs font-bold text-bc-teal-600 block">
-                    {language === 'ar' ? 'المجلس الثقافي البريطاني - مصر' : 'British Council Egypt'}
-                  </span>
-                </div>
+              {/* Official British Council Full Logo Image */}
+              <div className="flex items-center space-x-3 rtl:space-x-reverse mb-2">
+                <img
+                  src="/bc-logo-full.png"
+                  alt="British Council"
+                  className="h-10 sm:h-12 object-contain"
+                />
               </div>
               <p className="text-xs text-slate-500">
-                {language === 'ar' ? 'نظام المبيعات وخدمة العملاء المعتمد' : 'Official Sales & Customer Advisory Service'}
+                {language === 'ar'
+                  ? 'المجلس الثقافي البريطاني - مصر • نظام المبيعات وخدمة العملاء المعتمد'
+                  : 'British Council Egypt • Official Sales & Customer Advisory Service'}
               </p>
             </div>
 
@@ -101,8 +96,8 @@ export const OfficialQuoteModal: React.FC<OfficialQuoteModalProps> = ({
               </div>
               <div className="text-slate-500">{today}</div>
               {result.branchInfo && (
-                <div className="font-semibold text-slate-700">
-                  {result.branchInfo.name}
+                <div className="font-bold text-slate-800">
+                  {language === 'ar' && result.branchInfo.nameAr ? result.branchInfo.nameAr : result.branchInfo.name}
                 </div>
               )}
             </div>

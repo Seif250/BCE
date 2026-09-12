@@ -101,9 +101,13 @@ export interface Branch {
   id: string;
   code: string;
   name: string;
+  nameAr?: string;
   address: string;
+  addressAr?: string;
   workingHours: string;
+  workingHoursAr?: string;
   workingDays: string;
+  workingDaysAr?: string;
   customerServiceAvailable: boolean;
   manager?: string;
   adultSeniorTeacher?: string;
