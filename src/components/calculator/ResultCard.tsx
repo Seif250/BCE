@@ -12,14 +12,9 @@ import {
   Sparkles,
   Info,
   Languages,
-  Printer,
-  Send,
-  MessageSquare,
-  CheckCheck,
 } from 'lucide-react';
 import { CalculationResult } from '../../data/types';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { OfficialQuoteModal } from './OfficialQuoteModal';
 
 interface ResultCardProps {
   result: CalculationResult;
@@ -31,7 +26,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
   // Quick answer language selection: default to active app language
   const [answerLang, setAnswerLang] = useState<'ar' | 'en'>(language);
   const [copied, setCopied] = useState(false);
-  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
   // Sync answerLang when app language switches
   React.useEffect(() => {
@@ -71,14 +65,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
     }
   };
 
-  const currentTime = new Date().toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
   return (
     <div className="space-y-4">
-      {/* Top Banner: Age, Group, Category + Print Quotation Action */}
+      {/* Top Banner: Age, Group, Category */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow p-5 relative overflow-hidden">
         <div
           className={`absolute top-0 w-2.5 h-full bg-bc-teal-500 ${
@@ -117,22 +106,13 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
             </p>
           </div>
 
-          <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
-            {/* Print Official Quote Button */}
-            <button
-              onClick={() => setIsQuoteModalOpen(true)}
-              className="flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-xl bg-bc-navy-900 hover:bg-bc-navy-800 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02] border border-bc-navy-700"
-              title={language === 'ar' ? 'طباعة أو تصدير عرض سعر رسمي' : 'Print or Export Official Quote'}
-            >
-              <Printer className="w-4 h-4 text-bc-teal-400" />
-              <span>{language === 'ar' ? 'عرض سعر رسمي للطباعة' : 'Official Quote Sheet'}</span>
-            </button>
-
-            <div className="text-right rtl:text-left">
-              <span className="inline-block font-bold text-xs text-bc-navy-800 bg-bc-navy-50 px-3 py-1 rounded-lg border border-bc-navy-200">
-                {result.program}
-              </span>
-            </div>
+          <div className="text-right rtl:text-left">
+            <span className="text-xs text-slate-400 block font-medium">
+              {t.programSeasonLabel}
+            </span>
+            <span className="inline-block font-bold text-xs text-bc-navy-800 bg-bc-navy-50 px-3 py-1 rounded-lg border border-bc-navy-200">
+              {result.program}
+            </span>
           </div>
         </div>
 
@@ -228,35 +208,33 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
         </div>
       </div>
 
-      {/* WHATSAPP INTERACTIVE CUSTOMER MESSAGE CARD */}
-      <div className="bg-slate-900 rounded-2xl shadow-md border border-slate-800 overflow-hidden">
-        {/* WhatsApp Brand Header */}
-        <div className="bg-[#075E54] text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+      {/* QUICK SALES CALL SCRIPT / SUGGESTED ANSWER */}
+      <div className="bg-gradient-to-br from-bc-navy-950 to-bc-navy-900 text-white rounded-2xl shadow-sm p-5 border border-bc-navy-800 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
-            <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow">
-              <MessageSquare className="w-4 h-4 fill-current" />
-            </div>
+            <span className="p-1.5 rounded-lg bg-bc-teal-500/20 text-bc-teal-300 border border-bc-teal-500/30">
+              <FileText className="w-4 h-4" />
+            </span>
             <div>
-              <div className="font-bold text-xs sm:text-sm leading-tight flex items-center gap-1.5">
-                <span>{language === 'ar' ? 'رسالة واتساب الجاهزة للعميل' : 'Customer WhatsApp Ready Pitch'}</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              </div>
-              <span className="text-[11px] text-emerald-100">
-                {language === 'ar' ? 'مجهزة للإرسال الفوري للعميل أثناء المكالمة' : 'Formatted for 1-click customer sending'}
+              <span className="text-xs font-bold uppercase tracking-wider text-bc-teal-300 block">
+                {language === 'ar' ? 'صيغة الرد المقترح للعميل في المكالمة' : 'Suggested Call Pitch'}
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {language === 'ar' ? 'ملخص المعلومات والأسعار للرد الفوري أثناء المكالمة' : 'Instant response guide during phone calls'}
               </span>
             </div>
           </div>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            {/* Language Switch */}
-            <div className="flex items-center rounded-lg bg-[#054c44] p-0.5 border border-emerald-800">
+            {/* Toggle Answer Language (AR / EN) */}
+            <div className="flex items-center rounded-xl bg-bc-navy-900 p-0.5 border border-bc-navy-700">
               <button
                 type="button"
                 onClick={() => setAnswerLang('ar')}
-                className={`px-2.5 py-1 text-xs font-bold rounded transition-all ${
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
                   answerLang === 'ar'
-                    ? 'bg-[#25D366] text-slate-950 shadow'
-                    : 'text-emerald-100 hover:text-white'
+                    ? 'bg-bc-teal-500 text-bc-navy-950 shadow'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 🇪🇬 مصري
@@ -264,35 +242,23 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
               <button
                 type="button"
                 onClick={() => setAnswerLang('en')}
-                className={`px-2.5 py-1 text-xs font-bold rounded transition-all ${
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
                   answerLang === 'en'
-                    ? 'bg-[#25D366] text-slate-950 shadow'
-                    : 'text-emerald-100 hover:text-white'
+                    ? 'bg-bc-teal-500 text-bc-navy-950 shadow'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 🇬🇧 English
               </button>
             </div>
 
-            {/* Direct Send via WhatsApp Button */}
-            <a
-              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(activeAnswer)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 text-xs font-black shadow transition-transform hover:scale-105"
-              title={language === 'ar' ? 'فتح في واتساب ويب / تطبيق واتساب' : 'Open in WhatsApp Web / App'}
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{language === 'ar' ? 'فتح في واتساب' : 'Open WhatsApp'}</span>
-            </a>
-
             {/* Copy Button */}
             <button
               onClick={handleCopyAnswer}
-              className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow ${
+              className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow ${
                 copied
-                  ? 'bg-emerald-400 text-slate-950'
-                  : 'bg-white/15 text-white hover:bg-white/25'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-bc-teal-500 text-bc-navy-950 hover:bg-bc-teal-400 hover:scale-[1.02]'
               }`}
             >
               {copied ? (
@@ -310,28 +276,18 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
           </div>
         </div>
 
-        {/* WhatsApp Chat Bubble Body */}
-        <div className="p-4 sm:p-5 bg-[#0b141a] bg-opacity-95">
-          <div className="max-w-3xl bg-[#005c4b] text-white p-4 rounded-2xl rounded-tr-none shadow-md space-y-2 relative border border-[#00745e]">
-            <p
-              className={`text-sm sm:text-base leading-relaxed font-sans ${
-                answerLang === 'ar' ? 'text-right dir-rtl' : 'text-left dir-ltr'
-              }`}
-              dir={answerLang === 'ar' ? 'rtl' : 'ltr'}
-            >
-              "{activeAnswer}"
-            </p>
+        <p
+          className={`text-sm sm:text-base text-slate-100 leading-relaxed bg-bc-navy-900/70 p-4 rounded-xl border border-bc-navy-800 font-sans ${
+            answerLang === 'ar' ? 'text-right dir-rtl' : 'text-left dir-ltr'
+          }`}
+          dir={answerLang === 'ar' ? 'rtl' : 'ltr'}
+        >
+          "{activeAnswer}"
+        </p>
 
-            <div className="flex items-center justify-end space-x-1.5 rtl:space-x-reverse text-[11px] text-emerald-200/80 pt-1">
-              <span>{currentTime}</span>
-              <CheckCheck className="w-3.5 h-3.5 text-sky-400" />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-800">
-            <span>{t.quickAnswerDisclaimer}</span>
-            <span className="font-mono text-bc-teal-400/90 font-semibold">{result.sourceSheet}</span>
-          </div>
+        <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+          <span>{t.quickAnswerDisclaimer}</span>
+          <span className="font-mono text-bc-teal-300/80">{result.sourceSheet}</span>
         </div>
       </div>
 
@@ -518,13 +474,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
           </ul>
         </div>
       )}
-
-      {/* Official Printable Quotation Modal */}
-      <OfficialQuoteModal
-        isOpen={isQuoteModalOpen}
-        onClose={() => setIsQuoteModalOpen(false)}
-        result={result}
-      />
     </div>
   );
 };
