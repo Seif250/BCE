@@ -11,6 +11,7 @@ import {
   Sun,
   Snowflake,
   GraduationCap,
+  CreditCard,
 } from 'lucide-react';
 import { CalculationInput, ProgramType, RegistrationType, AgeCategory } from '../../data/types';
 import { evaluateStudent } from '../../engine/courseEngine';
@@ -131,13 +132,13 @@ export const StudentCalculator: React.FC = () => {
   ]);
 
   const quickPresets = [
-    { label: language === 'ar' ? '٤ سنين (Ducks)' : '4 (Ducks)', age: 4 },
-    { label: language === 'ar' ? '٥ سنين (Owls)' : '5 (Owls)', age: 5 },
-    { label: language === 'ar' ? '٧ سنين (ابتدائي أصغر)' : '7 (LP)', age: 7 },
-    { label: language === 'ar' ? '١٠ سنين (ابتدائي أكبر)' : '10 (UP)', age: 10 },
-    { label: language === 'ar' ? '١٣ سنة (إعدادي)' : '13 (Sec)', age: 13 },
-    { label: language === 'ar' ? '١٦ سنة (ثانوي)' : '16 (US)', age: 16 },
-    { label: language === 'ar' ? '٢٠+ (كبار)' : '20+ (Adult)', age: 20 },
+    { label: language === 'ar' ? '🦆 ٤ سنين (Ducks)' : '🦆 4 (Ducks)', age: 4 },
+    { label: language === 'ar' ? '🦉 ٥ سنين (Owls)' : '🦉 5 (Owls)', age: 5 },
+    { label: language === 'ar' ? '🎒 ٧ سنين (ابتدائي أصغر)' : '🎒 7 (LP)', age: 7 },
+    { label: language === 'ar' ? '📘 ١٠ سنين (ابتدائي أكبر)' : '📘 10 (UP)', age: 10 },
+    { label: language === 'ar' ? '⚡ ١٣ سنة (إعدادي)' : '⚡ 13 (Sec)', age: 13 },
+    { label: language === 'ar' ? '🎓 ١٦ سنة (ثانوي)' : '🎓 16 (US)', age: 16 },
+    { label: language === 'ar' ? '💼 ٢٠+ (كبار)' : '💼 20+ (Adult)', age: 20 },
   ];
 
   return (
@@ -155,30 +156,89 @@ export const StudentCalculator: React.FC = () => {
 
         <button
           onClick={handleReset}
-          className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors shadow-sm self-start sm:self-auto"
+          className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors shadow-2xs self-start sm:self-auto"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
           <span>{t.resetBtn}</span>
         </button>
+      </div>
+
+      {/* Executive KPI Stats Ribbon */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center space-x-3 rtl:space-x-reverse">
+          <div className="w-10 h-10 rounded-xl bg-bc-navy-50 text-bc-navy-800 flex items-center justify-center flex-shrink-0 border border-bc-navy-100">
+            <Building2 className="w-5 h-5 text-bc-navy-800" />
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              {language === 'ar' ? 'الفروع المعتمدة' : 'Branches'}
+            </span>
+            <span className="text-sm font-black text-slate-900">
+              {language === 'ar' ? '٦ فروع رئيسية بمصر' : '6 Centers in Egypt'}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center space-x-3 rtl:space-x-reverse">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center flex-shrink-0 border border-amber-200">
+            <GraduationCap className="w-5 h-5 text-amber-700" />
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              {language === 'ar' ? 'تحديد المستوى (PT)' : 'Placement Test'}
+            </span>
+            <span className="text-sm font-black text-slate-900">
+              {language === 'ar' ? '٢٠٠ ج.م (صالح ٦ شهور)' : '200 EGP (6 Mo. Valid)'}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center space-x-3 rtl:space-x-reverse">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0 border border-emerald-200">
+            <CreditCard className="w-5 h-5 text-emerald-700" />
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              {language === 'ar' ? 'التقسيط البنكي' : 'Bank Installments'}
+            </span>
+            <span className="text-sm font-black text-slate-900">
+              {language === 'ar' ? 'حتى ١٢ شهر بدون فوائد' : 'Up to 12 Months 0%'}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs flex items-center space-x-3 rtl:space-x-reverse">
+          <div className="w-10 h-10 rounded-xl bg-bc-teal-50 text-bc-teal-700 flex items-center justify-center flex-shrink-0 border border-bc-teal-200">
+            <Sparkles className="w-5 h-5 text-bc-teal-600" />
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              {language === 'ar' ? 'دقة البيانات والسرعة' : 'Data Speed'}
+            </span>
+            <span className="text-sm font-black text-bc-teal-700">
+              {language === 'ar' ? '٠ ثانية • معتمد ١٠٠٪' : '0 sec • 100% Policy'}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: Inputs (5 Cols) */}
-        <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-5">
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 space-y-5">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5 rtl:space-x-reverse">
               <Calendar className="w-4 h-4 text-bc-teal-600" />
               <span>{t.studentParameters}</span>
             </span>
-            <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
               {t.liveCalcBadge}
             </span>
           </div>
 
           {/* Quick Age Presets (Extreme Speed for Call Center!) */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
               {t.quickPresetsLabel}
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -187,7 +247,7 @@ export const StudentCalculator: React.FC = () => {
                   key={preset.age}
                   type="button"
                   onClick={() => handleQuickAgePreset(preset.age)}
-                  className="px-2 py-1 text-xs font-medium rounded-md bg-slate-100 hover:bg-bc-navy-800 hover:text-white text-slate-700 border border-slate-200 transition-colors"
+                  className="px-2.5 py-1.5 text-xs font-bold rounded-xl bg-slate-100 hover:bg-bc-navy-900 hover:text-white text-slate-700 border border-slate-200 shadow-2xs hover:shadow transition-all hover:-translate-y-0.5 active:translate-y-0"
                 >
                   {preset.label}
                 </button>

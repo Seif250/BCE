@@ -164,13 +164,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={item.id}
                 onClick={() => handleSelect(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left rtl:text-right ${
                   isActive
-                    ? 'bg-bc-navy-800 text-white shadow-sm'
-                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-bc-navy-900 text-white shadow-md ring-1 ring-bc-navy-700'
+                    : 'text-slate-700 hover:bg-slate-100/90 hover:text-slate-900'
                 }`}
               >
-                <div className="flex items-center space-x-3 truncate">
+                <div className="flex items-center space-x-3 rtl:space-x-reverse truncate">
                   <Icon
                     className={`w-4 h-4 flex-shrink-0 ${
                       isActive ? 'text-bc-teal-400' : 'text-slate-500'
@@ -181,9 +181,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 {item.badge && (
                   <span
-                    className={`ml-2 px-1.5 py-0.5 text-[10px] font-semibold rounded border ${
+                    className={`ml-2 rtl:ml-0 rtl:mr-2 px-1.5 py-0.5 text-[10px] font-bold rounded-md border ${
                       isActive
-                        ? 'bg-bc-navy-900/70 text-bc-teal-300 border-bc-navy-700'
+                        ? 'bg-bc-navy-950 text-bc-teal-300 border-bc-navy-800'
                         : item.badgeColor || 'bg-slate-100 text-slate-600 border-slate-200'
                     }`}
                   >
@@ -197,17 +197,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Source & Version Footer */}
         <div className="p-3.5 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-500 space-y-1">
-          <div className="flex items-center justify-between font-semibold text-slate-700">
-            <span>Data Source</span>
-            <span className="text-emerald-700 font-mono text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-              Verified
+          <div className="flex items-center justify-between font-bold text-slate-700">
+            <span>{language === 'ar' ? 'مصدر البيانات' : 'Data Source'}</span>
+            <span className="text-emerald-700 font-mono text-[10px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-300 font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>{language === 'ar' ? 'معتمد رسمياً' : 'Verified'}</span>
             </span>
           </div>
-          <p className="truncate text-slate-600" title="EG outbound Knowledge base.xlsx">
+          <p className="truncate text-slate-700 font-mono text-[10px]" title="EG outbound Knowledge base.xlsx">
             EG outbound Knowledge base.xlsx
           </p>
           <div className="text-[10px] text-slate-400">
-            Front-end static build • Zero backend
+            {language === 'ar' ? 'نظام سريع فوري • متوافق مع كافة الأجهزة' : 'High-speed frontend • Zero backend delay'}
           </div>
         </div>
       </aside>
