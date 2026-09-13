@@ -19,34 +19,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
   });
 
   return (
-    <header className="sticky top-0 z-30 bg-bc-navy-950/95 backdrop-blur-md text-white border-b border-bc-navy-800 shadow-lg">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md text-gray-800 border-b border-gray-200 shadow-lg">
       <div className="w-full px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Brand & Logo (Official British Council Styling) */}
+          {/* Brand */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0">
-            {/* Iconic British Council Official Logo Image */}
-            <div className="relative flex-shrink-0">
-              <img
-                src="/bc-logo.png"
-                alt="British Council"
-                className="w-10 h-10 rounded-xl object-contain shadow-md border border-white/20 hover:scale-105 transition-transform"
-              />
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-bc-navy-950 rounded-full animate-pulse"></span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-bc-navy-950 via-bc-navy-900 to-bc-teal-600 flex items-center justify-center text-white shadow-md shadow-bc-teal-900/20">
+              <Sparkles className="w-5 h-5 text-bc-teal-400" />
             </div>
-
             <div>
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <span className="font-black text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
-                  <span>BRITISH COUNCIL</span>
-                </span>
-                <span className="inline-flex items-center space-x-1 rtl:space-x-reverse px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 shadow-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                  <span>{language === 'ar' ? 'نظام مصر المعتمد ٢٠٢٦' : 'Egypt Portal 2026'}</span>
-                </span>
-              </div>
-              <p className="text-[11px] sm:text-xs text-bc-teal-300 font-medium hidden sm:block">
+              <h1 className="text-base font-black tracking-tight bg-gradient-to-r from-bc-navy-950 via-bc-navy-900 to-bc-teal-800 bg-clip-text text-transparent">
+                {t.appName}
+              </h1>
+              <p className="text-[11px] font-medium text-slate-500">
                 {language === 'ar'
-                  ? 'بوابة المبيعات وحساب الأسعار الفورية لمكالمات العملاء'
+                  ? 'قاعدة معرفة المبيعات والمكالمات الحية'
                   : 'Outbound Sales & Live Call Knowledge Base'}
               </p>
             </div>

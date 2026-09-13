@@ -64,8 +64,8 @@ describe('Age Category & Group Mapping', () => {
   });
 
   it('maps each exact age to the correct Young Learner age group', () => {
-    expect(getAgeGroup(4)?.name).toBe('Early Years 2 (Ducks)');
-    expect(getAgeGroup(5)?.name).toBe('Early Years 3 (Owls)');
+    expect(getAgeGroup(4)?.name).toBe('Early Years 2');
+    expect(getAgeGroup(5)?.name).toBe('Early Years 3');
     expect(getAgeGroup(6)?.name).toContain('Lower Primary');
     expect(getAgeGroup(8)?.name).toContain('Lower Primary');
     expect(getAgeGroup(9)?.name).toContain('Upper Primary');
@@ -201,7 +201,7 @@ describe('Winter Pricing and Bundle Discounts', () => {
 
     expect(res.basePrice).toBe(6400);
     expect(res.finalPrice).toBe(6400);
-    expect(res.academicLevel).toBe('Early Years 2 (Ducks)');
+    expect(res.academicLevel.value).toBe('Early Years 2 (Ducks)');
   });
 
   it('applies 10% sibling discount to youngest child', () => {

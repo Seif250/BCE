@@ -4,6 +4,7 @@
 export type AgeCategory = 'Early Years' | 'Young Learner' | 'Adult' | 'Outside Supported Range';
 
 export type ProgramType = 'Adult' | 'Winter Block' | 'Summer School';
+export type ProgramFamily = 'Auto' | 'Adult' | 'Young Learner';
 
 export type RegistrationType = 'New' | 'Re-registration';
 
@@ -150,10 +151,13 @@ export interface CalculationInput {
   selectedPackageCredits?: number;
   // Manual override
   isManualOverride?: boolean;
-  overrideAge?: number;
-  overrideAgeCategory?: AgeCategory;
-  overrideAgeGroup?: string;
-  overrideAcademicLevel?: string;
+  overrideProgramFamily?: ProgramFamily;
+}
+
+export interface ResultField<T> {
+  value: T;
+  status: 'confirmed' | 'needs_confirmation' | 'unavailable';
+  source: string;
 }
 
 export interface CalculationResult {
@@ -163,13 +167,14 @@ export interface CalculationResult {
   ageMonths: number;
   ageDays: number;
   referenceDateUsed: string;
-  ageCategory: AgeCategory;
-  ageGroup: string;
-  program: ProgramType;
+  ageCategory: ResultField<AgeCategory>;
+  ageGroup: ResultField<string>;
+  program: ResultField<ProgramType>;
   eligibleCourses: string[];
-  recommendedCourse: string;
-  academicLevel: string;
-  summerMapping: string | null;
+  recommendedCourse: ResultField<string>;
+  academicLevel: ResultField<string>;
+  summerMapping: ResultField<string | null>;
+
   placementTest: {
     required: boolean;
     fee: number;

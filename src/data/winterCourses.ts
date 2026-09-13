@@ -6,7 +6,7 @@ import { AgeGroupConfig, AcademicLevel, WinterPricingConfig } from './types';
 export const WINTER_AGE_GROUPS: AgeGroupConfig[] = [
   {
     id: 'ey2',
-    name: 'Early Years 2 (Ducks)',
+    name: 'Early Years 2',
     minAge: 4,
     maxAge: 4.999,
     category: 'Early Years',
@@ -16,7 +16,7 @@ export const WINTER_AGE_GROUPS: AgeGroupConfig[] = [
   },
   {
     id: 'ey3',
-    name: 'Early Years 3 (Owls)',
+    name: 'Early Years 3',
     minAge: 5,
     maxAge: 5.999,
     category: 'Early Years',
@@ -26,7 +26,7 @@ export const WINTER_AGE_GROUPS: AgeGroupConfig[] = [
   },
   {
     id: 'lower-primary',
-    name: 'Lower Primary (Ages 6–8)',
+    name: 'Lower Primary',
     minAge: 6,
     maxAge: 8.999,
     category: 'Young Learner',
@@ -34,7 +34,7 @@ export const WINTER_AGE_GROUPS: AgeGroupConfig[] = [
   },
   {
     id: 'upper-primary',
-    name: 'Upper Primary (Ages 9–11)',
+    name: 'Upper Primary',
     minAge: 9,
     maxAge: 11.999,
     category: 'Young Learner',
@@ -42,7 +42,7 @@ export const WINTER_AGE_GROUPS: AgeGroupConfig[] = [
   },
   {
     id: 'lower-secondary',
-    name: 'Lower Secondary (Ages 12–14)',
+    name: 'Lower Secondary',
     minAge: 12,
     maxAge: 14.999,
     category: 'Young Learner',
@@ -50,7 +50,7 @@ export const WINTER_AGE_GROUPS: AgeGroupConfig[] = [
   },
   {
     id: 'upper-secondary',
-    name: 'Upper Secondary (Ages 15–17)',
+    name: 'Upper Secondary',
     minAge: 15,
     maxAge: 17.999,
     category: 'Young Learner',

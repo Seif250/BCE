@@ -38,8 +38,8 @@ import { calculateAge, formatDisplayDate } from './ageCalculator';
  */
 export function getAgeCategory(ageYears: number): AgeCategory {
   if (ageYears < 4) return 'Outside Supported Range';
-  if (ageYears >= 4 && ageYears < 6) return 'Early Years';
-  if (ageYears >= 6 && ageYears < 18) return 'Young Learner';
+  if (ageYears >= 4 && ageYears <= 5) return 'Early Years';
+  if (ageYears >= 6 && ageYears <= 17) return 'Young Learner';
   return 'Adult';
 }
 
@@ -48,11 +48,20 @@ export function getAgeCategory(ageYears: number): AgeCategory {
  * Boundaries are strictly tested: 4, 5, 6-8, 9-11, 12-14, 15-17.
  */
 export function getAgeGroup(ageYears: number): AgeGroupConfig | null {
-  if (ageYears < 4) return null;
+  if (ageYears < 4) {
+    return {
+      id: 'unsupported',
+      name: 'Unsupported / outside configured range',
+      minAge: 0,
+      maxAge: 3.999,
+      category: 'Outside Supported Range',
+      description: 'Too young for current programs.',
+    };
+  }
   if (ageYears >= 18) {
     return {
       id: 'adult',
-      name: 'Adult (Age 18+)',
+      name: 'Adult',
       minAge: 18,
       maxAge: 99,
       category: 'Adult',
@@ -155,29 +164,37 @@ export function getSummerLevelMapping(academicLevelName?: string): string | null
 export function evaluateStudent(input: CalculationInput): CalculationResult {
   // 1. Calculate Age
   const ageCalc = calculateAge(input.dob, input.referenceDate);
-  const effectiveAge = input.isManualOverride && input.overrideAge !== undefined
-    ? input.overrideAge
-    : ageCalc.years;
+  const effectiveAge = ageCalc.years;
 
-  const ageCategory = input.isManualOverride && input.overrideAgeCategory
-    ? input.overrideAgeCategory
-    : getAgeCategory(effectiveAge);
+  let ageCategory = getAgeCategory(effectiveAge);
+  
+  // 2. Program family and override
+  const programFamily = input.isManualOverride && input.overrideProgramFamily && input.overrideProgramFamily !== 'Auto'
+    ? input.overrideProgramFamily
+    : (ageCategory === 'Adult' ? 'Adult' : 'Young Learner');
+
+  // If override changes the family, adjust ageCategory logically for UI
+  if (input.isManualOverride && input.overrideProgramFamily) {
+    if (input.overrideProgramFamily === 'Adult' && ageCategory !== 'Adult') {
+      ageCategory = 'Adult';
+    } else if (input.overrideProgramFamily === 'Young Learner' && ageCategory === 'Adult') {
+      ageCategory = 'Young Learner';
+    }
+  }
 
   const ageGroupConfig = getAgeGroup(effectiveAge);
-  const ageGroupName = input.isManualOverride && input.overrideAgeGroup
-    ? input.overrideAgeGroup
-    : ageGroupConfig ? ageGroupConfig.name : 'Unknown';
+  const ageGroupName = ageGroupConfig ? ageGroupConfig.name : 'Unsupported / outside configured range';
 
-  // 2. Determine Program
+  // 3. Determine specific Program
   let program: ProgramType;
   if (input.selectedProgram !== 'auto') {
     program = input.selectedProgram;
   } else {
-    // Auto detection
-    if (ageCategory === 'Adult') {
+    // Auto detection based on determined family
+    if (programFamily === 'Adult') {
       program = 'Adult';
     } else {
-      program = 'Winter Block'; // Default primary season
+      program = 'Winter Block'; // Default primary season for YL
     }
   }
 
@@ -473,13 +490,13 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     ageMonths: ageCalc.months,
     ageDays: ageCalc.days,
     referenceDateUsed: ageCalc.referenceDateUsed,
-    ageCategory,
-    ageGroup: ageGroupName,
-    program,
+    ageCategory: { value: ageCategory, status: 'confirmed', source: sourceSheet },
+    ageGroup: { value: ageGroupName, status: 'confirmed', source: sourceSheet },
+    program: { value: program, status: 'confirmed', source: sourceSheet },
     eligibleCourses,
-    recommendedCourse,
-    academicLevel,
-    summerMapping,
+    recommendedCourse: { value: recommendedCourse, status: 'confirmed', source: sourceSheet },
+    academicLevel: { value: academicLevel, status: 'confirmed', source: sourceSheet },
+    summerMapping: { value: summerMapping, status: 'confirmed', source: sourceSheet },
     placementTest: ptRule,
     durationAndSessions,
     basePrice,
