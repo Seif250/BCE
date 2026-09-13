@@ -147,7 +147,7 @@ export interface CalculationInput {
   selectedCamps?: number[]; // e.g. [1, 2]
   isStarterLevel?: boolean;
   // Adult specific
-  selectedAdultProduct?: 'beginner' | 'bce' | 'ielts-coach';
+  selectedAdultProduct?: 'beginner' | 'bce' | 'ielts-coach' | 'english-online';
   selectedPackageCredits?: number;
   // Manual override
   isManualOverride?: boolean;
