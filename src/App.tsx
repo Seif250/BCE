@@ -22,12 +22,24 @@ function MainApp() {
   const [currentSection, setCurrentSection] = useState<NavSection>('calculator');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(() => {
+    const saved = localStorage.getItem('bce_sidebar_expanded');
+    return saved === 'true';
+  });
   const [isFullWidth, setIsFullWidth] = useState<boolean>(() => {
     const saved = localStorage.getItem('bce_full_width');
-    return saved === 'true';
+    return saved !== 'false'; // default to full width clean view
   });
 
   const { t, isRTL, language } = useLanguage();
+
+  const toggleSidebarExpand = () => {
+    setIsSidebarExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem('bce_sidebar_expanded', String(next));
+      return next;
+    });
+  };
 
   const toggleFullWidth = () => {
     setIsFullWidth((prev) => {
@@ -50,7 +62,7 @@ function MainApp() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
+    <div className="min-h-screen bg-[#F7F9FC] flex flex-col font-sans text-slate-900">
       {/* Top Navbar */}
       <Navbar
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -59,25 +71,29 @@ function MainApp() {
 
       {/* Main App Body */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left/Right Navigation Sidebar */}
+        {/* Left/Right Modern Slim Sidebar */}
         <Sidebar
           currentSection={currentSection}
           onSelectSection={setCurrentSection}
           isOpenMobile={isMobileMenuOpen}
           onCloseMobile={() => setIsMobileMenuOpen(false)}
+          isExpanded={isSidebarExpanded}
+          onToggleExpand={toggleSidebarExpand}
         />
 
-        {/* Spacious Content Area */}
+        {/* Content Area with 25-30% reduced padding */}
         <main
           className={`flex-1 ${
-            isRTL ? 'lg:mr-64' : 'lg:ml-64'
-          } p-4 sm:p-6 lg:p-8 overflow-y-auto w-full transition-all`}
+            isSidebarExpanded
+              ? isRTL ? 'lg:mr-60' : 'lg:ml-60'
+              : isRTL ? 'lg:mr-[72px]' : 'lg:ml-[72px]'
+          } p-3 sm:p-4 lg:p-5 overflow-y-auto w-full transition-all`}
         >
           {/* Mobile Top Bar */}
-          <div className="mb-4 flex items-center justify-between lg:hidden bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+          <div className="mb-3 flex items-center justify-between lg:hidden bg-white p-2.5 rounded-xl border border-[#E6EAF0] shadow-subtle">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 rounded-lg text-slate-700 hover:bg-slate-100 flex items-center space-x-2 rtl:space-x-reverse"
+              className="p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 flex items-center space-x-1.5 rtl:space-x-reverse"
             >
               <Menu className="w-5 h-5 text-bc-navy-800" />
               <span className="text-xs font-bold uppercase tracking-wider">
@@ -85,40 +101,15 @@ function MainApp() {
               </span>
             </button>
 
-            <span className="text-sm font-black text-bc-navy-900 capitalize">
+            <span className="text-xs font-black text-bc-navy-900 capitalize">
               {currentSection.replace('-', ' ')}
             </span>
           </div>
 
-          {/* Desktop Top Utilities Bar: Full Width Toggle */}
-          <div className="hidden xl:flex items-center justify-end mb-4">
-            <button
-              onClick={toggleFullWidth}
-              className="flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs"
-              title={
-                isFullWidth
-                  ? (language === 'ar' ? 'إظهار المساعد السريع للمكالمة' : 'Show Live Companion')
-                  : (language === 'ar' ? 'توسيع الصفحة بكامل الشاشة' : 'Expand to Full Width')
-              }
-            >
-              {isFullWidth ? (
-                <>
-                  <Columns className="w-3.5 h-3.5 text-bc-teal-600" />
-                  <span>{language === 'ar' ? 'المساعد السريع للمكالمة' : 'Live Companion'}</span>
-                </>
-              ) : (
-                <>
-                  <Maximize2 className="w-3.5 h-3.5 text-bc-navy-800" />
-                  <span>{language === 'ar' ? 'ملء الشاشة' : 'Full Width'}</span>
-                </>
-              )}
-            </button>
-          </div>
-
           {/* Main Layout Grid: Main Content + Optional Live Companion */}
-          <div className="flex gap-6 items-start w-full">
+          <div className="flex gap-4 items-start w-full">
             {/* Active View Router */}
-            <div className="flex-1 min-w-0 animate-fade-in space-y-6">
+            <div className="flex-1 min-w-0 animate-fade-in space-y-4">
               {currentSection === 'calculator' && <StudentCalculator />}
               {currentSection === 'adult' && <AdultPage />}
               {currentSection === 'winter' && <WinterPage />}
@@ -129,9 +120,9 @@ function MainApp() {
               {currentSection === 'quick-ref' && <QuickReferencePage />}
             </div>
 
-            {/* Live Call Companion Widget (Fills the wide space on screens >= 1280px) */}
+            {/* Live Call Companion Widget (Slide-in or inline when active) */}
             {!isFullWidth && (
-              <div className="hidden xl:block sticky top-2">
+              <div className="hidden xl:block sticky top-2 w-80 flex-shrink-0">
                 <LiveCallCompanion
                   onToggleFullWidth={toggleFullWidth}
                   isFullWidth={isFullWidth}
@@ -141,6 +132,25 @@ function MainApp() {
           </div>
         </main>
       </div>
+
+      {/* Floating Quick Assistant Button (Bottom Screen) */}
+      <button
+        type="button"
+        onClick={toggleFullWidth}
+        className={`fixed bottom-4 ${
+          isRTL ? 'left-4' : 'right-4'
+        } z-30 flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-full shadow-lg transition-all hover:scale-105 active:scale-95 ${
+          !isFullWidth
+            ? 'bg-bc-teal-600 hover:bg-bc-teal-700 text-white ring-2 ring-bc-teal-400/50'
+            : 'bg-[#062A67] hover:bg-bc-navy-900 text-white'
+        }`}
+        title={language === 'ar' ? 'المساعد السريع للمكالمة' : 'Live Call Assistant'}
+      >
+        <span className="text-xs">✦</span>
+        <span className="text-xs font-bold">
+          {language === 'ar' ? 'مساعد سريع' : 'Quick Assistant'}
+        </span>
+      </button>
 
       {/* Global Search Modal */}
       <GlobalSearchModal
