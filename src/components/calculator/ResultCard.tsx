@@ -14,7 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { CalculationResult } from '../../data/types';
+import { CalculationResult, RegistrationType } from '../../data/types';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { WINTER_PRICING } from '../../data/winterCourses';
 import { ADULT_COURSES } from '../../data/adultCourses';
@@ -25,6 +25,9 @@ interface ResultCardProps {
   onSelectTerms?: (terms: number) => void;
   selectedPackageCredits?: number;
   onSelectPackageCredits?: (credits: number) => void;
+  siblingCount?: number;
+  isYoungestSibling?: boolean;
+  registrationType?: RegistrationType;
 }
 
 export const ResultCard: React.FC<ResultCardProps> = ({
@@ -33,6 +36,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   onSelectTerms,
   selectedPackageCredits,
   onSelectPackageCredits,
+  siblingCount = 1,
+  isYoungestSibling = false,
+  registrationType = 'New',
 }) => {
   const { t, language, isRTL } = useLanguage();
   const isAr = language === 'ar';
@@ -77,21 +83,36 @@ export const ResultCard: React.FC<ResultCardProps> = ({
     ? WINTER_PRICING.ieltsTeensTermFee // 5600
     : WINTER_PRICING.primaryAndSecondaryTermFee; // 5800
 
+  // Check active additional discounts
+  const isSiblingDiscountActive = Boolean(siblingCount > 1 && isYoungestSibling);
+  const isReRegistrationActive = registrationType === 'Re-registration';
+
   // Multi-term winter packages: [1, 2, 3, 4]
   const winterTermCards = [
-    { terms: 1, discount: 0, label: isAr ? 'ترم واحد' : '1 Term', popular: false },
-    { terms: 2, discount: 0.05, label: isAr ? 'ترمين (خصم 5%)' : '2 Terms (5% Off)', popular: false },
-    { terms: 3, discount: 0.10, label: isAr ? '3 ترمات (خصم 10%)' : '3 Terms (10% Off)', popular: true },
-    { terms: 4, discount: 0.15, label: isAr ? '4 ترمات (خصم 15%)' : '4 Terms (15% Off)', popular: false },
+    { terms: 1, bundleDiscount: 0, label: isAr ? 'ترم واحد' : '1 Term', popular: false },
+    { terms: 2, bundleDiscount: 0.05, label: isAr ? 'ترمين (خصم 5%)' : '2 Terms (5% Off)', popular: false },
+    { terms: 3, bundleDiscount: 0.10, label: isAr ? '3 ترمات (خصم 10%)' : '3 Terms (10% Off)', popular: true },
+    { terms: 4, bundleDiscount: 0.15, label: isAr ? '4 ترمات (خصم 15%)' : '4 Terms (15% Off)', popular: false },
   ].map((item) => {
     const rawTotal = baseTermFee * item.terms;
-    const discountAmt = Math.round(rawTotal * item.discount);
+
+    // Sum all applicable discounts for this term count
+    const siblingRate = isSiblingDiscountActive ? 0.10 : 0;
+    const reRegRate = isReRegistrationActive ? 0.10 : 0;
+    const totalDiscountRate = item.bundleDiscount + siblingRate + reRegRate;
+
+    const discountAmt = Math.round(rawTotal * totalDiscountRate);
     const finalAmt = rawTotal - discountAmt;
+    const totalPercentage = Math.round(totalDiscountRate * 100);
+
     return {
       ...item,
       rawTotal,
       discountAmt,
       finalAmt,
+      totalPercentage,
+      siblingRate,
+      reRegRate,
     };
   });
 
@@ -215,6 +236,29 @@ export const ResultCard: React.FC<ResultCardProps> = ({
           </div>
         </div>
 
+        {/* PROMINENT ACTIVE DISCOUNTS BANNER */}
+        {result.discountsApplied.length > 0 && (
+          <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 flex flex-wrap items-center justify-between gap-2 animate-fade-in">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-black text-emerald-950 flex items-center space-x-1 rtl:space-x-reverse">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600 inline" />
+                <span>{isAr ? 'الخصومات المطبقة فوراً:' : 'Applied Discounts:'}</span>
+              </span>
+              {result.discountsApplied.map((d, i) => (
+                <span
+                  key={i}
+                  className="px-2.5 py-1 rounded-lg text-xs font-black bg-white text-emerald-800 border border-emerald-300 shadow-2xs"
+                >
+                  ✓ {d.name} ({d.percentage}%): -{d.amount.toLocaleString()} {isAr ? 'ج.م' : 'EGP'}
+                </span>
+              ))}
+            </div>
+            <div className="text-xs font-extrabold text-emerald-900 bg-emerald-100/80 px-2.5 py-1 rounded-lg">
+              {isAr ? 'إجمالي الخصم:' : 'Total Savings:'} -{result.discountAmount.toLocaleString()} {isAr ? 'ج.م' : 'EGP'}
+            </div>
+          </div>
+        )}
+
         {/* WINTER MULTI-TERM CARDS GRID */}
         {result.program.value === 'Winter Block' && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
@@ -257,13 +301,15 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                     </span>
                   </div>
 
-                  {card.discount > 0 && (
+                  {card.discountAmt > 0 && (
                     <span
-                      className={`text-[10px] font-medium block mt-0.5 ${
+                      className={`text-[10px] font-bold block mt-0.5 ${
                         isSelected ? 'text-emerald-300' : 'text-emerald-600'
                       }`}
                     >
-                      {isAr ? `وفر ${card.discountAmt.toLocaleString()} ج.م` : `Save ${card.discountAmt.toLocaleString()} EGP`}
+                      {isAr
+                        ? `وفر ${card.discountAmt.toLocaleString()} ج.م (${card.totalPercentage}%)`
+                        : `Save ${card.discountAmt.toLocaleString()} EGP (${card.totalPercentage}%)`}
                     </span>
                   )}
                 </button>
@@ -277,6 +323,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
             {adultProduct.packages.map((pkg) => {
               const isSelected = selectedPackageCredits === pkg.credits;
+              const isReReg = registrationType === 'Re-registration';
+              const pkgDiscount = isReReg ? Math.round(pkg.price * 0.10) : 0;
+              const pkgFinal = pkg.price - pkgDiscount;
               return (
                 <button
                   key={pkg.id}
@@ -301,9 +350,18 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                         isSelected ? 'text-white' : 'text-slate-900'
                       }`}
                     >
-                      {pkg.price.toLocaleString()} {isAr ? 'ج.م' : 'EGP'}
+                      {pkgFinal.toLocaleString()} {isAr ? 'ج.م' : 'EGP'}
                     </span>
                   </div>
+                  {pkgDiscount > 0 && (
+                    <span
+                      className={`text-[10px] font-bold block mt-0.5 ${
+                        isSelected ? 'text-emerald-300' : 'text-emerald-600'
+                      }`}
+                    >
+                      {isAr ? `وفر ${pkgDiscount.toLocaleString()} ج.م (خصم 10%)` : `Save ${pkgDiscount.toLocaleString()} EGP (10%)`}
+                    </span>
+                  )}
                   <span
                     className={`text-[10px] block mt-0.5 ${
                       isSelected ? 'text-slate-300' : 'text-slate-500'

@@ -285,39 +285,6 @@ export const StudentCalculator: React.FC = () => {
 
             {/* DYNAMIC PROGRAM CONTROLS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              {/* If Young Learner: Season pills (Winter / Summer) */}
-              {effectiveFamily === 'Young Learner' && (
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                    {isAr ? 'الموسم الحالي' : 'Season Track'}
-                  </label>
-                  <div className="flex space-x-1.5 rtl:space-x-reverse">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSeason('Winter Block')}
-                      className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold border transition-all ${
-                        selectedSeason === 'Winter Block'
-                          ? 'bg-bc-navy-900 text-white border-bc-navy-900 shadow-2xs'
-                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      ❄️ {isAr ? 'البرنامج الشتوي (Winter Block)' : 'Winter Block'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSeason('Summer School')}
-                      className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold border transition-all ${
-                        selectedSeason === 'Summer School'
-                          ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
-                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      ☀️ {isAr ? 'المدرسة الصيفية (Summer School)' : 'Summer School'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {/* If Adult: Product dropdown */}
               {effectiveFamily === 'Adult' && (
                 <div>
@@ -363,6 +330,57 @@ export const StudentCalculator: React.FC = () => {
                 </select>
               </div>
             </div>
+
+            {/* Quick Registration & Sibling Toggles */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
+              <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">
+                  {isAr ? 'نوع التسجيل:' : 'Registration:'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setRegistrationType('New')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                    registrationType === 'New'
+                      ? 'bg-bc-navy-900 text-white border-bc-navy-900 shadow-2xs'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  {isAr ? 'طالب جديد' : 'New'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegistrationType('Re-registration')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                    registrationType === 'Re-registration'
+                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-2xs ring-1 ring-emerald-500'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  🏷️ {isAr ? 'إعادة تسجيل (خصم 10%)' : 'Re-registration (10% Off)'}
+                </button>
+              </div>
+
+              {/* Quick Sibling Toggle if Young Learner */}
+              {effectiveFamily === 'Young Learner' && (
+                <label className="flex items-center space-x-1.5 rtl:space-x-reverse cursor-pointer text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={siblingCount > 1 && isYoungestSibling}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSiblingCount(2);
+                        setIsYoungestSibling(true);
+                      } else {
+                        setIsYoungestSibling(false);
+                      }
+                    }}
+                    className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                  />
+                  <span>{isAr ? '👶 هذا هو الطفل الأصغر (خصم 10%)' : '👶 Youngest Sibling (10% Off)'}</span>
+                </label>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -376,6 +394,9 @@ export const StudentCalculator: React.FC = () => {
             onSelectTerms={setTerms}
             selectedPackageCredits={selectedPackageCredits}
             onSelectPackageCredits={setSelectedPackageCredits}
+            siblingCount={siblingCount}
+            isYoungestSibling={isYoungestSibling}
+            registrationType={registrationType}
           />
         </div>
       )}
@@ -446,33 +467,68 @@ export const StudentCalculator: React.FC = () => {
 
           {showManualOverride && (
             <div className="p-3.5 border-t border-slate-200 bg-slate-50/70 space-y-2">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
-                {isAr ? 'تجاوز نوع البرنامج يدويًا:' : 'Override Program Family:'}
-              </label>
-              <div className="flex space-x-2 rtl:space-x-reverse">
-                {(['Auto', 'Adult', 'Young Learner'] as const).map((family) => (
-                  <button
-                    key={family}
-                    type="button"
-                    onClick={() => setManualOverrideFamily(family)}
-                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold border transition-all ${
-                      manualOverrideFamily === family
-                        ? 'bg-bc-navy-900 text-white border-bc-navy-900 shadow-2xs ring-1 ring-bc-navy-800'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {family === 'Auto'
-                      ? (isAr ? 'تلقائي (Auto)' : 'Auto Detect')
-                      : family === 'Adult'
-                      ? (isAr ? 'بالغ (Adult)' : 'Adult')
-                      : (isAr ? 'صغار السن (Young Learner)' : 'Young Learner')}
-                  </button>
-                ))}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
+                  {isAr ? 'تجاوز نوع البرنامج يدويًا:' : 'Override Program Family:'}
+                </label>
+                <div className="flex space-x-2 rtl:space-x-reverse">
+                  {(['Auto', 'Adult', 'Young Learner'] as const).map((family) => (
+                    <button
+                      key={family}
+                      type="button"
+                      onClick={() => setManualOverrideFamily(family)}
+                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold border transition-all ${
+                        manualOverrideFamily === family
+                          ? 'bg-bc-navy-900 text-white border-bc-navy-900 shadow-2xs ring-1 ring-bc-navy-800'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {family === 'Auto'
+                        ? (isAr ? 'تلقائي (Auto)' : 'Auto Detect')
+                        : family === 'Adult'
+                        ? (isAr ? 'بالغ (Adult)' : 'Adult')
+                        : (isAr ? 'صغار السن (Young Learner)' : 'Young Learner')}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {effectiveFamily === 'Young Learner' && (
+                <div className="space-y-1.5 pt-2 border-t border-slate-200">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
+                    {isAr ? 'تغيير الموسم (لبرامج الصغار):' : 'Override Season (YL):'}
+                  </label>
+                  <div className="flex space-x-2 rtl:space-x-reverse">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSeason('Winter Block')}
+                      className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold border transition-all ${
+                        selectedSeason === 'Winter Block'
+                          ? 'bg-bc-navy-900 text-white border-bc-navy-900 shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      ❄️ {isAr ? 'الشتوي الأساسي (Winter Block)' : 'Winter Block (Default)'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSeason('Summer School')}
+                      className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold border transition-all ${
+                        selectedSeason === 'Summer School'
+                          ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      ☀️ {isAr ? 'المدرسة الصيفية (Summer School)' : 'Summer School'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <p className="text-[11px] text-slate-500 pt-1">
                 {isAr
-                  ? 'ملاحظة: السن والفئة العمرية يظلان محسوبين بدقة من تاريخ الميلاد، بينما يتم تحويل البرنامج فقط.'
-                  : 'Note: Exact age and age group remain computed from Date of Birth.'}
+                  ? 'ملاحظة: النظام يحدد البرنامج والموسم تلقائياً حسب السن (صغار السن + شتوي افتراضياً). استخدم هذه اللوحة فقط في الحالات الاستثنائية.'
+                  : 'Note: System determines family and season automatically from age (defaulting to Winter Block for YL). Use this panel only for exceptions.'}
               </p>
             </div>
           )}

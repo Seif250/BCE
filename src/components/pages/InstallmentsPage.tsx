@@ -313,7 +313,10 @@ export const InstallmentsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 bg-white rounded-xl border border-bc-teal-300 text-center shadow-sm">
+              <div className="p-3.5 bg-white rounded-xl border border-bc-teal-300 text-center shadow-sm relative">
+                <span className="absolute top-2 right-2 rtl:right-auto rtl:left-2 px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-200">
+                  ≈ {language === 'ar' ? 'تقريبي' : 'Approximate'}
+                </span>
                 <span className="text-[11px] text-slate-500 block mb-0.5">{pt.monthlyPayment}</span>
                 <span className="text-2xl font-black text-bc-navy-900 block">
                   ~{monthly6.toLocaleString()} {language === 'ar' ? 'جنيه' : 'EGP'}{' '}
@@ -358,7 +361,10 @@ export const InstallmentsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 bg-white rounded-xl border border-indigo-300 text-center shadow-sm">
+              <div className="p-3.5 bg-white rounded-xl border border-indigo-300 text-center shadow-sm relative">
+                <span className="absolute top-2 right-2 rtl:right-auto rtl:left-2 px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-200">
+                  ≈ {language === 'ar' ? 'تقريبي' : 'Approximate'}
+                </span>
                 <span className="text-[11px] text-slate-500 block mb-0.5">{pt.monthlyPayment}</span>
                 <span className="text-2xl font-black text-bc-navy-900 block">
                   ~{monthly12.toLocaleString()} {language === 'ar' ? 'جنيه' : 'EGP'}{' '}
@@ -379,12 +385,22 @@ export const InstallmentsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Bank Card Note */}
-        <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start space-x-2 rtl:space-x-reverse">
-          <Info className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            {pt.bankNote}
-          </p>
+        {/* Bank Card Note & Official Calculator Rule Disclaimer */}
+        <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-300 text-xs text-amber-950 flex items-start space-x-2.5 rtl:space-x-reverse">
+          <Info className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <strong className="block font-bold">
+              {language === 'ar'
+                ? 'قاعدة أساسية: السعر والقسط النهائي يرجع للـ official calculator والبنك'
+                : 'Core Rule: Final installment amount must refer to the official calculator & issuing bank'}
+            </strong>
+            <p className="leading-relaxed text-amber-900">
+              {pt.bankNote}{' '}
+              {language === 'ar'
+                ? '(الأرقام المعروضة أعلاه تقريبية استرشادية للمساعدة في توجيه العميل أثناء المكالمة).'
+                : '(Figures shown above are approximate guidelines to assist during customer calls).'}
+            </p>
+          </div>
         </div>
       </div>
     </div>

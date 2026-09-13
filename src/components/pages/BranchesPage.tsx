@@ -10,6 +10,8 @@ import {
   Search,
   User,
   ShieldCheck,
+  ChevronDown,
+  Mail,
 } from 'lucide-react';
 import { BRANCHES, GENERAL_CONTACT_INFO } from '../../data/branches';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -178,48 +180,49 @@ export const BranchesPage: React.FC = () => {
           return (
             <div
               key={branch.id}
-              className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 space-y-4 hover:shadow-md transition-all flex flex-col justify-between"
+              className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3 hover:border-bc-teal-400 transition-all flex flex-col justify-between"
             >
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {/* Header */}
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
                   <div>
                     <span className="text-[10px] font-mono font-bold bg-bc-navy-50 text-bc-navy-900 px-2 py-0.5 rounded border border-bc-navy-200">
                       {branch.code}
                     </span>
-                    <h3 className="text-base font-extrabold text-slate-900 mt-1">{branchName}</h3>
+                    <h3 className="text-sm sm:text-base font-black text-slate-900 mt-0.5">{branchName}</h3>
                   </div>
 
                   <span
-                    className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${
+                    className={`px-2 py-0.5 text-[10px] font-bold rounded-full border flex-shrink-0 ${
                       branch.customerServiceAvailable
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                         : 'bg-rose-50 text-rose-800 border-rose-200'
                     }`}
                   >
                     {branch.customerServiceAvailable
-                      ? (language === 'ar' ? 'مكتب خدمة عملاء نشط' : 'CS Desk Active')
-                      : (language === 'ar' ? 'بدون مكتب خدمة عملاء' : 'No CS Desk')}
+                      ? (language === 'ar' ? 'خدمة عملاء' : 'CS Desk')
+                      : (language === 'ar' ? 'تدريس فقط' : 'Teaching Only')}
                   </span>
                 </div>
 
                 {/* Address with one-click copy */}
-                <div className="text-xs text-slate-700 flex items-start space-x-2 rtl:space-x-reverse bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                <div className="text-xs text-slate-700 flex items-start space-x-2 rtl:space-x-reverse bg-slate-50/80 p-2 rounded-xl border border-slate-200/80">
                   <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <span className="block font-medium leading-relaxed">{branchAddress}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="block font-medium leading-snug line-clamp-2">{branchAddress}</span>
                     <button
+                      type="button"
                       onClick={() => handleCopy(branchAddress, `addr-${branch.id}`)}
-                      className="mt-1.5 text-bc-teal-700 hover:text-bc-teal-900 font-bold inline-flex items-center space-x-1 rtl:space-x-reverse text-[11px]"
+                      className="mt-1 text-bc-teal-700 hover:text-bc-teal-900 font-bold inline-flex items-center space-x-1 rtl:space-x-reverse text-[11px]"
                     >
                       {copiedId === `addr-${branch.id}` ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <Check className="w-3 h-3 text-emerald-600" />
                           <span>{common.copied}</span>
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3.5 h-3.5" />
+                          <Copy className="w-3 h-3" />
                           <span>{pt.cardLabels.copyAddress}</span>
                         </>
                       )}
@@ -227,75 +230,95 @@ export const BranchesPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Working Hours & Days */}
-                <div className="space-y-1.5 text-xs text-slate-700 pt-1">
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                    <span>
-                      <strong className="text-slate-900">{pt.cardLabels.hours}</strong> {branchHours}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                    <span>
-                      <strong className="text-slate-900">{pt.cardLabels.days}</strong> {branchDays}
-                    </span>
-                  </div>
+                {/* Working Hours */}
+                <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs text-slate-700">
+                  <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                  <span>
+                    <strong className="text-slate-900">{pt.cardLabels.hours}:</strong> {branchHours}
+                  </span>
                 </div>
 
-              {/* Personnel (Manager & Senior Teachers) */}
-              {(branch.manager || branch.adultSeniorTeacher) && (
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1">
-                  {branch.manager && (
-                    <div className="flex items-center space-x-1.5 rtl:space-x-reverse text-slate-800">
-                      <User className="w-3.5 h-3.5 text-slate-400" />
-                      <span>
-                        {pt.cardLabels.manager} <strong>{branch.manager}</strong>
-                      </span>
-                    </div>
-                  )}
-                  {branch.adultSeniorTeacher && (
-                    <div className="text-[11px] text-slate-600">
-                      {pt.cardLabels.seniorTeacher} {branch.adultSeniorTeacher}
-                    </div>
-                  )}
-                  {branch.ylSeniorTeacher && (
-                    <div className="text-[11px] text-slate-600">
-                      {language === 'ar' ? 'كبير معلمي الصغار:' : 'YL Senior Teacher:'} {branch.ylSeniorTeacher}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                {/* Manager */}
+                {branch.manager && (
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs text-slate-700">
+                    <User className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <span>
+                      <strong className="text-slate-900">{pt.cardLabels.manager}:</strong> {branch.manager}
+                    </span>
+                  </div>
+                )}
 
-            {/* Email Contact with Copy */}
-            {branch.emails.length > 0 && (
-              <div className="pt-3 border-t border-slate-100 text-[11px] space-y-1">
-                <span className="text-slate-500 font-bold block">{pt.cardLabels.email}</span>
-                {branch.emails.map((email, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between font-mono text-slate-800 bg-slate-50 p-2 rounded-lg border border-slate-200"
-                  >
-                    <span className="truncate mr-2 rtl:ml-2 rtl:mr-0 text-xs">{email}</span>
+                {/* Primary Email */}
+                {branch.emails.length > 0 && (
+                  <div className="flex items-center justify-between text-xs font-mono bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <div className="flex items-center space-x-1.5 rtl:space-x-reverse min-w-0">
+                      <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span className="truncate text-[11px] text-slate-800">{branch.emails[0]}</span>
+                    </div>
                     <button
-                      onClick={() => handleCopy(email, `email-${branch.id}-${idx}`)}
-                      className="text-slate-500 hover:text-slate-800 flex items-center space-x-1 rtl:space-x-reverse font-sans text-[11px]"
-                      title={pt.cardLabels.copyEmail}
+                      type="button"
+                      onClick={() => handleCopy(branch.emails[0], `email-${branch.id}-0`)}
+                      className="text-slate-500 hover:text-slate-800 flex items-center space-x-1 rtl:space-x-reverse text-[11px] font-sans font-bold flex-shrink-0 ml-1.5 rtl:mr-1.5 rtl:ml-0"
                     >
-                      {copiedId === `email-${branch.id}-${idx}` ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      {copiedId === `email-${branch.id}-0` ? (
+                        <Check className="w-3 h-3 text-emerald-600" />
                       ) : (
-                        <Copy className="w-3.5 h-3.5" />
+                        <Copy className="w-3 h-3" />
                       )}
                     </button>
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
-        );
-      })}
+
+              {/* Expandable Details (التفاصيل) */}
+              <details className="group pt-2 border-t border-slate-100 mt-2">
+                <summary className="cursor-pointer text-xs font-bold text-bc-navy-900 hover:text-bc-teal-700 flex items-center justify-between list-none py-1 select-none transition-colors">
+                  <span>{language === 'ar' ? '▸ التفاصيل (الأيام والمعلمين)' : '▸ Details & Staff'}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform" />
+                </summary>
+
+                <div className="mt-2 space-y-2 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <span>
+                      <strong className="text-slate-900">{pt.cardLabels.days}:</strong> {branchDays}
+                    </span>
+                  </div>
+
+                  {branch.adultSeniorTeacher && (
+                    <div>
+                      <strong className="text-slate-900">{pt.cardLabels.seniorTeacher}:</strong> {branch.adultSeniorTeacher}
+                    </div>
+                  )}
+
+                  {branch.ylSeniorTeacher && (
+                    <div>
+                      <strong className="text-slate-900">{language === 'ar' ? 'كبير معلمي الصغار:' : 'YL Senior Teacher:'}</strong> {branch.ylSeniorTeacher}
+                    </div>
+                  )}
+
+                  {branch.emails.length > 1 && (
+                    <div className="pt-1.5 border-t border-slate-200 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase">{language === 'ar' ? 'إيميلات بديلة:' : 'Additional Emails:'}</span>
+                      {branch.emails.slice(1).map((em, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-[11px] font-mono">
+                          <span className="truncate">{em}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(em, `email-${branch.id}-${idx + 1}`)}
+                            className="text-slate-400 hover:text-slate-700"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </details>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

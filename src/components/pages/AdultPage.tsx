@@ -57,38 +57,36 @@ export const AdultPage: React.FC = () => {
         </p>
       </div>
 
-      {/* QUICK TAKE / HIGHLIGHTS BAR (المفيد في ثواني) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-gradient-to-br from-bc-navy-900 to-bc-navy-800 text-white p-4 sm:p-5 rounded-2xl shadow-sm border border-bc-navy-700">
-          <span className="text-xs font-bold text-bc-teal-300 uppercase tracking-wider block mb-1">
-            {pt.quickHighlights.minAgeTitle}
+      {/* QUICK SUMMARY STRIP (شريط الأسعار والمصروفات المختصر) */}
+      <div className="bg-slate-900 text-white px-4 py-2.5 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm border border-slate-800">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-semibold">
+          <span className="flex items-center space-x-1 rtl:space-x-reverse">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+            <span className="text-slate-300">{language === 'ar' ? 'الشتوي:' : 'Winter:'}</span>
+            <strong className="text-white">5,800 {language === 'ar' ? 'ج' : 'EGP'}</strong>
           </span>
-          <span className="text-2xl sm:text-3xl font-black block">{pt.quickHighlights.minAgeValue}</span>
-          <span className="text-xs text-slate-300 block mt-1">{pt.quickHighlights.minAgeDesc}</span>
+          <span className="text-slate-600 hidden sm:inline">•</span>
+          <span className="flex items-center space-x-1 rtl:space-x-reverse">
+            <span className="w-2 h-2 rounded-full bg-sky-400 inline-block" />
+            <span className="text-slate-300">{language === 'ar' ? 'الحضانة (EY):' : 'Early Years:'}</span>
+            <strong className="text-white">6,400 {language === 'ar' ? 'ج' : 'EGP'}</strong>
+          </span>
+          <span className="text-slate-600 hidden sm:inline">•</span>
+          <span className="flex items-center space-x-1 rtl:space-x-reverse">
+            <span className="w-2 h-2 rounded-full bg-purple-400 inline-block" />
+            <span className="text-slate-300">{language === 'ar' ? 'آيلتس الشباب:' : 'IELTS Teens:'}</span>
+            <strong className="text-white">5,600 {language === 'ar' ? 'ج' : 'EGP'}</strong>
+          </span>
+          <span className="text-slate-600 hidden sm:inline">•</span>
+          <span className="flex items-center space-x-1 rtl:space-x-reverse">
+            <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+            <span className="text-slate-300">{language === 'ar' ? 'تحديد مستوى PT:' : 'Placement Test:'}</span>
+            <strong className="text-amber-300">200 {language === 'ar' ? 'ج' : 'EGP'}</strong>
+          </span>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-amber-200 bg-amber-50/40">
-          <span className="text-xs font-bold text-amber-900 uppercase tracking-wider block mb-1">
-            {pt.quickHighlights.ptTitle}
-          </span>
-          <span className="text-2xl sm:text-3xl font-black text-slate-900 block">{pt.quickHighlights.ptValue}</span>
-          <span className="text-xs text-slate-600 block mt-1">{pt.quickHighlights.ptDesc}</span>
-        </div>
-
-        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-emerald-200 bg-emerald-50/40">
-          <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider block mb-1">
-            {pt.quickHighlights.discountTitle}
-          </span>
-          <span className="text-2xl sm:text-3xl font-black text-emerald-700 block">{pt.quickHighlights.discountValue}</span>
-          <span className="text-xs text-slate-600 block mt-1">{pt.quickHighlights.discountDesc}</span>
-        </div>
-
-        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-blue-200 bg-blue-50/40">
-          <span className="text-xs font-bold text-blue-900 uppercase tracking-wider block mb-1">
-            {pt.quickHighlights.installmentTitle}
-          </span>
-          <span className="text-2xl sm:text-3xl font-black text-blue-900 block">{pt.quickHighlights.installmentValue}</span>
-          <span className="text-xs text-slate-600 block mt-1">{pt.quickHighlights.installmentDesc}</span>
+        <div className="text-[11px] font-bold text-bc-teal-300 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">
+          {language === 'ar' ? '18+ سنة كبار • خصم 10% إعادة التسجيل (خلال 3 شهور)' : '18+ Adult • 10% Re-registration Discount (3M window)'}
         </div>
       </div>
 

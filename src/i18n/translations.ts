@@ -20,12 +20,10 @@ export interface Translations {
   navAdult: string;
   navWinter: string;
   navSummer: string;
-  navPricing: string;
   navBranches: string;
   navInstallments: string;
   navLinks: string;
   navQuickRef: string;
-  navSettings: string;
 
   // Calculator Form
   calcTitle: string;
@@ -145,14 +143,12 @@ export const TRANSLATIONS: Record<Language, Translations> = {
 
     navCalculator: 'Student Calculator',
     navAdult: 'Adult Courses',
-    navWinter: 'YL Winter Block',
-    navSummer: 'YL Summer School',
-    navPricing: 'Prices & Discounts',
-    navBranches: 'Branches & Contacts',
+    navWinter: 'Winter Block',
+    navSummer: 'Summer Camps',
+    navBranches: 'Branches & Hours',
     navInstallments: 'Installments',
-    navLinks: 'Important Links',
-    navQuickRef: 'Call Quick Reference',
-    navSettings: 'Data Notes & Updates',
+    navLinks: 'System Links',
+    navQuickRef: 'Call Quick Answers',
 
     calcTitle: 'Student Calculator',
     calcSubtitle: 'Calculate eligibility, level, prices, and discounts quickly.',
@@ -258,15 +254,13 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     quickActionsTitle: 'إجراءات سريعة:',
 
     navCalculator: 'حاسبة الطالب',
-    navAdult: 'كورسات الكبار (Adults)',
-    navWinter: 'البرنامج الشتوي (Winter Block)',
-    navSummer: 'المدرسة الصيفية (Summer School)',
-    navPricing: 'الأسعار والخصومات',
-    navBranches: 'الفروع ومواعيد العمل',
-    navInstallments: 'التقسيط بالفيزا',
-    navLinks: 'روابط هامة للسيستم',
-    navQuickRef: 'إجابات المكالمات السريعة',
-    navSettings: 'دليل البيانات والتحديثات',
+    navAdult: 'أسعار الكبار',
+    navWinter: 'أسعار الشتوي',
+    navSummer: 'معسكرات الصيف',
+    navBranches: 'الفروع والمواعيد',
+    navInstallments: 'التقسيط',
+    navLinks: 'روابط النظام',
+    navQuickRef: 'إجابات المكالمات',
 
     calcTitle: 'حاسبة الطالب',
     calcSubtitle: 'احسب الأهلية، المستوى، الأسعار والخصومات بسرعة وأنت مع العميل على الخط.',

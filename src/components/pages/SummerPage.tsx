@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Sun,
   Calendar,
@@ -10,6 +10,7 @@ import {
   Info,
   Copy,
   Check,
+  Search,
 } from 'lucide-react';
 import {
   SUMMER_CAMPS,
@@ -30,6 +31,18 @@ export const SummerPage: React.FC = () => {
   const [isStarter, setIsStarter] = useState<boolean>(false);
   const [customCampPrice, setCustomCampPrice] = useState<string>('');
   const [copiedSummary, setCopiedSummary] = useState(false);
+  const [mappingSearch, setMappingSearch] = useState<string>('');
+
+  const filteredMapping = useMemo(() => {
+    if (!mappingSearch.trim()) return WINTER_ACADEMIC_LEVELS;
+    const q = mappingSearch.toLowerCase();
+    return WINTER_ACADEMIC_LEVELS.filter(
+      (lvl) =>
+        lvl.name.toLowerCase().includes(q) ||
+        lvl.ageGroupName.toLowerCase().includes(q) ||
+        (lvl.summerMapping && lvl.summerMapping.toLowerCase().includes(q))
+    );
+  }, [mappingSearch]);
 
   const toggleCamp = (num: number) => {
     if (selectedCampIds.includes(num)) {
@@ -304,45 +317,65 @@ export const SummerPage: React.FC = () => {
       </div>
 
       {/* Strict Summer-to-Winter Mapping Matrix */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-        <div>
-          <h3 className="text-base font-extrabold text-slate-900">{pt.mappingTitle}</h3>
-          <p className="text-xs text-slate-500 mt-0.5">{pt.mappingDesc}</p>
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h3 className="text-sm sm:text-base font-black text-slate-900">{pt.mappingTitle}</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{pt.mappingDesc}</p>
+          </div>
+          <div className="relative w-full sm:w-72">
+            <Search className={`w-3.5 h-3.5 text-slate-400 absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2`} />
+            <input
+              type="text"
+              value={mappingSearch}
+              onChange={(e) => setMappingSearch(e.target.value)}
+              placeholder={language === 'ar' ? 'بحث في المستويات (مثال: Primary Plus)...' : 'Search mapping (e.g. Primary Plus)...'}
+              className={`w-full ${isRTL ? 'pr-8 pl-3' : 'pl-8 pr-3'} py-1.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50/50 shadow-inner`}
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider">
-                <th className={`p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{pt.colWinterLevel}</th>
-                <th className={`p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{pt.colSummerCourse}</th>
-                <th className={`p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{pt.colNotes}</th>
+                <th className={`p-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>{pt.colWinterLevel}</th>
+                <th className={`p-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>{pt.colSummerCourse}</th>
+                <th className={`p-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>{pt.colNotes}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {WINTER_ACADEMIC_LEVELS.map((lvl) => (
-                <tr key={lvl.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="p-3 font-bold text-slate-900">
-                    {lvl.name} <span className="text-[11px] font-normal text-slate-500">({lvl.ageGroupName})</span>
-                  </td>
-                  <td className="p-3 font-semibold text-amber-900">
-                    {lvl.summerMapping ? (
-                      <span className="bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-bold">
-                        {lvl.summerMapping}
-                      </span>
-                    ) : (
-                      <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 text-[10px] font-bold">
-                        {language === 'ar' ? 'غير محدد بالملف المصدر' : 'Unmapped in source sheet'}
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3 text-slate-600 text-[11px]">
-                    {lvl.summerMapping
-                      ? (language === 'ar' ? 'مطابقة معتمدة مباشرة' : 'Standard mapped summer stream')
-                      : (language === 'ar' ? 'يتطلب تأكيد يدوي من المشرف الأكاديمي' : 'Requires confirmation from senior teacher')}
+              {filteredMapping.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="p-6 text-center text-slate-400 text-xs">
+                    {language === 'ar' ? 'لا توجد مستويات مطابقة لكلمة البحث.' : 'No matching levels found.'}
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredMapping.map((lvl) => (
+                  <tr key={lvl.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="p-2.5 font-bold text-slate-900">
+                      {lvl.name} <span className="text-[11px] font-normal text-slate-500">({lvl.ageGroupName})</span>
+                    </td>
+                    <td className="p-2.5 font-semibold text-amber-900">
+                      {lvl.summerMapping ? (
+                        <span className="bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 font-bold text-xs">
+                          {lvl.summerMapping}
+                        </span>
+                      ) : (
+                        <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200 text-[10px] font-bold">
+                          {language === 'ar' ? 'غير محدد بالملف المصدر' : 'Unmapped in source sheet'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-2.5 text-slate-600 text-[11px]">
+                      {lvl.summerMapping
+                        ? (language === 'ar' ? 'مطابقة معتمدة مباشرة' : 'Standard mapped summer stream')
+                        : (language === 'ar' ? 'يتطلب تأكيد يدوي من المشرف الأكاديمي' : 'Requires confirmation from senior teacher')}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

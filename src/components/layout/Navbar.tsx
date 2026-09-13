@@ -11,97 +11,83 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
   const { language, toggleLanguage, t } = useLanguage();
 
-  const todayFormatted = new Date().toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md text-gray-800 border-b border-gray-200 shadow-lg">
-      <div className="w-full px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Brand */}
-          <div className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-bc-navy-950 via-bc-navy-900 to-bc-teal-600 flex items-center justify-center text-white shadow-md shadow-bc-teal-900/20">
-              <Sparkles className="w-5 h-5 text-bc-teal-400" />
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md text-slate-800 border-b border-[#E6EAF0] shadow-subtle">
+      <div className="w-full px-3 sm:px-6">
+        <div className="flex items-center justify-between h-14">
+          {/* 1. Brand Logo & Title */}
+          <div className="flex items-center space-x-2.5 rtl:space-x-reverse flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#062A67] flex items-center justify-center text-white shadow-xs">
+              <Sparkles className="w-4 h-4 text-bc-teal-400" />
             </div>
             <div>
-              <h1 className="text-base font-black tracking-tight bg-gradient-to-r from-bc-navy-950 via-bc-navy-900 to-bc-teal-800 bg-clip-text text-transparent">
-                {t.appName}
-              </h1>
-              <p className="text-[11px] font-medium text-slate-500">
-                {language === 'ar'
-                  ? 'قاعدة معرفة المبيعات والمكالمات الحية'
-                  : 'Outbound Sales & Live Call Knowledge Base'}
-              </p>
+              <span className="text-sm sm:text-base font-black text-[#062A67] tracking-tight block">
+                Sales Assistant
+              </span>
             </div>
           </div>
 
-          {/* Quick Global Search Button */}
-          <div className="flex-1 max-w-lg mx-4 hidden md:block">
+          {/* 2. Quick Global Search Button */}
+          <div className="flex-1 max-w-md mx-3 sm:mx-6 hidden md:block">
             <button
+              type="button"
               onClick={onOpenSearch}
-              className="w-full flex items-center justify-between px-4 py-2 rounded-xl bg-bc-navy-900/90 border border-bc-navy-700/90 text-slate-300 hover:text-white hover:border-bc-teal-400/80 hover:bg-bc-navy-900 transition-all text-xs sm:text-sm shadow-inner group"
+              className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-lg bg-[#F7F9FC] border border-[#E6EAF0] text-slate-400 hover:text-slate-800 hover:border-slate-300 hover:bg-slate-100/70 transition-all text-xs group"
             >
               <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Search className="w-4 h-4 text-bc-teal-400 group-hover:scale-110 transition-transform flex-shrink-0" />
+                <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-bc-teal-600 transition-colors flex-shrink-0" />
                 <span className="truncate">
                   {language === 'ar'
                     ? 'بحث سريع بالكورسات، الأسعار، المستويات، الفروع...'
-                    : 'Search courses, levels, fees, branches...'}
+                    : 'Search courses, fees, levels, branches...'}
                 </span>
               </div>
-              <kbd className="hidden lg:inline-flex items-center px-2 py-0.5 text-[11px] font-mono bg-bc-navy-950 border border-bc-navy-700 rounded-md text-slate-300 shadow-sm">
-                Ctrl + K
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-white border border-[#E6EAF0] rounded text-slate-400">
+                Ctrl K
               </kbd>
             </button>
           </div>
 
-          {/* Right Status & Quick Contacts */}
+          {/* 3. Right Status, Phone, and Language Toggle */}
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            {/* Language Switcher Button (Prominent Luxury Style) */}
+            {/* Mobile Search Trigger */}
             <button
-              onClick={toggleLanguage}
-              className="flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-xl bg-gradient-to-r from-bc-teal-500 to-bc-teal-400 hover:from-bc-teal-400 hover:to-bc-teal-300 text-bc-navy-950 font-black text-xs transition-all shadow-md hover:scale-105 active:scale-95"
-              title="تغيير اللغة / Change Language"
-            >
-              <Languages className="w-4 h-4" />
-              <span>{t.langSwitchButton}</span>
-            </button>
-
-            <button
+              type="button"
               onClick={onOpenSearch}
-              className="p-2 md:hidden rounded-xl bg-bc-navy-800 text-slate-200 hover:text-white border border-bc-navy-700"
+              className="p-1.5 md:hidden rounded-lg text-slate-600 hover:bg-slate-100 border border-[#E6EAF0]"
               title="Search"
             >
               <Search className="w-4 h-4" />
             </button>
 
-            {/* WhatsApp Quick Tag */}
+            {/* Online Status Pill */}
+            <div className="flex items-center space-x-1.5 rtl:space-x-reverse px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[11px] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+              <span>{language === 'ar' ? 'متصل' : 'Online'}</span>
+            </div>
+
+            {/* Official WhatsApp/Phone Pill */}
             <a
               href={`https://wa.me/${GENERAL_CONTACT_INFO.whatsappNumber.replace(/[^0-9]/g, '')}`}
               target="_blank"
               rel="noreferrer"
-              className="hidden 2xl:flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-xs font-semibold hover:bg-emerald-900/60 transition-colors"
-              title="رقم واتساب المبيعات الرسمي"
+              className="hidden sm:flex items-center space-x-1.5 rtl:space-x-reverse px-2.5 py-1 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-[#E6EAF0] text-[11px] font-bold transition-colors"
+              title="WhatsApp Call Desk"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="font-mono">{GENERAL_CONTACT_INFO.whatsappNumber}</span>
+              <PhoneCall className="w-3 h-3 text-emerald-600" />
+              <span className="font-mono text-xs">{GENERAL_CONTACT_INFO.whatsappNumber}</span>
             </a>
 
-            {/* Date Tag */}
-            <div className="hidden xl:flex items-center space-x-1.5 rtl:space-x-reverse text-xs text-slate-300 bg-bc-navy-900/80 px-3 py-1.5 rounded-xl border border-bc-navy-800">
-              <Clock className="w-3.5 h-3.5 text-bc-teal-400" />
-              <span>{todayFormatted}</span>
-            </div>
-
-            {/* Offline Ready Badge */}
-            <div className="hidden sm:flex items-center space-x-1.5 rtl:space-x-reverse text-xs text-bc-teal-300 bg-bc-teal-950/60 border border-bc-teal-500/40 px-2.5 py-1.5 rounded-xl">
-              <ShieldCheck className="w-3.5 h-3.5 text-bc-teal-400" />
-              <span>{t.offlineReady}</span>
-            </div>
+            {/* Language Switcher Button */}
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="flex items-center space-x-1 rtl:space-x-reverse px-2.5 py-1 rounded-md bg-white hover:bg-slate-50 text-slate-700 border border-[#E6EAF0] font-bold text-xs transition-colors shadow-2xs"
+              title="تغيير اللغة / Change Language"
+            >
+              <Languages className="w-3.5 h-3.5 text-slate-500" />
+              <span>{language === 'ar' ? 'English' : 'عربي'}</span>
+            </button>
           </div>
         </div>
       </div>

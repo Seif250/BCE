@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calculator,
   GraduationCap,
   Snowflake,
   Sun,
-  Percent,
   Building2,
   CreditCard,
   ExternalLink,
   BookOpen,
-  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
   X,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -19,26 +20,26 @@ export type NavSection =
   | 'adult'
   | 'winter'
   | 'summer'
-  | 'pricing'
   | 'branches'
   | 'installments'
   | 'links'
-  | 'quick-ref'
-  | 'settings';
+  | 'quick-ref';
 
 interface SidebarProps {
   currentSection: NavSection;
   onSelectSection: (section: NavSection) => void;
   isOpenMobile: boolean;
   onCloseMobile: () => void;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
 }
 
 interface NavItem {
   id: NavSection;
   label: string;
+  shortLabel: string;
   icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
-  badgeColor?: string;
+  isHero?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -46,73 +47,63 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectSection,
   isOpenMobile,
   onCloseMobile,
+  isExpanded,
+  onToggleExpand,
 }) => {
   const { t, isRTL, language } = useLanguage();
 
-  const navItems: NavItem[] = [
+  const primaryItems: NavItem[] = [
     {
       id: 'calculator',
-      label: t.navCalculator,
+      label: language === 'ar' ? 'حاسبة الطالب' : 'Student Calculator',
+      shortLabel: language === 'ar' ? 'الحاسبة' : 'Calc',
       icon: Calculator,
-      badge: language === 'ar' ? 'الرئيسية' : 'Hero Tool',
-      badgeColor: 'bg-bc-teal-500/20 text-bc-teal-700 border-bc-teal-300',
+      isHero: true,
     },
     {
       id: 'adult',
-      label: t.navAdult,
+      label: language === 'ar' ? 'أسعار الكبار' : 'Adult English',
+      shortLabel: language === 'ar' ? 'الكبار' : 'Adult',
       icon: GraduationCap,
-      badge: language === 'ar' ? '٤ باقات' : '4 Products',
-      badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     },
     {
       id: 'winter',
-      label: t.navWinter,
+      label: language === 'ar' ? 'أسعار الشتوي' : 'Winter Block',
+      shortLabel: language === 'ar' ? 'الشتوي' : 'Winter',
       icon: Snowflake,
-      badge: language === 'ar' ? '٤ ترمات' : '4 Terms',
-      badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
     },
     {
       id: 'summer',
-      label: t.navSummer,
+      label: language === 'ar' ? 'معسكرات الصيف' : 'Summer School',
+      shortLabel: language === 'ar' ? 'الصيف' : 'Summer',
       icon: Sun,
-      badge: language === 'ar' ? '٣ معسكرات' : '3 Camps',
-      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
-    },
-    {
-      id: 'pricing',
-      label: t.navPricing,
-      icon: Percent,
     },
     {
       id: 'branches',
-      label: t.navBranches,
+      label: language === 'ar' ? 'الفروع والمواعيد' : 'Branches & Hours',
+      shortLabel: language === 'ar' ? 'الفروع' : 'Branches',
       icon: Building2,
-      badge: language === 'ar' ? '٦ فروع' : '6 Centers',
-      badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     },
     {
       id: 'installments',
-      label: t.navInstallments,
+      label: language === 'ar' ? 'التقسيط بالفيزا' : 'Installments',
+      shortLabel: language === 'ar' ? 'التقسيط' : 'Installments',
       icon: CreditCard,
+    },
+  ];
+
+  const secondaryItems: NavItem[] = [
+    {
+      id: 'quick-ref',
+      label: language === 'ar' ? 'إجابات المكالمات' : 'Call Q&A',
+      shortLabel: language === 'ar' ? 'الإجابات' : 'Q&A',
+      icon: BookOpen,
     },
     {
       id: 'links',
-      label: t.navLinks,
+      label: language === 'ar' ? 'روابط النظام' : 'System Portals',
+      shortLabel: language === 'ar' ? 'الروابط' : 'Links',
       icon: ExternalLink,
-      badge: language === 'ar' ? 'داخلي' : 'Internal',
-      badgeColor: 'bg-slate-100 text-slate-700 border-slate-200',
-    },
-    {
-      id: 'quick-ref',
-      label: t.navQuickRef,
-      icon: BookOpen,
-      badge: language === 'ar' ? 'مهم' : 'Cheat Sheet',
-      badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
-    },
-    {
-      id: 'settings',
-      label: t.navSettings,
-      icon: Settings,
     },
   ];
 
@@ -121,31 +112,88 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onCloseMobile();
   };
 
+  const renderNavButton = (item: NavItem) => {
+    const Icon = item.icon;
+    const isActive = currentSection === item.id;
+
+    return (
+      <div key={item.id} className="relative group/nav">
+        <button
+          type="button"
+          onClick={() => handleSelect(item.id)}
+          className={`w-full flex items-center ${
+            isExpanded ? 'px-3.5 py-2.5 justify-start space-x-3 rtl:space-x-reverse' : 'p-3 justify-center'
+          } rounded-xl text-xs font-bold transition-all relative ${
+            isActive
+              ? 'bg-[#062A67] text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+          }`}
+          title={!isExpanded ? item.label : undefined}
+        >
+          {/* Hero Indicator Dot */}
+          {item.isHero && (
+            <span className={`w-1.5 h-1.5 rounded-full absolute ${isExpanded ? 'top-3 right-3 rtl:right-auto rtl:left-3' : 'top-1.5 right-1.5'} ${isActive ? 'bg-bc-teal-400' : 'bg-amber-400'}`} />
+          )}
+
+          <Icon
+            className={`w-[18px] h-[18px] flex-shrink-0 transition-transform group-hover/nav:scale-105 ${
+              isActive ? 'text-bc-teal-300' : item.isHero ? 'text-[#062A67]' : 'text-slate-500'
+            }`}
+          />
+
+          {isExpanded && (
+            <span className="truncate text-xs font-bold tracking-tight">
+              {item.label}
+            </span>
+          )}
+        </button>
+
+        {/* Hover Tooltip (shown only when collapsed on desktop) */}
+        {!isExpanded && (
+          <div
+            className={`hidden lg:group-hover/nav:flex fixed z-50 px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold shadow-lg pointer-events-none whitespace-nowrap animate-fade-in ${
+              isRTL ? '-translate-x-full mr-2' : 'translate-x-0 ml-2'
+            }`}
+            style={{
+              [isRTL ? 'right' : 'left']: '76px',
+            }}
+          >
+            {item.label}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       {/* Mobile Backdrop */}
       {isOpenMobile && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs lg:hidden transition-opacity"
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-16 bottom-0 z-40 w-64 bg-white shadow-sm flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-14 bottom-0 z-40 ${
+          isExpanded ? 'w-60' : 'w-[72px]'
+        } bg-white flex flex-col justify-between transition-all duration-200 ease-in-out border-[#E6EAF0] lg:translate-x-0 ${
           isRTL
-            ? `right-0 border-l border-slate-200 ${isOpenMobile ? 'translate-x-0' : 'translate-x-full'}`
-            : `left-0 border-r border-slate-200 ${isOpenMobile ? 'translate-x-0' : '-translate-x-full'}`
+            ? `right-0 border-l ${isOpenMobile ? 'translate-x-0 w-64' : 'translate-x-full lg:translate-x-0'}`
+            : `left-0 border-r ${isOpenMobile ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}`
         }`}
       >
         {/* Navigation List */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        <div className="flex-1 overflow-y-auto py-3 px-2.5 space-y-1">
+          {/* Mobile Header */}
           <div className="flex items-center justify-between px-2 mb-2 lg:hidden">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               {language === 'ar' ? 'القائمة' : 'Navigation'}
             </span>
             <button
+              type="button"
               onClick={onCloseMobile}
               className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
             >
@@ -153,63 +201,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
 
-          <div className="px-3 pb-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            {language === 'ar' ? 'عمليات المبيعات وخدمة العملاء' : 'Call Center Operations'}
+          {/* Primary Core Sections */}
+          <div className="space-y-1">
+            {primaryItems.map(renderNavButton)}
           </div>
 
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentSection === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleSelect(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left rtl:text-right ${
-                  isActive
-                    ? 'bg-bc-navy-900 text-white shadow-md ring-1 ring-bc-navy-700'
-                    : 'text-slate-700 hover:bg-slate-100/90 hover:text-slate-900'
-                }`}
-              >
-                <div className="flex items-center space-x-3 rtl:space-x-reverse truncate">
-                  <Icon
-                    className={`w-4 h-4 flex-shrink-0 ${
-                      isActive ? 'text-bc-teal-400' : 'text-slate-500'
-                    }`}
-                  />
-                  <span className="truncate">{item.label}</span>
-                </div>
+          {/* Subtle Section Divider */}
+          <div className="my-2 border-t border-[#E6EAF0]" />
 
-                {item.badge && (
-                  <span
-                    className={`ml-2 rtl:ml-0 rtl:mr-2 px-1.5 py-0.5 text-[10px] font-bold rounded-md border ${
-                      isActive
-                        ? 'bg-bc-navy-950 text-bc-teal-300 border-bc-navy-800'
-                        : item.badgeColor || 'bg-slate-100 text-slate-600 border-slate-200'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          {/* Secondary Reference Sections */}
+          <div className="space-y-1">
+            {secondaryItems.map(renderNavButton)}
+          </div>
         </div>
 
-        {/* Source & Version Footer */}
-        <div className="p-3.5 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-500 space-y-1">
-          <div className="flex items-center justify-between font-bold text-slate-700">
-            <span>{language === 'ar' ? 'مصدر البيانات' : 'Data Source'}</span>
-            <span className="text-emerald-700 font-mono text-[10px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-300 font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span>{language === 'ar' ? 'معتمد رسمياً' : 'Verified'}</span>
-            </span>
-          </div>
-          <p className="truncate text-slate-700 font-mono text-[10px]" title="EG outbound Knowledge base.xlsx">
-            EG outbound Knowledge base.xlsx
-          </p>
-          <div className="text-[10px] text-slate-400">
-            {language === 'ar' ? 'نظام سريع فوري • متوافق مع كافة الأجهزة' : 'High-speed frontend • Zero backend delay'}
-          </div>
+        {/* Sidebar Footer: Expand / Collapse Toggle (Desktop only) */}
+        <div className="p-2.5 border-t border-[#E6EAF0] bg-[#F7F9FC]/60 hidden lg:flex items-center justify-between">
+          <button
+            type="button"
+            onClick={onToggleExpand}
+            className={`w-full flex items-center ${
+              isExpanded ? 'justify-between px-2.5' : 'justify-center'
+            } py-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white text-xs font-bold transition-all border border-transparent hover:border-[#E6EAF0]`}
+            title={isExpanded ? (language === 'ar' ? 'طي القائمة' : 'Collapse') : (language === 'ar' ? 'توسيع القائمة' : 'Expand')}
+          >
+            {isExpanded ? (
+              <>
+                <span className="text-[11px] text-slate-500">
+                  {language === 'ar' ? 'تصغير الشريط' : 'Collapse'}
+                </span>
+                {isRTL ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+              </>
+            ) : (
+              isRTL ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+            )}
+          </button>
         </div>
       </aside>
     </>

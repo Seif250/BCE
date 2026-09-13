@@ -302,6 +302,19 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
       });
     }
 
+    // Re-registration Discount (10% for returning student)
+    if (input.registrationType === 'Re-registration') {
+      const reRegRate = 0.10;
+      const reRegAmount = Math.round(basePrice * reRegRate);
+      currentDiscount += reRegAmount;
+      discountsApplied.push({
+        name: 'Re-registration Discount',
+        percentage: 10,
+        amount: reRegAmount,
+        description: '10% re-registration discount applied for returning student.',
+      });
+    }
+
     discountAmount = currentDiscount;
     discountPercentage = basePrice > 0 ? Math.round((discountAmount / basePrice) * 100) : 0;
     finalPrice = basePrice - discountAmount;
@@ -393,6 +406,30 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
             description: '10% discount on 2nd camp (3rd camp discount is reserved for Starters only).',
           });
         }
+      }
+
+      // Sibling Discount (10% on youngest child when registering >1 child)
+      if (input.siblingCount && input.siblingCount > 1 && input.isYoungestSibling) {
+        const siblingAmount = Math.round(basePrice * 0.10);
+        summerDiscount += siblingAmount;
+        discountsApplied.push({
+          name: 'Sibling Discount',
+          percentage: 10,
+          amount: siblingAmount,
+          description: '10% sibling discount applied for youngest child booked.',
+        });
+      }
+
+      // Re-registration Discount (10% for returning student)
+      if (input.registrationType === 'Re-registration') {
+        const reRegAmount = Math.round(basePrice * 0.10);
+        summerDiscount += reRegAmount;
+        discountsApplied.push({
+          name: 'Re-registration Discount',
+          percentage: 10,
+          amount: reRegAmount,
+          description: '10% re-registration discount applied for returning student.',
+        });
       }
 
       discountAmount = summerDiscount;
@@ -721,8 +758,16 @@ function generateQuickCustomerAnswerAr(params: {
   if (params.finalPrice !== null) {
     let feeText = `إجمالي المصروفات المطلوبة ${params.finalPrice.toLocaleString()} جنيه مصري`;
     if (params.discountsApplied.length > 0) {
+      const translateDiscountNameAr = (name: string) => {
+        if (name === 'Bundle Discount') return 'حزم الترمات';
+        if (name === 'Sibling Discount') return 'الأخ الأصغر';
+        if (name === 'Re-registration Discount') return 'إعادة التسجيل';
+        if (name === '2-Camp Discount') return 'معسكرين';
+        if (name === '3-Camp Starter Discount') return '3 معسكرات للمبتدئين';
+        return name;
+      };
       const discountNames = params.discountsApplied
-        .map((d) => `${d.name} (${d.percentage}%)`)
+        .map((d) => `${translateDiscountNameAr(d.name)} (${d.percentage}%)`)
         .join(' و ');
       feeText += ` (شامل خصم ${discountNames})`;
     }

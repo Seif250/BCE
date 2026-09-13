@@ -46,9 +46,26 @@ export default {
             700: '#b45309',
           },
         },
+        app: {
+          bg: '#F7F9FC',
+          surface: '#FFFFFF',
+          border: '#E6EAF0',
+          muted: '#64748B',
+        },
+        status: {
+          confirmed: '#16a34a',
+          pending: '#d97706',
+          unavailable: '#dc2626',
+          primary: '#062A67',
+        },
+      },
+      boxShadow: {
+        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.04)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        arabic: ['"IBM Plex Sans Arabic"', 'Cairo', 'Segoe UI', 'system-ui', 'sans-serif'],
       },
     },
   },

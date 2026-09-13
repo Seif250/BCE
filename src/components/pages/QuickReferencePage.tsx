@@ -10,6 +10,7 @@ import {
   Search,
   Sparkles,
   PhoneCall,
+  ChevronRight,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { PAGE_TRANSLATIONS } from '../../i18n/pageTranslations';
@@ -313,59 +314,70 @@ export const QuickReferencePage: React.FC = () => {
             return (
               <div
                 key={faq.id}
-                className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4 hover:border-bc-navy-300 transition-colors"
+                className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-3.5 hover:border-bc-teal-400 transition-colors"
               >
-                {/* Question & Copy Button Header */}
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-slate-100 pb-3">
-                  <div className="flex items-start space-x-2.5 rtl:space-x-reverse">
-                    <HelpCircle className="w-5 h-5 text-bc-teal-600 flex-shrink-0 mt-0.5" />
-                    <h3 className="text-base font-extrabold text-slate-900 leading-snug">
+                {/* 1. Question Title & Quick Copy Button Header */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-slate-100 pb-2.5">
+                  <div className="flex items-start space-x-2 rtl:space-x-reverse">
+                    <HelpCircle className="w-5 h-5 text-bc-navy-800 flex-shrink-0 mt-0.5" />
+                    <h3 className="text-sm sm:text-base font-black text-slate-900 leading-snug">
                       {question}
                     </h3>
                   </div>
 
                   <button
+                    type="button"
                     onClick={() => handleCopy(quickAnswer, faq.id)}
-                    className="self-start sm:self-auto flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg bg-bc-navy-800 hover:bg-bc-navy-900 text-white text-xs font-bold shadow-sm transition-all flex-shrink-0"
+                    className={`self-start sm:self-auto flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all flex-shrink-0 ${
+                      copiedId === faq.id
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-bc-navy-900 hover:bg-bc-navy-800 text-white'
+                    }`}
                   >
                     {copiedId === faq.id ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <Check className="w-3.5 h-3.5 text-white" />
                         <span>{common.copied}</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>{pt.copyForCall}</span>
+                        <Copy className="w-3.5 h-3.5 text-bc-teal-300" />
+                        <span>{language === 'ar' ? 'نسخ للعميل' : 'Copy for Customer'}</span>
                       </>
                     )}
                   </button>
                 </div>
 
-                {/* Quick Answer (المفيد للعميل) Box */}
-                <div className="bg-gradient-to-r from-bc-navy-50 to-emerald-50/40 p-4 rounded-xl border border-bc-navy-200">
-                  <span className="text-[11px] font-bold text-bc-navy-900 uppercase tracking-wider block mb-1">
-                    {pt.keyTakeaway}
-                  </span>
+                {/* 2. Customer-Facing Answer (الإجابة المباشرة للعميل) */}
+                <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 relative overflow-hidden">
+                  <div className="flex items-center space-x-1.5 rtl:space-x-reverse mb-1 text-bc-teal-700 font-bold text-[11px] uppercase tracking-wider">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{language === 'ar' ? 'الإجابة المباشرة للعميل:' : 'Customer-Facing Answer:'}</span>
+                  </div>
                   <p className="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed">
-                    {quickAnswer}
+                    "{quickAnswer}"
                   </p>
                 </div>
 
-                {/* Bullet Points Details */}
-                <div className="space-y-1.5 pt-1">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                    {pt.detailsTitle}
-                  </span>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-slate-700">
-                    {notes.map((note, idx) => (
-                      <li key={idx} className="flex items-start space-x-2 rtl:space-x-reverse">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                        <span className="leading-snug">{note}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {/* 3. Collapsible Internal Operational Details (▸ تفاصيل داخلية) */}
+                {notes && notes.length > 0 && (
+                  <details className="group pt-0.5">
+                    <summary className="cursor-pointer text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center space-x-1.5 rtl:space-x-reverse select-none list-none py-1 transition-colors">
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-open:rotate-90 rtl:group-open:-rotate-90 transition-transform" />
+                      <span>{language === 'ar' ? '▸ تفاصيل داخلية وملاحظات تشغيلية' : '▸ Internal Operational Notes'}</span>
+                    </summary>
+                    <div className="mt-2 pl-5 rtl:pr-5 border-l-2 rtl:border-r-2 rtl:border-l-0 border-slate-200 py-1">
+                      <ul className="space-y-1.5 text-xs text-slate-600">
+                        {notes.map((note, idx) => (
+                          <li key={idx} className="flex items-start space-x-2 rtl:space-x-reverse">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                            <span className="leading-snug">{note}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </details>
+                )}
               </div>
             );
           })

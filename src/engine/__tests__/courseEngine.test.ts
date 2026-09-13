@@ -390,4 +390,38 @@ describe('Bilingual Quick Answer Generation (English & Egyptian Arabic)', () => 
     expect(res.quickCustomerAnswerAr).toContain('السن ده معفي من امتحان تحديد المستوى');
     expect(res.quickCustomerAnswerAr).toContain('6,400 جنيه مصري');
   });
+
+  it('applies 10% re-registration discount in Winter Block', () => {
+    const res = evaluateStudent({
+      dob: '2016-01-01', // Age 10
+      referenceDate: ref,
+      selectedProgram: 'Winter Block',
+      registrationType: 'Re-registration',
+      numberOfTerms: 1,
+    });
+
+    expect(res.basePrice).toBe(5800);
+    expect(res.discountAmount).toBe(580);
+    expect(res.finalPrice).toBe(5220);
+    expect(res.discountsApplied.some((d) => d.name === 'Re-registration Discount')).toBe(true);
+    expect(res.quickCustomerAnswerAr).toContain('إعادة التسجيل (10%)');
+  });
+
+  it('combines Sibling Discount and Re-registration Discount in Winter Block', () => {
+    const res = evaluateStudent({
+      dob: '2016-01-01', // Age 10
+      referenceDate: ref,
+      selectedProgram: 'Winter Block',
+      registrationType: 'Re-registration',
+      numberOfTerms: 1,
+      siblingCount: 2,
+      isYoungestSibling: true,
+    });
+
+    // 5800 - 580 (sibling) - 580 (re-reg) = 4640
+    expect(res.basePrice).toBe(5800);
+    expect(res.discountAmount).toBe(1160);
+    expect(res.finalPrice).toBe(4640);
+    expect(res.discountsApplied.length).toBe(2);
+  });
 });
