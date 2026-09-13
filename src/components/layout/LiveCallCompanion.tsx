@@ -174,7 +174,7 @@ export const LiveCallCompanion: React.FC<LiveCallCompanionProps> = ({
               <div className="space-y-1 text-slate-700 text-[11px]">
                 <div className="flex justify-between">
                   <span className="text-slate-500">{language === 'ar' ? 'المرحلة:' : 'Stage:'}</span>
-                  <strong className="text-bc-navy-900">{calculation.ageGroup}</strong>
+                  <strong className="text-bc-navy-900">{calculation.ageGroup.value}</strong>
                 </div>
 
                 <div className="flex justify-between">

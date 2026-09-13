@@ -137,7 +137,7 @@ export const StudentCalculator: React.FC = () => {
       {/* Existing Level */}
       <div>
         <label className="block text-sm font-medium mb-1" htmlFor="level-input">{t.existingLevelLabel || 'Existing Level'} ({t.optional || 'Optional'})</label>
-        <input id="level-input" type="text" value={existingLevel} onChange={e => setExistingLevel(e.target.value)} placeholder={t.levelPlaceholder || 'e.g. LP Primary Plus 2'} className="border rounded w-full px-3 py-2" />
+        <input id="level-input" type="text" value={existingLevel} onChange={e => setExistingLevel(e.target.value)} placeholder={t.noLevelPlaceholder || 'e.g. LP Primary Plus 2'} className="border rounded w-full px-3 py-2" />
       </div>
 
       {/* Discount Simulator */}

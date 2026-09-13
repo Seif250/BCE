@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Navbar } from './Navbar';
-import { SmartSearch } from '../ui/SmartSearch';
-import { QuickReferenceDrawer } from '../ui/QuickReferenceDrawer';
+// Removed missing UI components
 
 // Context to manage Call Mode toggle
 interface AppShellContextProps {
@@ -23,10 +22,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   return (
     <AppShellContext.Provider value={{ callMode, setCallMode }}>
       <div className={callMode ? 'call-mode' : ''}>
-        <Navbar onOpenSearch={() => {/* placeholder */}} />
+        <Navbar activeSection="calculator" onOpenSearch={() => {/* placeholder */}} />
         {/* Global drawers */}
-        <SmartSearch />
-        <QuickReferenceDrawer />
         {children}
       </div>
     </AppShellContext.Provider>

@@ -96,13 +96,17 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
                 {result.ageCategory.value}
               </span>
               {result.ageCategory.status === 'needs_confirmation' && (
-                <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" title={`Source: ${result.ageCategory.source}\nStatus: ${result.ageCategory.status}`} />
+                <span title={`Source: ${result.ageCategory.source}\nStatus: ${result.ageCategory.status}`}>
+                  <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" />
+                </span>
               )}
             </div>
             <p className="text-sm font-medium text-slate-600 mt-0.5">
               {t.ageGroupLabel}: <strong className="text-slate-900">{result.ageGroup.value}</strong>
               {result.ageGroup.status === 'needs_confirmation' && (
-                <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" title={`Source: ${result.ageGroup.source}\nStatus: ${result.ageGroup.status}`} />
+                <span title={`Source: ${result.ageGroup.source}\nStatus: ${result.ageGroup.status}`}>
+                  <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" />
+                </span>
               )}
               {result.ageMonths > 0 && (
                 <span className="text-xs text-slate-400 mx-1.5 font-normal">
@@ -120,7 +124,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
               {result.program.value}
             </span>
             {result.program.status === 'needs_confirmation' && (
-              <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" title={`Source: ${result.program.source}\nStatus: ${result.program.status}`} />
+              <span title={`Source: ${result.program.source}\nStatus: ${result.program.status}`}>
+                <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" />
+              </span>
             )}
           </div>
         </div>
@@ -136,7 +142,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
               {result.recommendedCourse.value}
             </div>
             {result.recommendedCourse.status === 'needs_confirmation' && (
-              <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" title={`Source: ${result.recommendedCourse.source}\nStatus: ${result.recommendedCourse.status}`} />
+              <span title={`Source: ${result.recommendedCourse.source}\nStatus: ${result.recommendedCourse.status}`}>
+                <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" />
+              </span>
             )}
             <div className="text-xs text-slate-600 mt-1.5 flex items-center space-x-1.5 rtl:space-x-reverse">
               <span>{t.academicLevelLabel}:</span>
@@ -144,7 +152,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
                 {result.academicLevel.value}
               </span>
               {result.academicLevel.status === 'needs_confirmation' && (
-                <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" title={`Source: ${result.academicLevel.source}\nStatus: ${result.academicLevel.status}`} />
+                <span title={`Source: ${result.academicLevel.source}\nStatus: ${result.academicLevel.status}`}>
+                  <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" />
+                </span>
               )}
             </div>
 
@@ -161,7 +171,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result }) => {
               </div>
             )}
             {result.summerMapping.status === 'needs_confirmation' && (
-              <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" title={`Source: ${result.summerMapping.source}\nStatus: ${result.summerMapping.status}`} />
+              <span title={`Source: ${result.summerMapping.source}\nStatus: ${result.summerMapping.status}`}>
+                <AlertCircle className="inline-block w-4 h-4 text-amber-600 ml-1" />
+              </span>
             )}
             {result.summerMapping.value === null && result.program.value === 'Summer School' && (
               <div className="mt-2 text-xs text-slate-500 italic">

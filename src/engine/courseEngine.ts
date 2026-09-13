@@ -255,10 +255,6 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
       summerMapping = null;
     }
 
-    if (input.isManualOverride && input.overrideAcademicLevel) {
-      academicLevel = input.overrideAcademicLevel;
-      summerMapping = getSummerLevelMapping(academicLevel);
-    }
 
     durationAndSessions = '4 terms, 9 sessions during 9 weeks (1 session/week, 2 hrs/session)';
 

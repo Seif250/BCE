@@ -7,6 +7,7 @@ export interface Translations {
   // Brand & Navbar
   brandTitle: string;
   brandSubtitle: string;
+  appName: string;
   searchPlaceholder: string;
   searchShortcut: string;
   offlineReady: string;
@@ -45,6 +46,7 @@ export interface Translations {
   regReturning: string;
   branchLabel: string;
   existingLevelLabel: string;
+  optional: string;
   noLevelPlaceholder: string;
 
   // Winter Options
@@ -56,6 +58,8 @@ export interface Translations {
   terms4: string;
   siblingCountLabel: string;
   isYoungestLabel: string;
+  discountSimulatorTitle: string;
+  termsLabel: string;
 
   // Summer Options
   summerCampsLabel: string;
@@ -131,6 +135,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
   en: {
     brandTitle: 'British Council Egypt',
     brandSubtitle: 'Sales Assistant & Instant Call Calculator',
+    appName: 'Sales Assistant',
     searchPlaceholder: 'Search courses, levels, fees, branches...',
     searchShortcut: 'Ctrl + K',
     offlineReady: 'Offline Ready',
@@ -167,6 +172,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     regReturning: 'Re-registration (10% Disc)',
     branchLabel: 'Preferred Branch',
     existingLevelLabel: 'Existing Level',
+    optional: 'Optional',
     noLevelPlaceholder: '-- No Level Known (Requires PT / Placement) --',
 
     winterTermsLabel: 'Winter Term Booking & Bundle Discounts',
@@ -177,6 +183,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     terms4: '4 Terms',
     siblingCountLabel: 'Number of Children Registering:',
     isYoungestLabel: 'This is the youngest child (eligible for 10% Sibling Discount)',
+    discountSimulatorTitle: 'Discount Simulator',
+    termsLabel: 'Terms',
 
     summerCampsLabel: 'Summer School Camps Selection',
     camp1Label: 'Camp 1 (5 Jul – 16 Jul 2026)',
@@ -241,6 +249,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
   ar: {
     brandTitle: 'المجلس الثقافي البريطاني مصر',
     brandSubtitle: 'المساعد الذكي لموظف المبيعات وحاسبة الأسعار السريعة',
+    appName: 'حاسبة المبيعات',
     searchPlaceholder: 'ابحث عن الكورسات، المستويات، الأسعار، الفروع...',
     searchShortcut: 'Ctrl + K',
     offlineReady: 'يعمل بدون إنترنت',
@@ -277,6 +286,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     regReturning: 'إعادة تسجيل (خصم 10% Re-registration)',
     branchLabel: 'الفرع المفضل',
     existingLevelLabel: 'المستوى الحالي للطالب (اختياري)',
+    optional: 'اختياري',
     noLevelPlaceholder: '-- غير معروف (يحتاج امتحان تحديد مستوى PT) --',
 
     winterTermsLabel: 'حجز الترمات وخصم الحزم (Winter Block)',
@@ -287,6 +297,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     terms4: '4 ترمات (خصم 15%)',
     siblingCountLabel: 'عدد الأخوات اللي بيسجلوا سوا:',
     isYoungestLabel: 'ده أصغر طفل في الأخوات (بيستحق خصم الأخوات 10%)',
+    discountSimulatorTitle: 'محاكي الخصومات',
+    termsLabel: 'عدد الترمات',
 
     summerCampsLabel: 'اختيار معسكرات الصيف (Summer Camps)',
     camp1Label: 'معسكر 1 (من 5 يوليو لـ 16 يوليو 2026)',

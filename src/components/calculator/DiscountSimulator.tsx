@@ -55,7 +55,7 @@ export const DiscountSimulator: React.FC<DiscountSimulatorProps> = ({
             checked={isYoungestSibling}
             onChange={e => setIsYoungestSibling(e.target.checked)}
           />
-          <span className="text-sm">{t.isYoungestSiblingLabel || 'Youngest Sibling Discount'}</span>
+          <span className="text-sm">{t.isYoungestLabel || 'Youngest Sibling Discount'}</span>
         </div>
       )}
     </div>
