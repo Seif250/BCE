@@ -22,27 +22,41 @@ import { WINTER_ACADEMIC_LEVELS } from '../../data/winterCourses';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { PAGE_TRANSLATIONS } from '../../i18n/pageTranslations';
 
+import { useToast } from '../ui/ToastContext';
+
 export const SummerPage: React.FC = () => {
   const { language, isRTL } = useLanguage();
   const pt = PAGE_TRANSLATIONS[language].summer;
   const common = PAGE_TRANSLATIONS[language].common;
+  const { showToast } = useToast();
 
   const [selectedCampIds, setSelectedCampIds] = useState<number[]>([1, 2]);
   const [isStarter, setIsStarter] = useState<boolean>(false);
   const [customCampPrice, setCustomCampPrice] = useState<string>('');
   const [copiedSummary, setCopiedSummary] = useState(false);
   const [mappingSearch, setMappingSearch] = useState<string>('');
+  const [ageFilter, setAgeFilter] = useState<'all' | 'ey' | 'primary' | 'secondary'>('all');
+  const [selectedWinterLevel, setSelectedWinterLevel] = useState<string>('');
 
   const filteredMapping = useMemo(() => {
-    if (!mappingSearch.trim()) return WINTER_ACADEMIC_LEVELS;
+    let list = WINTER_ACADEMIC_LEVELS;
+    if (ageFilter === 'ey') {
+      list = list.filter((lvl) => ['ey2', 'ey3'].includes(lvl.ageGroupId));
+    } else if (ageFilter === 'primary') {
+      list = list.filter((lvl) => ['lower-primary', 'upper-primary'].includes(lvl.ageGroupId));
+    } else if (ageFilter === 'secondary') {
+      list = list.filter((lvl) => ['lower-secondary', 'upper-secondary'].includes(lvl.ageGroupId));
+    }
+
+    if (!mappingSearch.trim()) return list;
     const q = mappingSearch.toLowerCase();
-    return WINTER_ACADEMIC_LEVELS.filter(
+    return list.filter(
       (lvl) =>
         lvl.name.toLowerCase().includes(q) ||
         lvl.ageGroupName.toLowerCase().includes(q) ||
         (lvl.summerMapping && lvl.summerMapping.toLowerCase().includes(q))
     );
-  }, [mappingSearch]);
+  }, [mappingSearch, ageFilter]);
 
   const toggleCamp = (num: number) => {
     if (selectedCampIds.includes(num)) {
@@ -84,6 +98,7 @@ export const SummerPage: React.FC = () => {
         : `British Council Summer School 2026: 3 camps, 30 hours over 2 weeks (3 hrs/day Sun-Thu). Camp 1: 5-16 Jul, Camp 2: 26 Jul-6 Aug, Camp 3: 9-20 Aug. 10% discount on 2nd camp.`;
     navigator.clipboard.writeText(text);
     setCopiedSummary(true);
+    showToast(language === 'ar' ? '✓ تم نسخ ملخص المدرسة الصيفية والمواعيد' : '✓ Copied summer camp summary');
     setTimeout(() => setCopiedSummary(false), 2000);
   };
 
@@ -336,14 +351,150 @@ export const SummerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Strict Summer-to-Winter Mapping Matrix */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-3">
+      {/* Strict Summer-to-Winter Mapping Matrix & Quick Tool */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-4">
+        {/* Quick Tool Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div>
-            <h3 className="text-sm sm:text-base font-black text-slate-900">{pt.mappingTitle}</h3>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <h3 className="text-sm sm:text-base font-black text-slate-900">
+                {language === 'ar' ? 'خريطة الصيف لمعادلة المستويات (Summer Mapping Quick Tool)' : pt.mappingTitle}
+              </h3>
+            </div>
             <p className="text-xs text-slate-500 mt-0.5">{pt.mappingDesc}</p>
           </div>
-          <div className="relative w-full sm:w-72">
+        </div>
+
+        {/* Interactive Instant Equivalence Finder */}
+        <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200 space-y-2.5">
+          <label className="block text-xs font-bold text-amber-950">
+            {language === 'ar'
+              ? '⚡ اختر مستوى الطالب الحالي في الشتاء لمعرفة المعادل الصيفي فوراً:'
+              : '⚡ Select current winter level to get instant summer mapping:'}
+          </label>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <select
+              value={selectedWinterLevel}
+              onChange={(e) => setSelectedWinterLevel(e.target.value)}
+              className="flex-1 px-3 py-2 text-xs font-bold text-slate-900 bg-white border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm"
+            >
+              <option value="">
+                {language === 'ar' ? '-- اختر المستوى الشتوي للطالب --' : '-- Select student winter level --'}
+              </option>
+              {WINTER_ACADEMIC_LEVELS.map((lvl) => (
+                <option key={lvl.id} value={lvl.id}>
+                  {lvl.name} ({lvl.ageGroupName})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Result of Instant Selection */}
+          {selectedWinterLevel && (() => {
+            const lvl = WINTER_ACADEMIC_LEVELS.find((l) => l.id === selectedWinterLevel);
+            if (!lvl) return null;
+            return (
+              <div className="mt-2 p-3 rounded-lg bg-white border border-amber-300 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-600 font-semibold">
+                      {language === 'ar' ? 'مستوى الشتاء:' : 'Winter Level:'}
+                    </span>
+                    <span className="text-xs font-black text-slate-900">{lvl.name}</span>
+                    <span className="text-[10px] text-slate-500">({lvl.ageGroupName})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-600 font-semibold">
+                      {language === 'ar' ? '⬅️ يعادله في الصيف:' : '⬅️ Summer Equivalent:'}
+                    </span>
+                    <span className="text-sm font-black text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded border border-amber-300">
+                      {lvl.summerMapping || (language === 'ar' ? 'غير محدد بالملف' : 'Unmapped')}
+                    </span>
+                    {lvl.notes && (
+                      <span className="text-[10px] text-slate-500 font-medium">({lvl.notes})</span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text =
+                      language === 'ar'
+                        ? `مستوى الطالب في الشتاء هو (${lvl.name})، والمستوى المعادل له في المدرسة الصيفية (Summer Camp) هو: ${lvl.summerMapping || 'يتم تحديده مع المشرف'}.`
+                        : `Current winter level is (${lvl.name}), and the equivalent course for Summer Camp is: ${lvl.summerMapping || 'To be confirmed with supervisor'}.`;
+                    navigator.clipboard.writeText(text);
+                    showToast(
+                      language === 'ar'
+                        ? `✓ تم نسخ معادلة المستوى (${lvl.name} ⬅️ ${lvl.summerMapping})`
+                        : `✓ Copied mapping (${lvl.name} ⬅️ ${lvl.summerMapping})`
+                    );
+                  }}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm transition-all whitespace-nowrap"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>{language === 'ar' ? 'نسخ الإفادة للعميل' : 'Copy Pitch'}</span>
+                </button>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Filter Chips + Search Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
+          {/* Quick Filter Chips */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-bold text-slate-500 ml-1 rtl:mr-1">
+              {language === 'ar' ? 'تصفية سريعة:' : 'Filter:'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setAgeFilter('all')}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                ageFilter === 'all'
+                  ? 'bg-amber-600 text-white border-amber-700 shadow-sm'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
+            >
+              {language === 'ar' ? 'الكل' : 'All'} ({WINTER_ACADEMIC_LEVELS.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setAgeFilter('ey')}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                ageFilter === 'ey'
+                  ? 'bg-amber-600 text-white border-amber-700 shadow-sm'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
+            >
+              {language === 'ar' ? 'مرحلة مبكرة (4–5)' : 'Early Years (4–5)'} (2)
+            </button>
+            <button
+              type="button"
+              onClick={() => setAgeFilter('primary')}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                ageFilter === 'primary'
+                  ? 'bg-amber-600 text-white border-amber-700 shadow-sm'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
+            >
+              {language === 'ar' ? 'ابتدائي (6–11)' : 'Primary (6–11)'} (10)
+            </button>
+            <button
+              type="button"
+              onClick={() => setAgeFilter('secondary')}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                ageFilter === 'secondary'
+                  ? 'bg-amber-600 text-white border-amber-700 shadow-sm'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
+            >
+              {language === 'ar' ? 'إعدادي وثانوي (12–17)' : 'Secondary (12–17)'} (6)
+            </button>
+          </div>
+
+          {/* Search box */}
+          <div className="relative w-full md:w-64">
             <Search className={`w-3.5 h-3.5 text-slate-400 absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2`} />
             <input
               type="text"

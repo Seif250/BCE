@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
+import { ToastProvider } from './components/ui/ToastContext';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar, NavSection } from './components/layout/Sidebar';
 import { LiveCallCompanion } from './components/layout/LiveCallCompanion';
@@ -165,7 +166,9 @@ function MainApp() {
 export function App() {
   return (
     <LanguageProvider>
-      <MainApp />
+      <ToastProvider>
+        <MainApp />
+      </ToastProvider>
     </LanguageProvider>
   );
 }

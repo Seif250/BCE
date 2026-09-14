@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CreditCard,
   CheckCircle2,
@@ -7,19 +7,33 @@ import {
   Info,
   Copy,
   Check,
+  Zap,
 } from 'lucide-react';
 import { ADULT_INSTALLMENT_RULES, YL_INSTALLMENT_RULES } from '../../data/installments';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { PAGE_TRANSLATIONS } from '../../i18n/pageTranslations';
+import { useToast } from '../ui/ToastContext';
 
 export const InstallmentsPage: React.FC = () => {
   const { language, isRTL } = useLanguage();
   const pt = PAGE_TRANSLATIONS[language].installments;
   const common = PAGE_TRANSLATIONS[language].common;
+  const { showToast } = useToast();
 
   const [selectedPreset, setSelectedPreset] = useState<string>('adult-40');
   const [customAmount, setCustomAmount] = useState<string>('10000');
   const [copiedPlan, setCopiedPlan] = useState<string | null>(null);
+  const [lastCalculatedPrice, setLastCalculatedPrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('bce_last_price');
+    if (saved) {
+      const p = Number(saved);
+      if (!isNaN(p) && p > 0) {
+        setLastCalculatedPrice(p);
+      }
+    }
+  }, []);
 
   const presets = [
     {
@@ -78,6 +92,7 @@ export const InstallmentsPage: React.FC = () => {
         : `Course fee: ${amountNumber.toLocaleString()} EGP. ${months}-month credit card installment is approx ~${monthly.toLocaleString()} EGP/month (Total with admin fee: ${total.toLocaleString()} EGP).`;
     navigator.clipboard.writeText(text);
     setCopiedPlan(`plan-${months}`);
+    showToast(language === 'ar' ? `✓ تم نسخ عرض تقسيط ${months} شهور` : `✓ Copied ${months}-month quote`);
     setTimeout(() => setCopiedPlan(null), 2000);
   };
 
@@ -249,6 +264,43 @@ export const InstallmentsPage: React.FC = () => {
 
         {/* Quick Presets */}
         <div>
+          {lastCalculatedPrice && (
+            <div className="mb-3.5 p-3 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/5 border border-emerald-300 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
+                  <Zap className="w-4 h-4" />
+                </span>
+                <div>
+                  <div className="text-xs font-black text-emerald-950">
+                    {language === 'ar' ? 'سعر آخر طالب تم حسابه في الحاسبة:' : 'Last Calculated Student Price:'}
+                  </div>
+                  <div className="text-xs text-emerald-700 font-bold">
+                    {lastCalculatedPrice.toLocaleString()} {language === 'ar' ? 'جنيه مصري' : 'EGP'}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedPreset('last-calc');
+                  setCustomAmount(String(lastCalculatedPrice));
+                  showToast(
+                    language === 'ar'
+                      ? `⚡ تم استيراد سعر الطالب: ${lastCalculatedPrice.toLocaleString()} ج.م`
+                      : `⚡ Auto-filled student price: ${lastCalculatedPrice.toLocaleString()} EGP`
+                  );
+                }}
+                className={`px-3 py-1.5 text-xs font-black rounded-lg border transition-all ${
+                  selectedPreset === 'last-calc'
+                    ? 'bg-emerald-700 text-white border-emerald-800 shadow-sm ring-2 ring-emerald-500/30'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                }`}
+              >
+                {language === 'ar' ? '⚡ حساب التقسيط لهذا المبلغ الآن' : '⚡ Calculate Installments for This Price'}
+              </button>
+            </div>
+          )}
+
           <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
             {language === 'ar' ? 'اختر باقة سريعة أثناء المكالمة:' : 'Select Course Package Preset:'}
           </label>

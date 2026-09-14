@@ -618,11 +618,19 @@ function evaluateInstallments(params: {
       options: [
         {
           tenureMonths: 6,
-          adminPercent: 9, // reference rate
+          adminPercent: 9, // 9% admin fee
           basePrice: totalPrice,
           adminFee: totalPrice !== null ? Math.round(totalPrice * 0.09) : null,
           totalWithAdmin: totalPrice !== null ? Math.round(totalPrice * 1.09) : null,
           monthlyPayment: totalPrice !== null ? Math.round((totalPrice * 1.09) / 6) : null,
+        },
+        {
+          tenureMonths: 12,
+          adminPercent: 15, // 15% admin fee
+          basePrice: totalPrice,
+          adminFee: totalPrice !== null ? Math.round(totalPrice * 0.15) : null,
+          totalWithAdmin: totalPrice !== null ? Math.round(totalPrice * 1.15) : null,
+          monthlyPayment: totalPrice !== null ? Math.round((totalPrice * 1.15) / 12) : null,
         },
       ],
       notes: 'Refer to official Installment Charges Calculator - Updated.xlsx for exact banking terms.',
