@@ -400,14 +400,14 @@ describe('Bilingual Quick Answer Generation (English & Egyptian Arabic)', () => 
       numberOfTerms: 1,
     });
 
+    // Re-registration discount is strictly for Adult courses per source; Winter Block does not have it.
     expect(res.basePrice).toBe(5800);
-    expect(res.discountAmount).toBe(580);
-    expect(res.finalPrice).toBe(5220);
-    expect(res.discountsApplied.some((d) => d.name === 'Re-registration Discount')).toBe(true);
-    expect(res.quickCustomerAnswerAr).toContain('إعادة التسجيل (10%)');
+    expect(res.discountAmount).toBe(0);
+    expect(res.finalPrice).toBe(5800);
+    expect(res.discountsApplied.some((d) => d.name === 'Re-registration Discount')).toBe(false);
   });
 
-  it('combines Sibling Discount and Re-registration Discount in Winter Block', () => {
+  it('applies Sibling Discount in Winter Block without unconfirmed re-registration stacking', () => {
     const res = evaluateStudent({
       dob: '2016-01-01', // Age 10
       referenceDate: ref,
@@ -418,10 +418,12 @@ describe('Bilingual Quick Answer Generation (English & Egyptian Arabic)', () => 
       isYoungestSibling: true,
     });
 
-    // 5800 - 580 (sibling) - 580 (re-reg) = 4640
+    // 5800 - 580 (sibling only) = 5220
     expect(res.basePrice).toBe(5800);
-    expect(res.discountAmount).toBe(1160);
-    expect(res.finalPrice).toBe(4640);
-    expect(res.discountsApplied.length).toBe(2);
+    expect(res.discountAmount).toBe(580);
+    expect(res.finalPrice).toBe(5220);
+    expect(res.discountsApplied.length).toBe(1);
+    expect(res.discountsApplied[0].name).toBe('Sibling Discount');
   });
 });
+

@@ -108,8 +108,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({
     const termsStr = result.program.value === 'Winter Block' ? `${selectedTerms} Term(s)` : `${result.durationAndSessions}`;
     const priceStr = `${result.finalPrice?.toLocaleString()} EGP`;
     const discountStr = result.discountsApplied.length > 0
-      ? ` [Discounts Applied: ${result.discountsApplied.map(d => `${d.name} (${d.percentage}%)`).join(', ')}]`
+      ? ` [Discounts: ${result.discountsApplied.map(d => d.name === 'Vario' ? 'Vario (deducted on SMS)' : `${d.name} (${d.percentage}%)`).join(', ')}]`
       : ' [No Discounts]';
+
     const instStr = result.installmentEligibility.eligible && result.installmentEligibility.options.length >= 2
       ? `\n• Installments (Credit Card):\n  - 6 Months: ~${result.installmentEligibility.options[0]?.monthlyPayment?.toLocaleString()} EGP/mo (Total: ${result.installmentEligibility.options[0]?.totalWithAdmin?.toLocaleString()} EGP with 9% admin fee)\n  - 12 Months: ~${result.installmentEligibility.options[1]?.monthlyPayment?.toLocaleString()} EGP/mo (Total: ${result.installmentEligibility.options[1]?.totalWithAdmin?.toLocaleString()} EGP with 15% admin fee)`
       : '';
@@ -146,12 +147,12 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   ].map((item) => {
     const rawTotal = baseTermFee * item.terms;
 
-    // Sum all applicable discounts for this term count
-    const siblingRate = isSiblingDiscountActive ? 0.10 : 0;
-    const reRegRate = isReRegistrationActive ? 0.10 : 0;
-    const totalDiscountRate = item.bundleDiscount + siblingRate + reRegRate;
+    // Sum all applicable discounts for this term count (bundle + sibling if eligible)
+    const siblingRate = isSiblingDiscountActive ? WINTER_PRICING.siblingDiscountPercent / 100 : 0;
+    const totalDiscountRate = item.bundleDiscount + siblingRate;
 
     const discountAmt = Math.round(rawTotal * totalDiscountRate);
+
     const finalAmt = rawTotal - discountAmt;
     const totalPercentage = Math.round(totalDiscountRate * 100);
 
@@ -162,7 +163,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
       finalAmt,
       totalPercentage,
       siblingRate,
-      reRegRate,
     };
   });
 

@@ -60,7 +60,7 @@ describe('Sales Assistant End-to-End Calculator Flow', () => {
     expect(res.finalPrice).toBe(10000);
   });
 
-  it('applies 10% re-registration discount for Young Learner', () => {
+  it('does not apply re-registration discount for Young Learner (strictly for Adults)', () => {
     const res = evaluateStudent({
       dob: '2016-05-15',
       referenceDate: ref,
@@ -69,12 +69,13 @@ describe('Sales Assistant End-to-End Calculator Flow', () => {
       registrationType: 'Re-registration',
     });
 
-    // 5800 - 10% (580) = 5220
+    // Re-registration discount does not apply to Young Learner Winter Block
     expect(res.basePrice).toBe(5800);
-    expect(res.discountAmount).toBe(580);
-    expect(res.finalPrice).toBe(5220);
-    expect(res.discountsApplied.some((d) => d.name === 'Re-registration Discount')).toBe(true);
+    expect(res.discountAmount).toBe(0);
+    expect(res.finalPrice).toBe(5800);
+    expect(res.discountsApplied.some((d) => d.name === 'Re-registration Discount')).toBe(false);
   });
+
 
   it('applies combined discounts for bundle (10% for 3 terms) + sibling discount (10%)', () => {
     const res = evaluateStudent({

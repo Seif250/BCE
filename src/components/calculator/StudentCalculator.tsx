@@ -6,6 +6,7 @@ import {
   ProgramFamily,
   ProgramType,
   RegistrationType,
+  VarioTiming,
 } from '../../data/types';
 import {
   evaluateStudent,
@@ -13,6 +14,7 @@ import {
 } from '../../engine/courseEngine';
 import { calculateAge } from '../../engine/ageCalculator';
 import { ADULT_COURSES } from '../../data/adultCourses';
+import { WINTER_PRICING } from '../../data/winterCourses';
 import { ResultCard } from './ResultCard';
 import { DiscountSimulator } from './DiscountSimulator';
 import { DateOfBirthInput } from './DateOfBirthInput';
@@ -28,6 +30,7 @@ import {
   Layers,
   GraduationCap,
   Baby,
+
   Users,
   Plus,
   Trash2,
@@ -69,6 +72,7 @@ export const StudentCalculator: React.FC = () => {
   const [terms, setTerms] = useState(1);
   const [siblingCount, setSiblingCount] = useState(1);
   const [registrationType, setRegistrationType] = useState<RegistrationType>('New');
+  const [varioTiming, setVarioTiming] = useState<VarioTiming>('none');
 
   // Collapsible Sections
   const [showDiscountSim, setShowDiscountSim] = useState(false);
@@ -148,6 +152,40 @@ export const StudentCalculator: React.FC = () => {
     ? 'Adult'
     : 'Young Learner';
 
+  // State Invalidation when effectiveFamily changes (Section AF)
+  const prevFamilyRef = useRef<string>(effectiveFamily);
+  useEffect(() => {
+    if (prevFamilyRef.current !== effectiveFamily) {
+      prevFamilyRef.current = effectiveFamily;
+      setExistingLevel('');
+      setTerms(1);
+      setSiblingCount(1);
+      setVarioTiming('none');
+      if (effectiveFamily === 'Young Learner') {
+        setRegistrationType('New');
+      }
+    }
+  }, [effectiveFamily]);
+
+  // State Invalidation when season changes
+  const prevSeasonRef = useRef<string>(selectedSeason);
+  useEffect(() => {
+    if (prevSeasonRef.current !== selectedSeason) {
+      prevSeasonRef.current = selectedSeason;
+      setExistingLevel('');
+      setVarioTiming('none');
+    }
+  }, [selectedSeason]);
+
+  // State Invalidation when adult product changes
+  const prevProductRef = useRef<string>(selectedAdultProduct);
+  useEffect(() => {
+    if (prevProductRef.current !== selectedAdultProduct) {
+      prevProductRef.current = selectedAdultProduct;
+      setExistingLevel('');
+    }
+  }, [selectedAdultProduct]);
+
   // Get age group title
   const ageGroupDisplay = useMemo(() => {
     if (!ageInfo) return '';
@@ -193,6 +231,7 @@ export const StudentCalculator: React.FC = () => {
       numberOfTerms: terms,
       siblingCount,
       isYoungestSibling: false,
+      varioTiming: effectiveFamily === 'Young Learner' && selectedSeason === 'Winter Block' ? varioTiming : 'none',
       isManualOverride: isManualOverrideActive,
       overrideProgramFamily: manualOverrideFamily,
     };
@@ -209,6 +248,7 @@ export const StudentCalculator: React.FC = () => {
     existingLevel,
     terms,
     siblingCount,
+    varioTiming,
     isManualOverrideActive,
     manualOverrideFamily,
   ]);
@@ -239,14 +279,13 @@ export const StudentCalculator: React.FC = () => {
     return sorted.map((child, index) => {
       const isEldest = index === 0;
       const isEarlyYears = child.ageYears < 6;
-      const baseTermFee = isEarlyYears ? 6400 : 5800;
+      const baseTermFee = isEarlyYears
+        ? WINTER_PRICING.earlyYearsTermFee
+        : WINTER_PRICING.primaryAndSecondaryTermFee;
       const rawBaseTotal = baseTermFee * child.termsCount;
 
-      let bundleDiscountPercent = 0;
-      if (child.termsCount === 2) bundleDiscountPercent = 5;
-      else if (child.termsCount === 3) bundleDiscountPercent = 10;
-      else if (child.termsCount === 4) bundleDiscountPercent = 15;
-
+      const bundleConf = WINTER_PRICING.bundleDiscounts.find((b) => b.terms === child.termsCount);
+      const bundleDiscountPercent = bundleConf ? bundleConf.discountPercent : 0;
       const bundleRate = bundleDiscountPercent / 100;
       const bundleDiscountAmount = Math.round(rawBaseTotal * bundleRate);
 
@@ -259,7 +298,8 @@ export const StudentCalculator: React.FC = () => {
         const olderTerms = Math.max(...sorted.slice(0, index).map((o) => o.termsCount));
         sharedTermsWithOlder = Math.min(child.termsCount, olderTerms);
         nonSharedTerms = child.termsCount - sharedTermsWithOlder;
-        siblingDiscountAmount = Math.round(baseTermFee * sharedTermsWithOlder * 0.10);
+        const siblingRate = WINTER_PRICING.siblingDiscountPercent / 100;
+        siblingDiscountAmount = Math.round(baseTermFee * sharedTermsWithOlder * siblingRate);
       }
 
       const totalDiscountAmount = bundleDiscountAmount + siblingDiscountAmount;
@@ -294,12 +334,13 @@ export const StudentCalculator: React.FC = () => {
         totalDiscountAmount,
         rawBaseTotal,
         finalChildPrice,
-        placementTestFee: 200,
+        placementTestFee: WINTER_PRICING.placementTestFee,
         placementTestRequired: !isEarlyYears,
         level: child.level || (isEarlyYears ? (y === 4 ? 'Ducks' : 'Owls') : 'Level Assigned on Call'),
       };
     });
   }, [familyChildren, isMultiChildMode, isAr]);
+
 
   // Sync current price for Installments page
   useEffect(() => {
@@ -341,9 +382,11 @@ export const StudentCalculator: React.FC = () => {
     setExistingLevel('');
     setTerms(1);
     setSiblingCount(1);
+    setVarioTiming('none');
     setRegistrationType('New');
     setResetTrigger((prev) => prev + 1);
   };
+
 
   // Keyboard Enter flow: Advance from DOB input to Level select
   const handleDobEnterNext = () => {
@@ -727,7 +770,7 @@ export const StudentCalculator: React.FC = () => {
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Sliders className="w-4 h-4 text-bc-teal-600" />
               <span>{isAr ? '▸ محاكي الخصومات والحزم (Discount Simulator)' : '▸ Discount & Bundle Simulator'}</span>
-              {(terms > 1 || (effectiveFamily === 'Adult' && registrationType === 'Re-registration')) && (
+              {(terms > 1 || (effectiveFamily === 'Adult' && registrationType === 'Re-registration') || varioTiming !== 'none') && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
                   {isAr ? 'خصومات مفعلة' : 'Discounts Active'}
                 </span>
@@ -750,10 +793,14 @@ export const StudentCalculator: React.FC = () => {
                 registrationType={registrationType}
                 setRegistrationType={setRegistrationType}
                 isAdult={effectiveFamily === 'Adult'}
+                varioTiming={varioTiming}
+                setVarioTiming={setVarioTiming}
+                selectedSeason={selectedSeason}
               />
             </div>
           )}
         </div>
+
 
         {/* Manual Override Collapsible */}
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">

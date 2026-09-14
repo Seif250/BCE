@@ -351,3 +351,25 @@ export const WINTER_OPERATIONAL_NOTES = [
   'Vario rule: Deducted amount is applied on SMS when registering after the first class (maximum after 2 classes). Can only be combined with sibling discount.',
   'Installments: No installment for 1 term; bookings must start from 2 terms.',
 ];
+
+export const VARIO_RULES = {
+  sourceSheet: 'YL WB' as const,
+  timing: {
+    beforeFirstClass: 'not_applicable',
+    afterFirstClass: 'eligible',
+    afterSecondClass: 'maximum_window',
+    afterMoreThanTwoClasses: 'not_applicable',
+  },
+  applicationMethod: 'Deducted amount is applied on SMS',
+  maxClasses: 2,
+  combinableWith: ['Sibling Discount'] as const,
+  exactAmountCalculable: false,
+  notes: [
+    'Deducted amount is applied on SMS.',
+    'Applicable when registering after the first class.',
+    'Maximum allowed window is after 2 classes.',
+    'Can be combined with sibling discount only.',
+    'Exact Vario amount cannot be calculated from the current knowledge base; amount is determined from SMS.',
+  ],
+};
+

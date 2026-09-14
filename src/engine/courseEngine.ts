@@ -10,6 +10,8 @@ import {
   CalculationInput,
   CalculationResult,
   AdultCourseProduct,
+  VarioTiming,
+  VarioRuleResult,
 } from '../data/types';
 import {
   WINTER_AGE_GROUPS,
@@ -17,6 +19,7 @@ import {
   WINTER_PRICING,
   IELTS_FOR_TEENS_INFO,
   WINTER_OPERATIONAL_NOTES,
+  VARIO_RULES,
 } from '../data/winterCourses';
 import { ADULT_COURSES } from '../data/adultCourses';
 import {
@@ -48,16 +51,7 @@ export function getAgeCategory(ageYears: number): AgeCategory {
  * Boundaries are strictly tested: 4, 5, 6-8, 9-11, 12-14, 15-17.
  */
 export function getAgeGroup(ageYears: number): AgeGroupConfig | null {
-  if (ageYears < 4) {
-    return {
-      id: 'unsupported',
-      name: 'Unsupported / outside configured range',
-      minAge: 0,
-      maxAge: 3.999,
-      category: 'Outside Supported Range',
-      description: 'Too young for current programs.',
-    };
-  }
+  if (ageYears < 4) return null;
   if (ageYears >= 18) {
     return {
       id: 'adult',
@@ -68,15 +62,11 @@ export function getAgeGroup(ageYears: number): AgeGroupConfig | null {
       description: 'Adult English courses (Beginner, BCE, IELTS Coach, English Online)',
     };
   }
-
-  for (const group of WINTER_AGE_GROUPS) {
-    if (ageYears >= group.minAge && ageYears <= group.maxAge) {
-      return group;
-    }
-  }
-
-  return null;
+  return WINTER_AGE_GROUPS.find(
+    (grp) => ageYears >= grp.minAge && ageYears <= grp.maxAge
+  ) || null;
 }
+
 
 /**
  * Returns available academic levels for a specific age group.
@@ -88,7 +78,7 @@ export function getAcademicLevelsForAge(ageYears: number): AcademicLevel[] {
 }
 
 /**
- * Returns the Placement Test rules based on age and program.
+ * Returns the Placement Test rules based on age, program, and adult product.
  */
 export function getPlacementTestRule(
   ageYears: number,
@@ -100,6 +90,7 @@ export function getPlacementTestRule(
   duration: string;
   validity: string;
   reason: string;
+  status: 'confirmed' | 'needs_confirmation' | 'unavailable';
 } {
   // Age 4 and 5: No Placement Test
   if (ageYears >= 4 && ageYears < 6) {
@@ -109,6 +100,7 @@ export function getPlacementTestRule(
       duration: 'N/A',
       validity: 'N/A',
       reason: 'No Placement Test needed for 4 & 5 years old (Ducks & Owls) — Early Years.',
+      status: 'confirmed',
     };
   }
 
@@ -119,18 +111,31 @@ export function getPlacementTestRule(
       fee: WINTER_PRICING.placementTestFee, // 200 EGP
       duration: '20 to 30 mins',
       validity: '6 months (Non-refundable)',
-      reason: 'Placement Test is required for learners from 6 years old to determine exact level.',
+      reason: 'Placement Test is required for learners from 6 years old (200 EGP, 20–30 mins, valid 6 months, non-refundable).',
+      status: 'confirmed',
     };
   }
 
   // Adult (18+)
   if (adultProductCode === 'english-online') {
     return {
-      required: true,
+      required: false,
       fee: 0,
-      duration: 'Online assessment included',
-      validity: 'Platform account',
-      reason: 'Integrated online placement assessment included with English Online subscription.',
+      duration: 'Not stated in source',
+      validity: 'Not stated in source',
+      reason: 'Placement test status and fee for English Online are not stated in knowledge base; requires confirmation.',
+      status: 'needs_confirmation',
+    };
+  }
+
+  if (adultProductCode === 'ielts-coach') {
+    return {
+      required: true,
+      fee: 200,
+      duration: '20 to 30 mins',
+      validity: '6 months (Non-refundable)',
+      reason: 'Placement Test required for IELTS Coach (200 EGP, 20–30 mins, valid 6 months, non-refundable). Minimum level requirement: B1 Intermediate.',
+      status: 'confirmed',
     };
   }
 
@@ -139,7 +144,8 @@ export function getPlacementTestRule(
     fee: 200,
     duration: '20 to 30 mins',
     validity: '6 months (Non-refundable)',
-    reason: 'Placement Test required for Adults (fee: 200 EGP, duration: 20–30 mins, valid 6 months).',
+    reason: 'Placement Test required for Adults (200 EGP, 20–30 mins, valid 6 months, non-refundable).',
+    status: 'confirmed',
   };
 }
 
@@ -158,6 +164,96 @@ export function getSummerLevelMapping(academicLevelName?: string): string | null
 }
 
 /**
+ * Evaluates Vario discount window and stacking eligibility strictly per YL WB sheet rules.
+ * - Deducted amount is applied on SMS.
+ * - Applicable when registering after the first class.
+ * - Maximum after 2 classes.
+ * - Can only be combined with sibling discount.
+ * - The workbook does NOT provide a fixed numeric amount/percentage -> amount is strictly null.
+ */
+export function evaluateVarioRule(params: {
+  timing?: VarioTiming;
+  terms: number;
+  hasSiblingDiscount: boolean;
+  hasOtherDiscounts: boolean;
+}): VarioRuleResult | undefined {
+  const { timing, hasSiblingDiscount, hasOtherDiscounts } = params;
+  if (!timing || timing === 'none') {
+    return undefined;
+  }
+
+  if (timing === 'before_first_class') {
+    return {
+      applicable: true,
+      eligible: false,
+      status: 'confirmed',
+      windowStatus: 'not_applicable',
+      message: 'Vario is not applicable before the first class.',
+      messageAr: 'خصم فاريو لا يطبق قبل الحصة الأولى.',
+      amount: null,
+      source: 'YL WB',
+      canCombineWithSiblingOnly: true,
+      stackingStatus: 'not_applicable',
+    };
+  }
+
+  if (timing === 'after_first_class') {
+    const stackingStatus = hasOtherDiscounts ? 'needs_confirmation' : 'confirmed_allowed';
+    const stackingNote = hasOtherDiscounts ? ' Discount combination requires confirmation.' : '';
+    const stackingNoteAr = hasOtherDiscounts ? ' تنبيه: دمج الخصومات يتطلب التأكيد الإداري.' : '';
+
+    return {
+      applicable: true,
+      eligible: true,
+      status: 'needs_confirmation',
+      windowStatus: 'eligible_after_1st_class',
+      message: `Vario eligible window: after the first class. Amount is determined from SMS; exact Vario amount cannot be calculated from the current knowledge base.${stackingNote}`,
+      messageAr: `مؤهل لخصم فاريو (بعد الحصة الأولى). يتم تحديد المبلغ عبر رسائل SMS ولا يمكن حسابه من قاعدة المعرفة الحالية.${stackingNoteAr}`,
+      amount: null,
+      source: 'YL WB',
+      canCombineWithSiblingOnly: true,
+      stackingStatus,
+    };
+  }
+
+  if (timing === 'after_second_class') {
+    const stackingStatus = hasOtherDiscounts ? 'needs_confirmation' : 'confirmed_allowed';
+    const stackingNote = hasOtherDiscounts ? ' Discount combination requires confirmation.' : '';
+    const stackingNoteAr = hasOtherDiscounts ? ' تنبيه: دمج الخصومات يتطلب التأكيد الإداري.' : '';
+
+    return {
+      applicable: true,
+      eligible: true,
+      status: 'needs_confirmation',
+      windowStatus: 'maximum_after_2_classes',
+      message: `Vario maximum allowed window: after 2 classes. Amount is determined from SMS; exact Vario amount cannot be calculated from the current knowledge base.${stackingNote}`,
+      messageAr: `الحد الأقصى المسموح لخصم فاريو (بعد حصتين). يتم تحديد المبلغ عبر رسائل SMS ولا يمكن حسابه من قاعدة المعرفة الحالية.${stackingNoteAr}`,
+      amount: null,
+      source: 'YL WB',
+      canCombineWithSiblingOnly: true,
+      stackingStatus,
+    };
+  }
+
+  if (timing === 'after_more_than_two_classes') {
+    return {
+      applicable: true,
+      eligible: false,
+      status: 'confirmed',
+      windowStatus: 'exceeded_maximum',
+      message: 'Vario is not applicable after more than 2 classes.',
+      messageAr: 'خصم فاريو غير متاح بعد أكثر من حصتين (تجاوز الحد الأقصى).',
+      amount: null,
+      source: 'YL WB',
+      canCombineWithSiblingOnly: true,
+      stackingStatus: 'not_applicable',
+    };
+  }
+
+  return undefined;
+}
+
+/**
  * Main evaluation function for the Sales Calculator.
  * Executes instantly on any input change.
  */
@@ -166,29 +262,37 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
   const ageCalc = calculateAge(input.dob, input.referenceDate);
   const effectiveAge = ageCalc.years;
 
-  let ageCategory = getAgeCategory(effectiveAge);
-  
-  // 2. Program family and override
-  const programFamily = input.isManualOverride && input.overrideProgramFamily && input.overrideProgramFamily !== 'Auto'
-    ? input.overrideProgramFamily
-    : (ageCategory === 'Adult' ? 'Adult' : 'Young Learner');
-
-  // If override changes the family, adjust ageCategory logically for UI
-  if (input.isManualOverride && input.overrideProgramFamily) {
-    if (input.overrideProgramFamily === 'Adult' && ageCategory !== 'Adult') {
-      ageCategory = 'Adult';
-    } else if (input.overrideProgramFamily === 'Young Learner' && ageCategory === 'Adult') {
-      ageCategory = 'Young Learner';
-    }
-  }
-
+  // True calculated age classification — NEVER overridden by manual override
+  const ageCategory = getAgeCategory(effectiveAge);
   const ageGroupConfig = getAgeGroup(effectiveAge);
-  const ageGroupName = ageGroupConfig ? ageGroupConfig.name : 'Unsupported / outside configured range';
+  const ageGroupName = ageGroupConfig
+    ? ageGroupConfig.name
+    : effectiveAge >= 18
+    ? 'Adult'
+    : 'Unsupported / outside configured range';
+
+  // 2. Program family and override:
+  // Manual override ONLY changes the program family, never the age, age group, or DOB
+  const isManualOverrideActive = Boolean(
+    input.isManualOverride &&
+      input.overrideProgramFamily &&
+      input.overrideProgramFamily !== 'Auto'
+  );
+
+  const programFamily = isManualOverrideActive
+    ? input.overrideProgramFamily!
+    : effectiveAge >= 18
+    ? 'Adult'
+    : 'Young Learner';
 
   // 3. Determine specific Program
   let program: ProgramType;
-  if (input.selectedProgram !== 'auto') {
-    program = input.selectedProgram;
+  if (input.selectedProgram && input.selectedProgram !== 'auto') {
+    if (programFamily === 'Adult') {
+      program = 'Adult';
+    } else {
+      program = input.selectedProgram === 'Adult' ? 'Winter Block' : input.selectedProgram;
+    }
   } else {
     // Auto detection based on determined family
     if (programFamily === 'Adult') {
@@ -198,26 +302,28 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     }
   }
 
-  // 3. Placement Test rule
+  // 4. Placement Test rule
   const ptRule = getPlacementTestRule(effectiveAge, program, input.selectedAdultProduct);
 
-  // 4. Academic level & course recommendations
-  let academicLevel = 'Placement / level confirmation required';
+  // 5. Academic level & course recommendations
+  let academicLevel = 'Exact course/level requires current level or placement confirmation.';
+  let academicLevelStatus: 'confirmed' | 'needs_confirmation' | 'unavailable' = 'needs_confirmation';
   let recommendedCourse = '';
   let eligibleCourses: string[] = [];
   let summerMapping: string | null = null;
   let durationAndSessions = '';
-  let sourceSheet = 'EG outbound Knowledge base.xlsx';
+  let sourceSheet = 'YL WB';
 
   // Operational notes accumulator
   const operationalNotes: string[] = [];
+  let varioRuleResult: VarioRuleResult | undefined = undefined;
 
   // Branch details
   const branchInfo = input.preferredBranch
     ? BRANCHES.find((b) => b.id === input.preferredBranch || b.code === input.preferredBranch)
     : undefined;
 
-  // 5. Evaluation per program
+  // 6. Evaluation per program
   let basePrice: number | null = null;
   let discountAmount = 0;
   let discountPercentage = 0;
@@ -229,32 +335,35 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
   // A. EARLY YEARS & YOUNG LEARNER - WINTER BLOCK
   // ==========================
   if (program === 'Winter Block') {
-    sourceSheet = 'EG outbound Knowledge base.xlsx — YL WB';
+    sourceSheet = 'YL WB';
     operationalNotes.push(...WINTER_OPERATIONAL_NOTES);
 
     // Level assignment
     if (effectiveAge === 4) {
       academicLevel = 'Early Years 2 (Ducks)';
+      academicLevelStatus = 'confirmed';
       recommendedCourse = 'Early Years 2 (Ducks) – Winter Block';
       eligibleCourses = ['Early Years 2 (Ducks)'];
       summerMapping = 'Ducks';
     } else if (effectiveAge === 5) {
       academicLevel = 'Early Years 3 (Owls)';
+      academicLevelStatus = 'confirmed';
       recommendedCourse = 'Early Years 3 (Owls) – Winter Block';
       eligibleCourses = ['Early Years 3 (Owls)'];
       summerMapping = 'Owls';
     } else if (input.existingLevel) {
       academicLevel = input.existingLevel;
+      academicLevelStatus = 'confirmed';
       recommendedCourse = `${input.existingLevel} (${ageGroupName})`;
       eligibleCourses = [input.existingLevel];
       summerMapping = getSummerLevelMapping(input.existingLevel);
     } else {
-      academicLevel = `Placement required (${ageGroupName})`;
+      academicLevel = 'Exact course/level requires current level or placement confirmation.';
+      academicLevelStatus = 'needs_confirmation';
       recommendedCourse = `${ageGroupName} Winter Block Course`;
       eligibleCourses = getAcademicLevelsForAge(effectiveAge).map((lvl) => lvl.name);
       summerMapping = null;
     }
-
 
     durationAndSessions = '4 terms, 9 sessions during 9 weeks (1 session/week, 2 hrs/session)';
 
@@ -289,7 +398,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
       });
     }
 
-    // Sibling Discount (10% on youngest child when registering >1 child)
+    // Sibling Discount (10% on youngest child when registering >1 child and booked in same term)
     if (input.siblingCount && input.siblingCount > 1 && input.isYoungestSibling) {
       const siblingRate = WINTER_PRICING.siblingDiscountPercent / 100; // 0.10
       const siblingAmount = Math.round(basePrice * siblingRate);
@@ -302,16 +411,22 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
       });
     }
 
-    // Re-registration Discount (10% for returning student)
-    if (input.registrationType === 'Re-registration') {
-      const reRegRate = 0.10;
-      const reRegAmount = Math.round(basePrice * reRegRate);
-      currentDiscount += reRegAmount;
+    // Vario Discount Evaluation (SMS based, eligible after 1st class up to 2 classes max)
+    const hasSiblingDiscount = discountsApplied.some((d) => d.name === 'Sibling Discount');
+    const hasOtherDiscounts = discountsApplied.some((d) => d.name !== 'Sibling Discount');
+    varioRuleResult = evaluateVarioRule({
+      timing: input.varioTiming,
+      terms,
+      hasSiblingDiscount,
+      hasOtherDiscounts,
+    });
+
+    if (varioRuleResult && varioRuleResult.eligible) {
       discountsApplied.push({
-        name: 'Re-registration Discount',
-        percentage: 10,
-        amount: reRegAmount,
-        description: '10% re-registration discount applied for returning student.',
+        name: 'Vario',
+        percentage: 0,
+        amount: 0, // Never invent an amount!
+        description: 'Vario deduction is applied on SMS (exact amount determined from SMS).',
       });
     }
 
@@ -325,28 +440,40 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
   // B. YOUNG LEARNER - SUMMER SCHOOL
   // ==========================
   else if (program === 'Summer School') {
-    sourceSheet = 'EG outbound Knowledge base.xlsx — YL SC';
+    sourceSheet = 'YL SC';
     operationalNotes.push(...SUMMER_OPERATIONAL_NOTES);
 
     // Level assignment
     if (effectiveAge === 4) {
       academicLevel = 'Ducks';
+      academicLevelStatus = 'confirmed';
       recommendedCourse = 'Summer Camp – Ducks';
       eligibleCourses = ['Ducks'];
       summerMapping = 'Ducks';
     } else if (effectiveAge === 5) {
       academicLevel = 'Owls';
+      academicLevelStatus = 'confirmed';
       recommendedCourse = 'Summer Camp – Owls';
       eligibleCourses = ['Owls'];
       summerMapping = 'Owls';
     } else if (input.existingLevel) {
       const mapped = getSummerLevelMapping(input.existingLevel);
-      academicLevel = mapped ? mapped : 'Summer mapping not specified in current source';
-      recommendedCourse = mapped ? `Summer Camp – ${mapped}` : `Summer Camp (${input.existingLevel})`;
-      eligibleCourses = mapped ? [mapped] : [];
-      summerMapping = mapped;
+      if (mapped) {
+        academicLevel = mapped;
+        academicLevelStatus = 'confirmed';
+        recommendedCourse = `Summer Camp – ${mapped}`;
+        eligibleCourses = [mapped];
+        summerMapping = mapped;
+      } else {
+        academicLevel = 'Not defined in current source';
+        academicLevelStatus = 'unavailable';
+        recommendedCourse = `Summer Camp (${input.existingLevel})`;
+        eligibleCourses = [];
+        summerMapping = null;
+      }
     } else {
-      academicLevel = `Placement required (${ageGroupName})`;
+      academicLevel = 'Exact course/level requires current level or placement confirmation.';
+      academicLevelStatus = 'needs_confirmation';
       recommendedCourse = `${ageGroupName} Summer Camp`;
       eligibleCourses = getAcademicLevelsForAge(effectiveAge)
         .map((lvl) => lvl.summerMapping)
@@ -356,7 +483,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
 
     durationAndSessions = 'Each camp: 30 hours over 2 weeks, 3 hrs/day (2h class + 1h activity), Sun–Thu';
 
-    // Pricing calculation: Default is null ("Price not available in current source")
+    // Pricing calculation: Default is null ("Price unavailable in current source")
     const selectedCamps = input.selectedCamps && input.selectedCamps.length > 0
       ? input.selectedCamps
       : [1];
@@ -367,7 +494,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
       finalPrice = null;
       discountAmount = 0;
       discountPercentage = 0;
-      priceNote = 'Price not available in current source (refer to SharePoint YL Age & Fees Calculator)';
+      priceNote = 'Price unavailable in current source.';
     } else {
       const pricePerCamp = SUMMER_PRICING_CONFIG.defaultPricePerCamp;
       basePrice = pricePerCamp * campCount;
@@ -396,7 +523,6 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
             description: '10% discount on 2nd and 3rd camp for 3 camps (Starter level only).',
           });
         } else {
-          // If 3 camps but not starter, applies 10% on 2nd camp
           const camp2Discount = Math.round(pricePerCamp * 0.10);
           summerDiscount += camp2Discount;
           discountsApplied.push({
@@ -420,18 +546,6 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
         });
       }
 
-      // Re-registration Discount (10% for returning student)
-      if (input.registrationType === 'Re-registration') {
-        const reRegAmount = Math.round(basePrice * 0.10);
-        summerDiscount += reRegAmount;
-        discountsApplied.push({
-          name: 'Re-registration Discount',
-          percentage: 10,
-          amount: reRegAmount,
-          description: '10% re-registration discount applied for returning student.',
-        });
-      }
-
       discountAmount = summerDiscount;
       discountPercentage = basePrice > 0 ? Math.round((discountAmount / basePrice) * 100) : 0;
       finalPrice = basePrice - discountAmount;
@@ -443,7 +557,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
   // C. ADULT COURSES
   // ==========================
   else {
-    sourceSheet = 'EG outbound Knowledge base.xlsx — Adult';
+    sourceSheet = 'Adult';
 
     const adultProd = ADULT_COURSES.find(
       (p) => p.id === (input.selectedAdultProduct || 'bce')
@@ -452,36 +566,52 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     operationalNotes.push(...adultProd.operationalNotes);
     eligibleCourses = adultProd.levels;
     recommendedCourse = adultProd.name;
-    academicLevel = input.existingLevel || 'Level placement via PT';
+
+    if (input.existingLevel) {
+      academicLevel = input.existingLevel;
+      academicLevelStatus = 'confirmed';
+    } else {
+      academicLevel = 'Exact course/level requires current level or placement confirmation.';
+      academicLevelStatus = 'needs_confirmation';
+    }
+
     durationAndSessions = adultProd.sessionDuration;
 
-    // Pick package
-    const credits = input.selectedPackageCredits || (adultProd.packages[1]?.credits || 20);
-    const pkg = adultProd.packages.find((p) => p.credits === credits) || adultProd.packages[0];
+    if (adultProd.packages.length === 0) {
+      basePrice = null;
+      finalPrice = null;
+      discountAmount = 0;
+      discountPercentage = 0;
+      priceNote = 'Pricing unavailable in current source (contact support.englishonline@britishcouncil.org)';
+    } else {
+      // Pick package
+      const credits = input.selectedPackageCredits || (adultProd.packages[1]?.credits || adultProd.packages[0].credits);
+      const pkg = adultProd.packages.find((p) => p.credits === credits) || adultProd.packages[0];
 
-    if (pkg) {
-      basePrice = pkg.price;
-      priceNote = `${pkg.label} — ${pkg.durationOrLevels}`;
+      if (pkg) {
+        basePrice = pkg.price;
+        priceNote = `${pkg.label} — ${pkg.durationOrLevels}`;
 
-      // Re-registration discount: 10% if within 3 months
-      if (input.registrationType === 'Re-registration') {
-        const reRegAmount = Math.round(basePrice * 0.10);
-        discountAmount = reRegAmount;
-        discountPercentage = 10;
-        finalPrice = basePrice - discountAmount;
-        discountsApplied.push({
-          name: 'Re-registration Discount',
-          percentage: 10,
-          amount: reRegAmount,
-          description: '10% re-registration discount (within 3 months from last attended session).',
-        });
-      } else {
-        finalPrice = basePrice;
+        // Re-registration discount: 10% if within 3 months
+        if (input.registrationType === 'Re-registration') {
+          const reRegAmount = Math.round(basePrice * 0.10);
+          discountAmount = reRegAmount;
+          discountPercentage = 10;
+          finalPrice = basePrice - discountAmount;
+          discountsApplied.push({
+            name: 'Re-registration Discount',
+            percentage: 10,
+            amount: reRegAmount,
+            description: '10% re-registration discount (within 3 months from last attended session).',
+          });
+        } else {
+          finalPrice = basePrice;
+        }
       }
     }
   }
 
-  // 6. Installment calculation
+  // 7. Installment calculation
   const installmentEligibility = evaluateInstallments({
     program,
     basePrice: finalPrice || basePrice,
@@ -489,7 +619,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     terms: input.numberOfTerms || 1,
   });
 
-  // 7. Quick Customer Answer Generation (Bilingual: English & Egyptian Arabic)
+  // 8. Quick Customer Answer Generation (Bilingual: English & Egyptian Arabic)
   const quickCustomerAnswerEn = generateQuickCustomerAnswer({
     effectiveAge,
     ageGroupName,
@@ -501,6 +631,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     basePrice,
     discountsApplied,
     branchInfo,
+    vario: varioRuleResult,
   });
 
   const quickCustomerAnswerAr = generateQuickCustomerAnswerAr({
@@ -514,6 +645,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     basePrice,
     discountsApplied,
     branchInfo,
+    vario: varioRuleResult,
   });
 
   return {
@@ -528,8 +660,12 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     program: { value: program, status: 'confirmed', source: sourceSheet },
     eligibleCourses,
     recommendedCourse: { value: recommendedCourse, status: 'confirmed', source: sourceSheet },
-    academicLevel: { value: academicLevel, status: 'confirmed', source: sourceSheet },
-    summerMapping: { value: summerMapping, status: 'confirmed', source: sourceSheet },
+    academicLevel: { value: academicLevel, status: academicLevelStatus, source: sourceSheet },
+    summerMapping: {
+      value: summerMapping,
+      status: summerMapping ? 'confirmed' : 'unavailable',
+      source: 'YL SC',
+    },
     placementTest: ptRule,
     durationAndSessions,
     basePrice,
@@ -538,6 +674,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     finalPrice,
     priceNote,
     discountsApplied,
+    vario: varioRuleResult,
     installmentEligibility,
     branchInfo,
     operationalNotes,
@@ -545,9 +682,10 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     quickCustomerAnswerEn,
     quickCustomerAnswerAr,
     sourceSheet,
-    isManualOverrideActive: Boolean(input.isManualOverride),
+    isManualOverrideActive,
   };
 }
+
 
 /**
  * Calculates installment options and eligibility based on source rules.
@@ -661,6 +799,7 @@ function generateQuickCustomerAnswer(params: {
   basePrice: number | null;
   discountsApplied: { name: string; percentage: number }[];
   branchInfo?: { name: string; address: string; workingHours: string };
+  vario?: VarioRuleResult;
 }): string {
   const parts: string[] = [];
 
@@ -685,21 +824,31 @@ function generateQuickCustomerAnswer(params: {
   }
 
   // Course & Level
-  if (params.academicLevel && !params.academicLevel.includes('Placement required')) {
+  if (params.academicLevel && !params.academicLevel.includes('requires current level')) {
     parts.push(`The designated level is ${params.academicLevel}.`);
+  } else {
+    parts.push('Exact course level requires current level or placement confirmation.');
   }
 
   // Fees & Discounts
   if (params.finalPrice !== null) {
     let feeText = `The total tuition fee is ${params.finalPrice.toLocaleString()} EGP`;
-    if (params.discountsApplied.length > 0) {
-      const discountNames = params.discountsApplied
+    const numericDiscounts = params.discountsApplied.filter((d) => d.percentage > 0);
+    if (numericDiscounts.length > 0) {
+      const discountNames = numericDiscounts
         .map((d) => `${d.name} (${d.percentage}%)`)
         .join(', ');
       feeText += ` (includes ${discountNames})`;
     }
     feeText += '.';
     parts.push(feeText);
+  } else {
+    parts.push('Tuition fee: Price unavailable in current source (subject to customer service confirmation).');
+  }
+
+  // Vario note
+  if (params.vario && params.vario.eligible) {
+    parts.push('Eligible for Vario discount (deduction applied on SMS).');
   }
 
   // Branch
@@ -727,6 +876,7 @@ function generateQuickCustomerAnswerAr(params: {
   basePrice: number | null;
   discountsApplied: { name: string; percentage: number }[];
   branchInfo?: { name: string; address: string; workingHours: string };
+  vario?: VarioRuleResult;
 }): string {
   const parts: string[] = [];
 
@@ -758,14 +908,17 @@ function generateQuickCustomerAnswerAr(params: {
   }
 
   // Course & Level
-  if (params.academicLevel && !params.academicLevel.includes('Placement required')) {
+  if (params.academicLevel && !params.academicLevel.includes('requires current level')) {
     parts.push(`المستوى الأكاديمي المقترح هو ${params.academicLevel}.`);
+  } else {
+    parts.push('تحديد المستوى الدقيق يتطلب معرفة المستوى الحالي أو اجتياز اختبار تحديد المستوى.');
   }
 
   // Fees & Discounts
   if (params.finalPrice !== null) {
     let feeText = `إجمالي المصروفات المطلوبة ${params.finalPrice.toLocaleString()} جنيه مصري`;
-    if (params.discountsApplied.length > 0) {
+    const numericDiscounts = params.discountsApplied.filter((d) => d.percentage > 0);
+    if (numericDiscounts.length > 0) {
       const translateDiscountNameAr = (name: string) => {
         if (name === 'Bundle Discount') return 'حزم الترمات';
         if (name === 'Sibling Discount') return 'الأخ الأصغر';
@@ -774,13 +927,20 @@ function generateQuickCustomerAnswerAr(params: {
         if (name === '3-Camp Starter Discount') return '3 معسكرات للمبتدئين';
         return name;
       };
-      const discountNames = params.discountsApplied
+      const discountNames = numericDiscounts
         .map((d) => `${translateDiscountNameAr(d.name)} (${d.percentage}%)`)
         .join(' و ');
       feeText += ` (شامل خصم ${discountNames})`;
     }
     feeText += '.';
     parts.push(feeText);
+  } else {
+    parts.push('المصروفات: السعر غير متاح في المصدر الحالي (يرجى التأكيد مع خدمة العملاء).');
+  }
+
+  // Vario note
+  if (params.vario && params.vario.eligible) {
+    parts.push('مؤهل لخصم فاريو (يتم تحديد وخصم المبلغ عبر رسائل SMS).');
   }
 
   // Branch
@@ -792,3 +952,4 @@ function generateQuickCustomerAnswerAr(params: {
 
   return parts.join(' ');
 }
+

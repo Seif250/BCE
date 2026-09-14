@@ -305,16 +305,8 @@ export const PAGE_TRANSLATIONS = {
       },
       openLink: 'Open Portal',
     },
-
-    settingsNotes: {
-      title: 'System Architecture & Data Update Guide',
-      subtitle: 'Single source of truth documentation, file locations, and data maintenance instructions.',
-      excelVerificationTitle: 'Single Source of Truth Verification',
-      excelVerificationDesc: 'This application strictly derives all pricing, age brackets, bundle rules, branch contacts, and level mappings from "EG outbound Knowledge base.xlsx". No business values are invented.',
-      dataFilesTitle: 'Where Data Files Live in the Codebase',
-      dataFilesDesc: 'To update prices or rules for future seasons, simply update the clean TypeScript data structures in the `src/data/` folder without touching UI components:',
-    },
   },
+
 
   ar: {
     common: {
@@ -619,14 +611,6 @@ export const PAGE_TRANSLATIONS = {
       },
       openLink: 'فتح المنصة',
     },
-
-    settingsNotes: {
-      title: 'دليل بنية البيانات وتحديث الأسعار مستقبلاً',
-      subtitle: 'توثيق مصدر الحقيقة للبيانات، ومواقع الملفات، وطريقة التعديل السلسة دون لمس كود الواجهة.',
-      excelVerificationTitle: 'مصدر الحقيقة المعتمد (Excel Verification)',
-      excelVerificationDesc: 'جميع الأسعار، والمراحل العمرية، وشروط الخصومات، ومطابقة المستويات، وأرقام الفروع تم استخراجها وتطبيعها بدقة 100% من ملف EG outbound Knowledge base.xlsx بدون أي تخمين.',
-      dataFilesTitle: 'أين توجد ملفات البيانات في المشروع؟',
-      dataFilesDesc: 'لتعديل أي سعر أو تاريخ في المواسم القادمة، يتم التعديل في ملفات TypeScript النظيفة في مجلد `src/data/` مباشرة وتنعكس في كافة أرجاء النظام تلقائياً:',
-    },
   },
 };
+

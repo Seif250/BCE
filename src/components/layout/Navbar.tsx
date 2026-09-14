@@ -60,11 +60,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
               <Search className="w-4 h-4" />
             </button>
 
-            {/* Online Status Pill */}
-            <div className="flex items-center space-x-1.5 rtl:space-x-reverse px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[11px] font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-              <span>{language === 'ar' ? 'متصل' : 'Online'}</span>
+            {/* Offline-ready Status Pill */}
+            <div
+              className="flex items-center space-x-1.5 rtl:space-x-reverse px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[11px] font-bold"
+              title={
+                language === 'ar'
+                  ? 'الحاسبة الأساسية تعمل بدون إنترنت (الروابط الخارجية تتطلب اتصالاً)'
+                  : 'Core calculator available offline (external portal links require internet)'
+              }
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+              <span>{language === 'ar' ? 'الحاسبة متاحة أوفلاين' : 'Core Calc Offline-Ready'}</span>
             </div>
+
 
             {/* Official WhatsApp/Phone Pill */}
             <a

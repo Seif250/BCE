@@ -175,11 +175,12 @@ export const ADULT_COURSES: AdultCourseProduct[] = [
     description: '100% online self-paced and teacher-led British Council global subscription for Adults.',
     placementTest: {
       fee: 0,
-      duration: 'Online assessment included',
-      validity: 'Subscription based',
+      duration: 'Not stated in current source',
+      validity: 'Not stated in current source',
       nonRefundable: false,
-      notes: 'Integrated online level check provided through English Online platform.',
+      notes: 'PT status not stated in knowledge base; requires confirmation (support.englishonline@britishcouncil.org).',
     },
+
     levels: ['A1 Beginner through C1 Advanced'],
     sessionDuration: 'Online live classes + self-study modules',
     attendanceMode: '100% Online',

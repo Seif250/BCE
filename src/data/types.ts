@@ -132,6 +132,30 @@ export interface InstallmentOption {
   applicablePackages: number[]; // e.g. [40, 60]
 }
 
+export type VarioTiming =
+  | 'none'
+  | 'before_first_class'
+  | 'after_first_class'
+  | 'after_second_class'
+  | 'after_more_than_two_classes';
+
+export interface VarioRuleResult {
+  applicable: boolean;
+  eligible: boolean;
+  status: 'confirmed' | 'needs_confirmation' | 'unavailable';
+  windowStatus:
+    | 'not_applicable'
+    | 'eligible_after_1st_class'
+    | 'maximum_after_2_classes'
+    | 'exceeded_maximum';
+  message: string;
+  messageAr: string;
+  amount: null; // Strictly null - never invent an amount or percentage!
+  source: 'YL WB';
+  canCombineWithSiblingOnly: boolean;
+  stackingStatus: 'confirmed_allowed' | 'needs_confirmation' | 'not_applicable';
+}
+
 export interface CalculationInput {
   dob: string;
   referenceDate?: string;
@@ -143,6 +167,7 @@ export interface CalculationInput {
   numberOfTerms?: number;
   siblingCount?: number;
   isYoungestSibling?: boolean;
+  varioTiming?: VarioTiming;
   // Summer specific
   selectedCamps?: number[]; // e.g. [1, 2]
   isStarterLevel?: boolean;
@@ -194,6 +219,7 @@ export interface CalculationResult {
     amount: number;
     description: string;
   }[];
+  vario?: VarioRuleResult;
   installmentEligibility: {
     eligible: boolean;
     reason: string;
@@ -215,3 +241,4 @@ export interface CalculationResult {
   sourceSheet: string;
   isManualOverrideActive: boolean;
 }
+

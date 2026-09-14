@@ -144,8 +144,23 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     const fullY = String(yNum);
     const iso = `${fullY}-${paddedM}-${paddedD}`;
 
+    const todayIso = now.toISOString().split('T')[0];
+    if (iso > todayIso) {
+      return {
+        valid: false,
+        iso: '',
+        d: dRaw,
+        m: mRaw,
+        y: String(yNum),
+        error: isAr
+          ? 'تاريخ الميلاد لا يمكن أن يكون في المستقبل'
+          : 'Date of birth cannot be in the future',
+      };
+    }
+
     return { valid: true, iso, d: paddedD, m: paddedM, y: fullY, error: '' };
   };
+
 
   // Validate and emit date
   const updateAndEmit = (d: string, m: string, y: string, showErrorIfIncomplete = false): boolean => {
