@@ -61,8 +61,15 @@ export const StudentCalculator: React.FC = () => {
   const [showDiscountSim, setShowDiscountSim] = useState(false);
   const [showManualOverride, setShowManualOverride] = useState(false);
 
-  // Refs for keyboard navigation
+  // Refs for keyboard navigation and scrolling
   const levelSelectRef = useRef<HTMLSelectElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  const handleCalculate = () => {
+    setTimeout(() => {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 40);
+  };
 
   // Calculate age info when DOB is filled
   const ageInfo = useMemo(() => {
@@ -203,6 +210,7 @@ export const StudentCalculator: React.FC = () => {
           value={dob}
           onChange={setDob}
           onEnterNext={handleDobEnterNext}
+          onCalculate={handleCalculate}
           resetTrigger={resetTrigger}
         />
 
@@ -387,7 +395,7 @@ export const StudentCalculator: React.FC = () => {
 
       {/* 4. RESULT CARD (Only shown when DOB is filled) */}
       {result && (
-        <div className="animate-fade-in">
+        <div ref={resultRef} id="result-section" className="animate-fade-in">
           <ResultCard
             result={result}
             selectedTerms={terms}

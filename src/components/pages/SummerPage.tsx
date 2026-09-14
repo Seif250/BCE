@@ -173,67 +173,87 @@ export const SummerPage: React.FC = () => {
         </button>
       </div>
 
-      {/* 3 LARGE CAMP CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {SUMMER_CAMPS.map((camp) => {
-          const isSelected = selectedCampIds.includes(camp.campNumber);
-          const campTitle =
-            camp.campNumber === 1 ? pt.camp1 : camp.campNumber === 2 ? pt.camp2 : pt.camp3;
+      {/* SUMMER CAMPS TIMELINE SEQUENCE */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h2 className="text-base sm:text-lg font-black text-slate-900 flex items-center space-x-2 rtl:space-x-reverse">
+              <Calendar className="w-5 h-5 text-amber-500" />
+              <span>{language === 'ar' ? 'الجدول الزمني للمعسكرات الصيفية' : 'Summer Camps Timeline'}</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {language === 'ar'
+                ? 'اضغط على أي معسكر لاختياره أو استبعاده من حساب الخصم التراكمي:'
+                : 'Click any camp to toggle inclusion in the bundle discount calculation:'}
+            </p>
+          </div>
+          <span className="text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200 px-3 py-1 rounded-xl self-start sm:self-auto shadow-2xs">
+            {language === 'ar' ? `المعسكرات المختارة: ${campCount} من 3` : `Selected: ${campCount} of 3`}
+          </span>
+        </div>
 
-          return (
-            <div
-              key={camp.campNumber}
-              onClick={() => toggleCamp(camp.campNumber)}
-              className={`cursor-pointer rounded-2xl border transition-all p-5 space-y-4 relative overflow-hidden ${
-                isSelected
-                  ? 'bg-amber-50/70 border-amber-400 shadow-md ring-2 ring-amber-400/40'
-                  : 'bg-white border-slate-200 hover:border-amber-300 shadow-sm'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-200/80 text-amber-950">
-                  {language === 'ar' ? `معسكر ${camp.campNumber}` : `Camp ${camp.campNumber}`}
-                </span>
-                <span
-                  className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                    isSelected ? 'bg-amber-600 text-white' : 'border border-slate-300'
-                  }`}
-                >
-                  {isSelected ? '✓' : ''}
-                </span>
-              </div>
+        {/* Timeline Sequence Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 relative">
+          {SUMMER_CAMPS.map((camp) => {
+            const isSelected = selectedCampIds.includes(camp.campNumber);
+            const campTitle =
+              camp.campNumber === 1 ? pt.camp1 : camp.campNumber === 2 ? pt.camp2 : pt.camp3;
 
-              <div>
-                <h3 className="text-base font-black text-slate-900">{campTitle}</h3>
-                <div className="flex items-center space-x-1.5 rtl:space-x-reverse text-amber-900 font-bold text-sm mt-1">
-                  <Calendar className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                  <span>{camp.displayDates}</span>
+            return (
+              <div
+                key={camp.campNumber}
+                onClick={() => toggleCamp(camp.campNumber)}
+                className={`cursor-pointer rounded-2xl border p-4 space-y-3 transition-all relative flex flex-col justify-between ${
+                  isSelected
+                    ? 'bg-amber-50/70 border-amber-400 shadow-sm ring-2 ring-amber-300/60'
+                    : 'bg-white border-slate-200 hover:border-slate-300 opacity-80 hover:opacity-100'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#062A67] text-white">
+                      {language === 'ar' ? `المعسكر ${camp.campNumber}` : `Camp ${camp.campNumber}`}
+                    </span>
+                    <span
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                        isSelected ? 'bg-amber-600 text-white shadow-xs' : 'border border-slate-300 text-transparent'
+                      }`}
+                    >
+                      ✓
+                    </span>
+                  </div>
+
+                  <h3 className="text-sm sm:text-base font-black text-slate-900">{campTitle}</h3>
+
+                  {/* Dates Strip */}
+                  <div className="mt-2 p-2.5 rounded-xl bg-white border border-amber-200 flex items-center space-x-2 rtl:space-x-reverse shadow-2xs">
+                    <Calendar className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span className="text-xs font-black text-amber-950 font-mono tracking-tight">
+                      {camp.displayDates}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-xs text-slate-600 pt-2.5 border-t border-slate-100">
+                  <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                    <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <span>
+                      {camp.durationHours} {language === 'ar' ? 'ساعة' : 'hours'} ({camp.durationWeeks} {language === 'ar' ? 'أسابيع' : 'weeks'})
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <span className="text-[11px]">{camp.dailySchedule}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-white/90 border border-slate-200 text-[11px] text-slate-700 leading-snug">
+                    <strong className="text-slate-900">{language === 'ar' ? 'المنهج:' : 'Curriculum:'}</strong>{' '}
+                    {camp.contentNotes}
+                  </div>
                 </div>
               </div>
-
-              <div className="space-y-1.5 text-xs text-slate-600 pt-3 border-t border-slate-100">
-                <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                  <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                  <span>
-                    {camp.durationHours} {language === 'ar' ? 'ساعة على مدار' : 'hours over'} {camp.durationWeeks} {language === 'ar' ? 'أسابيع' : 'weeks'}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                  <span>{camp.dailySchedule}</span>
-                </div>
-                <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                  <span>{language === 'ar' ? 'أيام الأحد إلى الخميس' : camp.daysOfWeek}</span>
-                </div>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-white/80 border border-amber-200/80 text-[11px] text-amber-950">
-                <strong>{language === 'ar' ? 'ملاحظة المنهج:' : 'Content note:'}</strong> {camp.contentNotes}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Multi-Camp Interactive Calculator */}

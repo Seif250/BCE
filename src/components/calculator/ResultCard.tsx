@@ -269,49 +269,75 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                   key={card.terms}
                   type="button"
                   onClick={() => onSelectTerms && onSelectTerms(card.terms)}
-                  className={`p-3 rounded-xl border text-center relative transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-xl border text-center relative transition-all cursor-pointer flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-gradient-to-b from-bc-navy-950 to-bc-navy-900 text-white border-bc-navy-900 shadow-md ring-2 ring-bc-teal-400 scale-[1.02]'
-                      : 'bg-slate-50/90 hover:bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:shadow-2xs'
+                      ? 'bg-gradient-to-b from-[#062A67] to-[#041d48] text-white border-[#062A67] shadow-md ring-2 ring-bc-teal-400 scale-[1.02]'
+                      : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 hover:border-slate-300 hover:shadow-2xs'
                   }`}
                 >
-                  {/* Popular Star Badge */}
-                  {card.popular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-full shadow-xs flex items-center space-x-0.5">
-                      <Sparkles className="w-2.5 h-2.5 text-slate-950 inline" />
-                      <span>{isAr ? '⭐ الأكثر طلباً' : '⭐ Best Value'}</span>
-                    </span>
-                  )}
+                  <div>
+                    {/* Subtle Best Value Badge */}
+                    {card.popular && (
+                      <span
+                        className={`inline-block mb-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md ${
+                          isSelected
+                            ? 'bg-amber-400 text-slate-950 shadow-xs'
+                            : 'bg-amber-100 text-amber-900 border border-amber-300'
+                        }`}
+                      >
+                        {isAr ? 'الأكثر طلباً • Best Value' : 'Best Value'}
+                      </span>
+                    )}
 
-                  <span
-                    className={`text-xs font-bold block ${
-                      isSelected ? 'text-bc-teal-300' : 'text-slate-600'
-                    }`}
-                  >
-                    {card.label}
-                  </span>
-
-                  <div className="mt-1">
                     <span
-                      className={`text-base sm:text-lg font-black block tracking-tight ${
-                        isSelected ? 'text-white' : 'text-slate-900'
+                      className={`text-xs font-bold block ${
+                        isSelected ? 'text-bc-teal-300' : 'text-slate-600'
                       }`}
                     >
-                      {card.finalAmt.toLocaleString()} {isAr ? 'ج.م' : 'EGP'}
+                      {card.label}
                     </span>
+
+                    {/* HERO PRICE NUMBER (24-28px bold) */}
+                    <div className="my-2">
+                      <span
+                        className={`text-2xl sm:text-3xl font-black block tracking-tight ${
+                          isSelected ? 'text-white' : 'text-slate-900'
+                        }`}
+                      >
+                        {card.finalAmt.toLocaleString()}
+                        <span className="text-xs font-bold mr-1 rtl:ml-1 rtl:mr-0 opacity-85">
+                          {isAr ? 'ج.م' : 'EGP'}
+                        </span>
+                      </span>
+                    </div>
                   </div>
 
-                  {card.discountAmt > 0 && (
-                    <span
-                      className={`text-[10px] font-bold block mt-0.5 ${
-                        isSelected ? 'text-emerald-300' : 'text-emerald-600'
-                      }`}
-                    >
-                      {isAr
-                        ? `وفر ${card.discountAmt.toLocaleString()} ج.م (${card.totalPercentage}%)`
-                        : `Save ${card.discountAmt.toLocaleString()} EGP (${card.totalPercentage}%)`}
-                    </span>
-                  )}
+                  <div className="space-y-0.5 pt-1.5 border-t border-slate-200/50">
+                    {/* Bundle discount note directly underneath */}
+                    {card.bundleDiscount > 0 && (
+                      <span
+                        className={`text-[11px] font-medium block ${
+                          isSelected ? 'text-slate-300' : 'text-slate-500'
+                        }`}
+                      >
+                        {isAr
+                          ? `يشمل خصم حزمة ${Math.round(card.bundleDiscount * 100)}%`
+                          : `includes ${Math.round(card.bundleDiscount * 100)}% bundle discount`}
+                      </span>
+                    )}
+
+                    {card.discountAmt > 0 && (
+                      <span
+                        className={`text-xs font-bold block ${
+                          isSelected ? 'text-emerald-300' : 'text-emerald-600'
+                        }`}
+                      >
+                        {isAr
+                          ? `وفر ${card.discountAmt.toLocaleString()} ج.م (${card.totalPercentage}%)`
+                          : `Save ${card.discountAmt.toLocaleString()} EGP (${card.totalPercentage}%)`}
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -331,44 +357,54 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                   key={pkg.id}
                   type="button"
                   onClick={() => onSelectPackageCredits && onSelectPackageCredits(pkg.credits)}
-                  className={`p-3 rounded-xl border text-center relative transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-xl border text-center relative transition-all cursor-pointer flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-gradient-to-b from-bc-navy-950 to-bc-navy-900 text-white border-bc-navy-900 shadow-md ring-2 ring-bc-teal-400 scale-[1.02]'
-                      : 'bg-slate-50/90 hover:bg-white text-slate-800 border-slate-200 hover:border-slate-300'
+                      ? 'bg-gradient-to-b from-[#062A67] to-[#041d48] text-white border-[#062A67] shadow-md ring-2 ring-bc-teal-400 scale-[1.02]'
+                      : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <span
-                    className={`text-xs font-bold block ${
-                      isSelected ? 'text-bc-teal-300' : 'text-slate-600'
-                    }`}
-                  >
-                    {pkg.credits} {isAr ? 'ساعة / رصيد' : 'Credits'}
-                  </span>
-                  <div className="mt-1">
+                  <div>
                     <span
-                      className={`text-base sm:text-lg font-black block tracking-tight ${
-                        isSelected ? 'text-white' : 'text-slate-900'
+                      className={`text-xs font-bold block ${
+                        isSelected ? 'text-bc-teal-300' : 'text-slate-600'
                       }`}
                     >
-                      {pkgFinal.toLocaleString()} {isAr ? 'ج.م' : 'EGP'}
+                      {pkg.credits} {isAr ? 'ساعة / رصيد' : 'Credits'}
+                    </span>
+
+                    {/* HERO PRICE */}
+                    <div className="my-2">
+                      <span
+                        className={`text-xl sm:text-2xl font-black block tracking-tight ${
+                          isSelected ? 'text-white' : 'text-slate-900'
+                        }`}
+                      >
+                        {pkgFinal.toLocaleString()}
+                        <span className="text-xs font-bold mr-1 rtl:ml-1 rtl:mr-0 opacity-85">
+                          {isAr ? 'ج.م' : 'EGP'}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-0.5 pt-1.5 border-t border-slate-200/50">
+                    {pkgDiscount > 0 && (
+                      <span
+                        className={`text-xs font-bold block ${
+                          isSelected ? 'text-emerald-300' : 'text-emerald-600'
+                        }`}
+                      >
+                        {isAr ? `وفر ${pkgDiscount.toLocaleString()} ج.م (خصم 10%)` : `Save ${pkgDiscount.toLocaleString()} EGP (10%)`}
+                      </span>
+                    )}
+                    <span
+                      className={`text-[10px] block ${
+                        isSelected ? 'text-slate-300' : 'text-slate-500'
+                      }`}
+                    >
+                      {pkg.durationOrLevels}
                     </span>
                   </div>
-                  {pkgDiscount > 0 && (
-                    <span
-                      className={`text-[10px] font-bold block mt-0.5 ${
-                        isSelected ? 'text-emerald-300' : 'text-emerald-600'
-                      }`}
-                    >
-                      {isAr ? `وفر ${pkgDiscount.toLocaleString()} ج.م (خصم 10%)` : `Save ${pkgDiscount.toLocaleString()} EGP (10%)`}
-                    </span>
-                  )}
-                  <span
-                    className={`text-[10px] block mt-0.5 ${
-                      isSelected ? 'text-slate-300' : 'text-slate-500'
-                    }`}
-                  >
-                    {pkg.durationOrLevels}
-                  </span>
                 </button>
               );
             })}
@@ -410,8 +446,8 @@ export const ResultCard: React.FC<ResultCardProps> = ({
       {/* 3. DUAL CALL PITCH / SCRIPT (ARABIC & ENGLISH SIDE-BY-SIDE) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Arabic Call Script */}
-        <div className="bg-gradient-to-br from-bc-navy-950 to-bc-navy-900 text-white rounded-2xl shadow-sm p-4 border border-bc-navy-800 flex flex-col justify-between space-y-2.5">
-          <div className="flex items-center justify-between border-b border-bc-navy-800 pb-2">
+        <div className="bg-gradient-to-br from-[#062A67] to-[#041d48] text-white rounded-2xl shadow-sm p-4 border border-[#062A67] flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between border-b border-white/15 pb-2">
             <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
               <FileText className="w-4 h-4 text-bc-teal-400" />
               <span className="text-xs font-bold text-bc-teal-300">
@@ -424,7 +460,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
               className={`inline-flex items-center space-x-1 rtl:space-x-reverse px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow ${
                 copiedAr
                   ? 'bg-emerald-500 text-white'
-                  : 'bg-bc-teal-500 text-bc-navy-950 hover:bg-bc-teal-400'
+                  : 'bg-bc-teal-500 text-[#062A67] hover:bg-bc-teal-400'
               }`}
             >
               {copiedAr ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -433,20 +469,16 @@ export const ResultCard: React.FC<ResultCardProps> = ({
           </div>
 
           <p
-            className="text-xs sm:text-sm text-slate-100 leading-relaxed bg-bc-navy-900/80 p-3 rounded-xl border border-bc-navy-800 text-right dir-rtl font-sans flex-1"
+            className="text-xs sm:text-sm text-slate-100 leading-relaxed bg-black/20 p-3 rounded-xl border border-white/10 text-right dir-rtl font-sans flex-1"
             dir="rtl"
           >
             "{result.quickCustomerAnswerAr}"
           </p>
-
-          <span className="text-[10px] text-slate-400 block text-right font-mono">
-            {result.sourceSheet}
-          </span>
         </div>
 
         {/* English Call Script */}
-        <div className="bg-gradient-to-br from-bc-navy-950 to-bc-navy-900 text-white rounded-2xl shadow-sm p-4 border border-bc-navy-800 flex flex-col justify-between space-y-2.5">
-          <div className="flex items-center justify-between border-b border-bc-navy-800 pb-2">
+        <div className="bg-gradient-to-br from-[#062A67] to-[#041d48] text-white rounded-2xl shadow-sm p-4 border border-[#062A67] flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between border-b border-white/15 pb-2">
             <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
               <FileText className="w-4 h-4 text-bc-teal-400" />
               <span className="text-xs font-bold text-bc-teal-300">
@@ -459,7 +491,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
               className={`inline-flex items-center space-x-1 rtl:space-x-reverse px-2.5 py-1 rounded-lg text-xs font-bold transition-all shadow ${
                 copiedEn
                   ? 'bg-emerald-500 text-white'
-                  : 'bg-bc-teal-500 text-bc-navy-950 hover:bg-bc-teal-400'
+                  : 'bg-bc-teal-500 text-[#062A67] hover:bg-bc-teal-400'
               }`}
             >
               {copiedEn ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -468,15 +500,11 @@ export const ResultCard: React.FC<ResultCardProps> = ({
           </div>
 
           <p
-            className="text-xs sm:text-sm text-slate-100 leading-relaxed bg-bc-navy-900/80 p-3 rounded-xl border border-bc-navy-800 text-left dir-ltr font-sans flex-1"
+            className="text-xs sm:text-sm text-slate-100 leading-relaxed bg-black/20 p-3 rounded-xl border border-white/10 text-left dir-ltr font-sans flex-1"
             dir="ltr"
           >
             "{result.quickCustomerAnswerEn}"
           </p>
-
-          <span className="text-[10px] text-slate-400 block text-left font-mono">
-            Clean pitch format
-          </span>
         </div>
       </div>
 
