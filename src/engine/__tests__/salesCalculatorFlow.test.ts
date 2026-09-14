@@ -95,4 +95,20 @@ describe('Sales Assistant End-to-End Calculator Flow', () => {
     expect(res.discountAmount).toBe(3480);
     expect(res.finalPrice).toBe(13920);
   });
+
+  it('applies 10% re-registration discount for Adult (BCE package)', () => {
+    const res = evaluateStudent({
+      dob: '2000-01-01',
+      referenceDate: ref,
+      selectedProgram: 'Adult',
+      selectedAdultProduct: 'bce',
+      selectedPackageCredits: 20,
+      registrationType: 'Re-registration',
+    });
+
+    expect(res.basePrice).toBe(6000);
+    expect(res.discountAmount).toBe(600);
+    expect(res.finalPrice).toBe(5400);
+    expect(res.discountsApplied.some((d) => d.name === 'Re-registration Discount')).toBe(true);
+  });
 });

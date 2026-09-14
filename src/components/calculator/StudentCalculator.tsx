@@ -68,7 +68,6 @@ export const StudentCalculator: React.FC = () => {
   // Discount Simulator Values
   const [terms, setTerms] = useState(1);
   const [siblingCount, setSiblingCount] = useState(1);
-  const [isYoungestSibling, setIsYoungestSibling] = useState(false);
   const [registrationType, setRegistrationType] = useState<RegistrationType>('New');
 
   // Collapsible Sections
@@ -189,11 +188,11 @@ export const StudentCalculator: React.FC = () => {
       selectedProgram: programToPass,
       selectedAdultProduct,
       selectedPackageCredits,
-      registrationType,
+      registrationType: effectiveFamily === 'Adult' ? registrationType : 'New',
       existingLevel: existingLevel || undefined,
       numberOfTerms: terms,
       siblingCount,
-      isYoungestSibling,
+      isYoungestSibling: false,
       isManualOverride: isManualOverrideActive,
       overrideProgramFamily: manualOverrideFamily,
     };
@@ -210,7 +209,6 @@ export const StudentCalculator: React.FC = () => {
     existingLevel,
     terms,
     siblingCount,
-    isYoungestSibling,
     isManualOverrideActive,
     manualOverrideFamily,
   ]);
@@ -343,7 +341,6 @@ export const StudentCalculator: React.FC = () => {
     setExistingLevel('');
     setTerms(1);
     setSiblingCount(1);
-    setIsYoungestSibling(false);
     setRegistrationType('New');
     setResetTrigger((prev) => prev + 1);
   };
@@ -536,56 +533,38 @@ export const StudentCalculator: React.FC = () => {
                 </div>
               </div>
 
-              {/* Quick Registration & Sibling Toggles */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
-                <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">
-                    {isAr ? 'نوع التسجيل:' : 'Registration:'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setRegistrationType('New')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                      registrationType === 'New'
-                        ? 'bg-[#062A67] text-white border-[#062A67] shadow-2xs'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {isAr ? 'طالب جديد' : 'New'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRegistrationType('Re-registration')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                      registrationType === 'Re-registration'
-                        ? 'bg-emerald-700 text-white border-emerald-700 shadow-2xs ring-1 ring-emerald-500'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    🏷️ {isAr ? 'إعادة تسجيل (خصم 10%)' : 'Re-registration (10% Off)'}
-                  </button>
+              {/* Quick Registration Pills (Adults Only) */}
+              {effectiveFamily === 'Adult' && (
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
+                  <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase">
+                      {isAr ? 'نوع التسجيل:' : 'Registration:'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setRegistrationType('New')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        registrationType === 'New'
+                          ? 'bg-[#062A67] text-white border-[#062A67] shadow-2xs'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {isAr ? 'طالب جديد' : 'New'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRegistrationType('Re-registration')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        registrationType === 'Re-registration'
+                          ? 'bg-emerald-700 text-white border-emerald-700 shadow-2xs ring-1 ring-emerald-500'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      🏷️ {isAr ? 'إعادة تسجيل (خصم 10%)' : 'Re-registration (10% Off)'}
+                    </button>
+                  </div>
                 </div>
-
-                {/* Quick Sibling Toggle if Young Learner */}
-                {effectiveFamily === 'Young Learner' && (
-                  <label className="flex items-center space-x-1.5 rtl:space-x-reverse cursor-pointer text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={siblingCount > 1 && isYoungestSibling}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSiblingCount(2);
-                          setIsYoungestSibling(true);
-                        } else {
-                          setIsYoungestSibling(false);
-                        }
-                      }}
-                      className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
-                    />
-                    <span>{isAr ? '👶 هذا هو الطفل الأصغر (خصم 10%)' : '👶 Youngest Sibling (10% Off)'}</span>
-                  </label>
-                )}
-              </div>
+              )}
             </div>
           )}
         </div>
@@ -730,7 +709,7 @@ export const StudentCalculator: React.FC = () => {
             selectedPackageCredits={selectedPackageCredits}
             onSelectPackageCredits={setSelectedPackageCredits}
             siblingCount={siblingCount}
-            isYoungestSibling={isYoungestSibling}
+            isYoungestSibling={false}
             registrationType={registrationType}
           />
         </div>
@@ -748,7 +727,7 @@ export const StudentCalculator: React.FC = () => {
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Sliders className="w-4 h-4 text-bc-teal-600" />
               <span>{isAr ? '▸ محاكي الخصومات والحزم (Discount Simulator)' : '▸ Discount & Bundle Simulator'}</span>
-              {(terms > 1 || siblingCount > 1 || registrationType === 'Re-registration') && (
+              {(terms > 1 || (effectiveFamily === 'Adult' && registrationType === 'Re-registration')) && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
                   {isAr ? 'خصومات مفعلة' : 'Discounts Active'}
                 </span>
@@ -768,10 +747,9 @@ export const StudentCalculator: React.FC = () => {
                 setTerms={setTerms}
                 siblingCount={siblingCount}
                 setSiblingCount={setSiblingCount}
-                isYoungestSibling={isYoungestSibling}
-                setIsYoungestSibling={setIsYoungestSibling}
                 registrationType={registrationType}
                 setRegistrationType={setRegistrationType}
+                isAdult={effectiveFamily === 'Adult'}
               />
             </div>
           )}

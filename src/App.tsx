@@ -3,7 +3,6 @@ import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import { ToastProvider } from './components/ui/ToastContext';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar, NavSection } from './components/layout/Sidebar';
-import { LiveCallCompanion } from './components/layout/LiveCallCompanion';
 import { StudentCalculator } from './components/calculator/StudentCalculator';
 import { AdultPage } from './components/pages/AdultPage';
 import { WinterPage } from './components/pages/WinterPage';
@@ -13,11 +12,7 @@ import { InstallmentsPage } from './components/pages/InstallmentsPage';
 import { ImportantLinksPage } from './components/pages/ImportantLinksPage';
 import { QuickReferencePage } from './components/pages/QuickReferencePage';
 import { GlobalSearchModal } from './components/search/GlobalSearchModal';
-import {
-  Menu,
-  Maximize2,
-  Columns,
-} from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 function MainApp() {
   const [currentSection, setCurrentSection] = useState<NavSection>('calculator');
@@ -27,10 +22,6 @@ function MainApp() {
     const saved = localStorage.getItem('bce_sidebar_expanded');
     return saved === 'true';
   });
-  const [isFullWidth, setIsFullWidth] = useState<boolean>(() => {
-    const saved = localStorage.getItem('bce_full_width');
-    return saved !== 'false'; // default to full width clean view
-  });
 
   const { t, isRTL, language } = useLanguage();
 
@@ -38,14 +29,6 @@ function MainApp() {
     setIsSidebarExpanded((prev) => {
       const next = !prev;
       localStorage.setItem('bce_sidebar_expanded', String(next));
-      return next;
-    });
-  };
-
-  const toggleFullWidth = () => {
-    setIsFullWidth((prev) => {
-      const next = !prev;
-      localStorage.setItem('bce_full_width', String(next));
       return next;
     });
   };
@@ -107,51 +90,19 @@ function MainApp() {
             </span>
           </div>
 
-          {/* Main Layout Grid: Main Content + Optional Live Companion */}
-          <div className="flex gap-4 items-start w-full">
-            {/* Active View Router */}
-            <div className="flex-1 min-w-0 animate-fade-in space-y-4">
-              {currentSection === 'calculator' && <StudentCalculator />}
-              {currentSection === 'adult' && <AdultPage />}
-              {currentSection === 'winter' && <WinterPage />}
-              {currentSection === 'summer' && <SummerPage />}
-              {currentSection === 'branches' && <BranchesPage />}
-              {currentSection === 'installments' && <InstallmentsPage />}
-              {currentSection === 'links' && <ImportantLinksPage />}
-              {currentSection === 'quick-ref' && <QuickReferencePage />}
-            </div>
-
-            {/* Live Call Companion Widget (Slide-in or inline when active) */}
-            {!isFullWidth && (
-              <div className="hidden xl:block sticky top-2 w-80 flex-shrink-0">
-                <LiveCallCompanion
-                  onToggleFullWidth={toggleFullWidth}
-                  isFullWidth={isFullWidth}
-                />
-              </div>
-            )}
+          {/* Main Layout: Active View Router */}
+          <div className="w-full animate-fade-in space-y-4">
+            {currentSection === 'calculator' && <StudentCalculator />}
+            {currentSection === 'adult' && <AdultPage />}
+            {currentSection === 'winter' && <WinterPage />}
+            {currentSection === 'summer' && <SummerPage />}
+            {currentSection === 'branches' && <BranchesPage />}
+            {currentSection === 'installments' && <InstallmentsPage />}
+            {currentSection === 'links' && <ImportantLinksPage />}
+            {currentSection === 'quick-ref' && <QuickReferencePage />}
           </div>
         </main>
       </div>
-
-      {/* Floating Quick Assistant Button (Bottom Screen) */}
-      <button
-        type="button"
-        onClick={toggleFullWidth}
-        className={`fixed bottom-4 ${
-          isRTL ? 'left-4' : 'right-4'
-        } z-30 flex items-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-full shadow-lg transition-all hover:scale-105 active:scale-95 ${
-          !isFullWidth
-            ? 'bg-bc-teal-600 hover:bg-bc-teal-700 text-white ring-2 ring-bc-teal-400/50'
-            : 'bg-[#062A67] hover:bg-bc-navy-900 text-white'
-        }`}
-        title={language === 'ar' ? 'المساعد السريع للمكالمة' : 'Live Call Assistant'}
-      >
-        <span className="text-xs">✦</span>
-        <span className="text-xs font-bold">
-          {language === 'ar' ? 'مساعد سريع' : 'Quick Assistant'}
-        </span>
-      </button>
 
       {/* Global Search Modal */}
       <GlobalSearchModal

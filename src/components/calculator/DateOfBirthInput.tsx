@@ -59,6 +59,13 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     dayRef.current?.focus();
   }, [resetTrigger]);
 
+  // Normalize Eastern Arabic numerals (٠-٩ / ۰-۹) to standard Western digits
+  const normalizeArabicDigits = (str: string): string => {
+    return str
+      .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632))
+      .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 1776));
+  };
+
   // Pure validation function
   const parseAndValidate = (dRaw: string, mRaw: string, yRaw: string) => {
     if (!dRaw || !mRaw || !yRaw) {
@@ -141,30 +148,27 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   };
 
   // Validate and emit date
-  const updateAndEmit = (d: string, m: string, y: string, forcePad = false): boolean => {
-    const isDayReady = forcePad ? d.length >= 1 : d.length === 2;
-    const isMonthReady = forcePad ? m.length >= 1 : m.length === 2;
-    const isYearReady = forcePad ? y.length >= 2 : y.length === 4;
+  const updateAndEmit = (d: string, m: string, y: string, showErrorIfIncomplete = false): boolean => {
+    const isDayReady = d.length >= 1;
+    const isMonthReady = m.length >= 1;
+    const isYearReady = y.length >= 2;
 
     if (isDayReady && isMonthReady && isYearReady) {
       const res = parseAndValidate(d, m, y);
       if (res.valid) {
         setErrorMsg('');
-        if (forcePad) {
-          setDay(res.d);
-          setMonth(res.m);
-          setYear(res.y);
-        }
+        // CRITICAL: DO NOT overwrite local user state (day/month) with forced padded strings!
+        // The ISO string res.iso already contains properly formatted YYYY-MM-DD for the engine.
         lastEmittedIsoRef.current = res.iso;
         onChange(res.iso);
         return true;
       } else {
-        if (forcePad) {
+        if (showErrorIfIncomplete) {
           setErrorMsg(res.error);
         }
       }
     } else {
-      if (forcePad) {
+      if (showErrorIfIncomplete && (d || m || y)) {
         setErrorMsg(isAr ? 'يرجى إكمال اليوم والشهر والسنة' : 'Please complete day, month, and year');
       }
     }
@@ -177,7 +181,23 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   };
 
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+    const raw = normalizeArabicDigits(e.target.value);
+
+    // If user typed/pasted full 8 digits: DDMMYYYY
+    const onlyDigits = raw.replace(/\D/g, '');
+    if (onlyDigits.length === 8 && !onlyDigits.startsWith('19') && !onlyDigits.startsWith('20')) {
+      const d = onlyDigits.slice(0, 2);
+      const m = onlyDigits.slice(2, 4);
+      const y = onlyDigits.slice(4, 8);
+      setDay(d);
+      setMonth(m);
+      setYear(y);
+      setErrorMsg('');
+      updateAndEmit(d, m, y, true);
+      return;
+    }
+
+    const val = onlyDigits.slice(0, 2);
     setDay(val);
     setErrorMsg('');
     if (val.length === 2) {
@@ -193,15 +213,15 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   };
 
   const handleDayBlur = () => {
-    if (day.length === 1 && day !== '0') {
-      const padded = day.padStart(2, '0');
-      setDay(padded);
-      updateAndEmit(padded, month, year, false);
+    // Do NOT auto-pad with '0' on blur to avoid corrupting multi-digit input
+    if (day && month && year) {
+      updateAndEmit(day, month, year, false);
     }
   };
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+    const raw = normalizeArabicDigits(e.target.value);
+    const val = raw.replace(/\D/g, '').slice(0, 2);
     setMonth(val);
     setErrorMsg('');
     if (val.length === 2) {
@@ -217,15 +237,15 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   };
 
   const handleMonthBlur = () => {
-    if (month.length === 1 && month !== '0') {
-      const padded = month.padStart(2, '0');
-      setMonth(padded);
-      updateAndEmit(day, padded, year, false);
+    // Do NOT auto-pad with '0' on blur
+    if (day && month && year) {
+      updateAndEmit(day, month, year, false);
     }
   };
 
   const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+    const raw = normalizeArabicDigits(e.target.value);
+    const val = raw.replace(/\D/g, '').slice(0, 4);
     setYear(val);
     setErrorMsg('');
     if (val.length === 4) {
@@ -239,21 +259,19 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   };
 
   const handleYearBlur = () => {
-    if (year.length >= 2) {
+    if (day && month && year.length >= 2) {
       updateAndEmit(day, month, year, true);
     }
   };
 
   const handleDayKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === '/' || e.key === 'ArrowRight' || e.key === 'Tab') {
+    if (e.key === 'Enter' || e.key === '/' || e.key === 'Tab') {
       if (e.key !== 'Tab') {
         e.preventDefault();
       }
       if (day.length >= 1) {
-        const padded = day.padStart(2, '0');
-        setDay(padded);
         if (month && year) {
-          const ok = updateAndEmit(padded, month, year, true);
+          const ok = updateAndEmit(day, month, year, true);
           if (ok) {
             onCalculate?.();
             onEnterNext?.();
@@ -270,13 +288,13 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     if (e.key === 'Backspace' && !month) {
       e.preventDefault();
       dayRef.current?.focus();
-    } else if (e.key === 'Enter' || e.key === '/' || e.key === 'ArrowRight') {
-      e.preventDefault();
+    } else if (e.key === 'Enter' || e.key === '/' || e.key === 'Tab') {
+      if (e.key !== 'Tab') {
+        e.preventDefault();
+      }
       if (month.length >= 1) {
-        const padded = month.padStart(2, '0');
-        setMonth(padded);
         if (day && year) {
-          const ok = updateAndEmit(day, padded, year, true);
+          const ok = updateAndEmit(day, month, year, true);
           if (ok) {
             onCalculate?.();
             onEnterNext?.();
@@ -286,17 +304,11 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
         yearRef.current?.focus();
         yearRef.current?.select();
       }
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      dayRef.current?.focus();
     }
   };
 
   const handleYearKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !year) {
-      e.preventDefault();
-      monthRef.current?.focus();
-    } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
       monthRef.current?.focus();
     } else if (e.key === 'Enter') {
@@ -457,6 +469,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
               ref={dayRef}
               id="dob-day-input"
               type="text"
+              dir="ltr"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={2}
@@ -482,6 +495,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
               ref={monthRef}
               id="dob-month-input"
               type="text"
+              dir="ltr"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={2}
@@ -507,6 +521,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
               ref={yearRef}
               id="dob-year-input"
               type="text"
+              dir="ltr"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={4}

@@ -9,10 +9,11 @@ interface DiscountSimulatorProps {
   setTerms: (t: number) => void;
   siblingCount: number;
   setSiblingCount: (c: number) => void;
-  isYoungestSibling: boolean;
-  setIsYoungestSibling: (v: boolean) => void;
+  isYoungestSibling?: boolean;
+  setIsYoungestSibling?: (v: boolean) => void;
   registrationType?: RegistrationType;
   setRegistrationType?: (r: RegistrationType) => void;
+  isAdult?: boolean;
 }
 
 export const DiscountSimulator: React.FC<DiscountSimulatorProps> = ({
@@ -20,10 +21,9 @@ export const DiscountSimulator: React.FC<DiscountSimulatorProps> = ({
   setTerms,
   siblingCount,
   setSiblingCount,
-  isYoungestSibling,
-  setIsYoungestSibling,
   registrationType = 'New',
   setRegistrationType,
+  isAdult = false,
 }) => {
   const { t, language } = useLanguage();
   const isAr = language === 'ar';
@@ -74,7 +74,6 @@ export const DiscountSimulator: React.FC<DiscountSimulatorProps> = ({
                 type="button"
                 onClick={() => {
                   setSiblingCount(c);
-                  if (c === 1) setIsYoungestSibling(false);
                 }}
                 className={`py-2 px-1 text-center rounded-lg border font-bold text-xs transition-all ${
                   siblingCount === c
@@ -93,28 +92,8 @@ export const DiscountSimulator: React.FC<DiscountSimulatorProps> = ({
         </div>
       </div>
 
-      {/* Sibling Checkbox (if > 1 child) */}
-      {siblingCount > 1 && (
-        <label className="flex items-center space-x-2 rtl:space-x-reverse p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 cursor-pointer text-emerald-900">
-          <input
-            type="checkbox"
-            checked={isYoungestSibling}
-            onChange={(e) => setIsYoungestSibling(e.target.checked)}
-            className="w-4 h-4 text-emerald-600 rounded border-emerald-300 focus:ring-emerald-500"
-          />
-          <span className="text-xs font-bold flex items-center space-x-1 rtl:space-x-reverse">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600 inline" />
-            <span>
-              {isAr
-                ? 'هذا هو الطفل الأصغر (يستحق خصم الأخوات 10%)'
-                : 'Youngest Child Discount (Eligible for 10% Sibling Discount)'}
-            </span>
-          </span>
-        </label>
-      )}
-
-      {/* Registration Type (New vs Re-registration) */}
-      {setRegistrationType && (
+      {/* Registration Type (New vs Re-registration) - Adults Only */}
+      {isAdult && setRegistrationType && (
         <div className="flex items-center justify-between pt-1 border-t border-slate-200">
           <span className="text-[11px] font-bold text-slate-500 uppercase">
             {isAr ? 'نوع التسجيل:' : 'Registration:'}

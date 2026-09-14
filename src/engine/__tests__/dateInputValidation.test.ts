@@ -55,4 +55,47 @@ describe('Date Input Validation & Calculation Integration', () => {
     expect(res.ageGroup.value).toBe('Lower Primary');
     expect(res.placementTest.required).toBe(true);
   });
+
+  it('correctly preserves Day 25 and Month 12 without mutating into 02 and 01', () => {
+    const normalizeDigits = (val: string): string => {
+      return val
+        .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632))
+        .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 1776))
+        .replace(/\D/g, '');
+    };
+
+    const cleanD = normalizeDigits('25');
+    const cleanM = normalizeDigits('12');
+    const cleanY = normalizeDigits('2015');
+
+    expect(cleanD).toBe('25');
+    expect(cleanM).toBe('12');
+    expect(cleanY).toBe('2015');
+
+    const iso = `${cleanY}-${cleanM}-${cleanD}`;
+    expect(iso).toBe('2015-12-25');
+
+    const res = evaluateStudent({
+      dob: iso,
+      referenceDate: ref,
+      selectedProgram: 'Winter Block',
+      registrationType: 'New',
+    });
+
+    expect(res.calculatedAge).toBe(10);
+    expect(res.ageGroup.value).toBe('Upper Primary');
+  });
+
+  it('correctly normalizes Arabic numerals ٢٥ / ١٢ / ٢٠١٥', () => {
+    const normalizeDigits = (val: string): string => {
+      return val
+        .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632))
+        .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 1776))
+        .replace(/\D/g, '');
+    };
+
+    expect(normalizeDigits('٢٥')).toBe('25');
+    expect(normalizeDigits('١٢')).toBe('12');
+    expect(normalizeDigits('٢٠١٥')).toBe('2015');
+  });
 });
