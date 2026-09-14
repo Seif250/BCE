@@ -28,6 +28,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
   const dayRef = useRef<HTMLInputElement>(null);
   const monthRef = useRef<HTMLInputElement>(null);
   const yearRef = useRef<HTMLInputElement>(null);
+  const lastEmittedIsoRef = useRef<string>('');
 
   // Sync external value changes (e.g., reset or presets)
   useEffect(() => {
@@ -36,6 +37,11 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
       setMonth('');
       setYear('');
       setErrorMsg('');
+      lastEmittedIsoRef.current = '';
+      return;
+    }
+    // Avoid cyclic overwrite of local inputs when the value came from our own typing
+    if (value === lastEmittedIsoRef.current) {
       return;
     }
     const parts = value.split('-');
@@ -44,6 +50,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
       setMonth(parts[1]);
       setDay(parts[2]);
       setErrorMsg('');
+      lastEmittedIsoRef.current = value;
     }
   }, [value]);
 
@@ -135,8 +142,11 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
 
   // Validate and emit date
   const updateAndEmit = (d: string, m: string, y: string, forcePad = false): boolean => {
-    const isYearReady = y.length === 4 || (forcePad && y.length >= 2);
-    if (d.length >= 1 && m.length >= 1 && isYearReady) {
+    const isDayReady = forcePad ? d.length >= 1 : d.length === 2;
+    const isMonthReady = forcePad ? m.length >= 1 : m.length === 2;
+    const isYearReady = forcePad ? y.length >= 2 : y.length === 4;
+
+    if (isDayReady && isMonthReady && isYearReady) {
       const res = parseAndValidate(d, m, y);
       if (res.valid) {
         setErrorMsg('');
@@ -145,6 +155,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
           setMonth(res.m);
           setYear(res.y);
         }
+        lastEmittedIsoRef.current = res.iso;
         onChange(res.iso);
         return true;
       } else {
@@ -159,6 +170,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     }
     // If not fully valid, clear emitted date
     if (value !== '') {
+      lastEmittedIsoRef.current = '';
       onChange('');
     }
     return false;
@@ -168,10 +180,15 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     const val = e.target.value.replace(/\D/g, '').slice(0, 2);
     setDay(val);
     setErrorMsg('');
-    updateAndEmit(val, month, year);
     if (val.length === 2) {
+      updateAndEmit(val, month, year, false);
       monthRef.current?.focus();
       monthRef.current?.select();
+    } else {
+      if (value !== '') {
+        lastEmittedIsoRef.current = '';
+        onChange('');
+      }
     }
   };
 
@@ -179,7 +196,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     if (day.length === 1 && day !== '0') {
       const padded = day.padStart(2, '0');
       setDay(padded);
-      updateAndEmit(padded, month, year);
+      updateAndEmit(padded, month, year, false);
     }
   };
 
@@ -187,10 +204,15 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     const val = e.target.value.replace(/\D/g, '').slice(0, 2);
     setMonth(val);
     setErrorMsg('');
-    updateAndEmit(day, val, year);
     if (val.length === 2) {
+      updateAndEmit(day, val, year, false);
       yearRef.current?.focus();
       yearRef.current?.select();
+    } else {
+      if (value !== '') {
+        lastEmittedIsoRef.current = '';
+        onChange('');
+      }
     }
   };
 
@@ -198,7 +220,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     if (month.length === 1 && month !== '0') {
       const padded = month.padStart(2, '0');
       setMonth(padded);
-      updateAndEmit(day, padded, year);
+      updateAndEmit(day, padded, year, false);
     }
   };
 
@@ -206,7 +228,14 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     const val = e.target.value.replace(/\D/g, '').slice(0, 4);
     setYear(val);
     setErrorMsg('');
-    updateAndEmit(day, month, val);
+    if (val.length === 4) {
+      updateAndEmit(day, month, val, true);
+    } else {
+      if (value !== '') {
+        lastEmittedIsoRef.current = '';
+        onChange('');
+      }
+    }
   };
 
   const handleYearBlur = () => {
@@ -304,6 +333,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
         setMonth(res.m);
         setYear(res.y);
         setErrorMsg('');
+        lastEmittedIsoRef.current = res.iso;
         onChange(res.iso);
         onCalculate?.();
         onEnterNext?.();
@@ -322,6 +352,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
         setMonth(res.m);
         setYear(res.y);
         setErrorMsg('');
+        lastEmittedIsoRef.current = res.iso;
         onChange(res.iso);
         onCalculate?.();
         onEnterNext?.();
@@ -342,6 +373,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
           setMonth(res.m);
           setYear(res.y);
           setErrorMsg('');
+          lastEmittedIsoRef.current = res.iso;
           onChange(res.iso);
           onCalculate?.();
           onEnterNext?.();
@@ -358,6 +390,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
           setMonth(res.m);
           setYear(res.y);
           setErrorMsg('');
+          lastEmittedIsoRef.current = res.iso;
           onChange(res.iso);
           onCalculate?.();
           onEnterNext?.();
@@ -378,6 +411,7 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     setMonth(m);
     setYear(String(y));
     setErrorMsg('');
+    lastEmittedIsoRef.current = iso;
     onChange(iso);
     if (onCalculate) {
       onCalculate();

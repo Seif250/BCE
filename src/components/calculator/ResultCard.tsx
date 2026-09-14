@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Copy,
   Check,
@@ -53,6 +53,20 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   const [showInstallments, setShowInstallments] = useState(true);
   const [showBranch, setShowBranch] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === 's' || e.key === 'S' || e.key === 'س')) {
+        e.preventDefault();
+        handleCopyText(generateCrmSummary(), 'crm');
+      } else if (e.altKey && (e.key === 'c' || e.key === 'C' || e.key === 'ؤ')) {
+        e.preventDefault();
+        handleCopyText(isAr ? result.quickCustomerAnswerAr : result.quickCustomerAnswerEn, isAr ? 'ar' : 'en');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [result, isAr]);
+
   const handleCopyText = async (text: string, type: 'ar' | 'en' | 'price' | 'crm') => {
     try {
       await navigator.clipboard.writeText(text);
@@ -85,27 +99,29 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   };
 
   const generateCrmSummary = () => {
-    const ageStr = `${result.calculatedAge} سنة`;
+    const ageStr = `${result.calculatedAge} yrs`;
     const levelStr = result.academicLevel.value;
     const ptStr = result.placementTest.required
-      ? `امتحان تحديد مستوى PT مطلوب (${result.placementTest.fee} ج.م)`
-      : `معفي من امتحان تحديد المستوى (PT Not Required)`;
+      ? `Placement Test: Completed / Passed (Level confirmed on call | Test fee: ${result.placementTest.fee} EGP if new test required)`
+      : `Placement Test: Not Required (Early Years 4–5)`;
     const courseStr = result.recommendedCourse.value;
-    const termsStr = result.program.value === 'Winter Block' ? `${selectedTerms} ترم` : `${result.durationAndSessions}`;
-    const priceStr = `${result.finalPrice?.toLocaleString()} ج.م`;
+    const termsStr = result.program.value === 'Winter Block' ? `${selectedTerms} Term(s)` : `${result.durationAndSessions}`;
+    const priceStr = `${result.finalPrice?.toLocaleString()} EGP`;
     const discountStr = result.discountsApplied.length > 0
-      ? ` [خصومات مطبقة: ${result.discountsApplied.map(d => `${d.name} (${d.percentage}%)`).join(', ')}]`
-      : '';
+      ? ` [Discounts Applied: ${result.discountsApplied.map(d => `${d.name} (${d.percentage}%)`).join(', ')}]`
+      : ' [No Discounts]';
     const instStr = result.installmentEligibility.eligible && result.installmentEligibility.options.length >= 2
-      ? `\n- التقسيط: 6 شهور (~${result.installmentEligibility.options[0]?.monthlyPayment?.toLocaleString()} ج.م/ش) أو 12 شهر (~${result.installmentEligibility.options[1]?.monthlyPayment?.toLocaleString()} ج.م/ش)`
+      ? `\n• Installments (Credit Card):\n  - 6 Months: ~${result.installmentEligibility.options[0]?.monthlyPayment?.toLocaleString()} EGP/mo (Total: ${result.installmentEligibility.options[0]?.totalWithAdmin?.toLocaleString()} EGP with 9% admin fee)\n  - 12 Months: ~${result.installmentEligibility.options[1]?.monthlyPayment?.toLocaleString()} EGP/mo (Total: ${result.installmentEligibility.options[1]?.totalWithAdmin?.toLocaleString()} EGP with 15% admin fee)`
       : '';
 
-    return `[ملخص مكالمة مبيعات المجلس الثقافي البريطاني]
-- الطالب: ${ageStr} (${result.ageGroup.value})
-- البرنامج: ${courseStr} (${termsStr})
-- المستوى المقترح: ${levelStr}
-- موقف الامتحان: ${ptStr}
-- المبلغ المطلوب: ${priceStr}${discountStr}${instStr}`;
+    return `=== BRITISH COUNCIL SALES CALL SUMMARY (CRM) ===
+• Student: Age ${ageStr} | Age Group: ${result.ageGroup.value}
+• Program: ${courseStr} | Booking: ${termsStr}
+• Assigned Level: ${levelStr}
+• Placement Test: ${ptStr}
+• Total Course Fee: ${priceStr}${discountStr}${instStr}
+• Status: Ready for booking / payment link
+=================================================`;
   };
 
   // Determine base term price for Winter Block
@@ -181,26 +197,27 @@ export const ResultCard: React.FC<ResultCardProps> = ({
           </div>
 
           {/* Placement Test Badge */}
-          <div
-            className={`px-3 py-1.5 rounded-xl border flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-bold ${
-              result.placementTest.required
-                ? 'bg-amber-50 text-amber-900 border-amber-300'
-                : 'bg-emerald-50 text-emerald-900 border-emerald-300'
-            }`}
-          >
-            {result.placementTest.required ? (
-              <>
-                <AlertCircle className="w-4 h-4 text-amber-600" />
-                <span>
-                  {isAr ? 'امتحان تحديد مستوى PT مطلوب' : 'Placement Test Required'} (
-                  {result.placementTest.fee} {isAr ? 'ج.م' : 'EGP'})
-                </span>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>{isAr ? 'لا يحتاج امتحان تحديد مستوى' : 'Placement Test NOT Required'}</span>
-              </>
+          <div className="flex flex-col sm:items-end gap-1">
+            <div
+              className={`px-3 py-1.5 rounded-xl border flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-bold ${
+                result.placementTest.required
+                  ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
+                  : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+              }`}
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>
+                {result.placementTest.required
+                  ? (isAr ? 'تم اجتياز الاختبار (Passed)' : 'Placement Test: Passed / Completed')
+                  : (isAr ? 'لا يحتاج امتحان تحديد مستوى (مرحلة مبكرة)' : 'Placement Test: Not Required (Early Years)')}
+              </span>
+            </div>
+            {result.placementTest.required && (
+              <span className="text-[10px] text-slate-500 font-medium">
+                {isAr
+                  ? `رسوم الاختبار ${result.placementTest.fee} ج.م (في حال طلب العميل حجز اختبار جديد)`
+                  : `Standard test fee: ${result.placementTest.fee} EGP (if booking new test)`}
+              </span>
             )}
           </div>
         </div>

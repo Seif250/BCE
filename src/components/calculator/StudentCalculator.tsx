@@ -29,9 +29,20 @@ import {
   GraduationCap,
   Baby,
   Users,
+  Plus,
+  Trash2,
 } from 'lucide-react';
-import { FamilyResultCard } from './FamilyResultCard';
+import { FamilyResultCard, CalculatedSiblingInfo } from './FamilyResultCard';
 import { useToast } from '../ui/ToastContext';
+
+export interface FamilyChildState {
+  id: string;
+  name: string;
+  dob: string;
+  termsCount: number;
+  level?: string;
+  resetTrigger: number;
+}
 
 export const StudentCalculator: React.FC = () => {
   const { t, language, isRTL } = useLanguage();
@@ -64,10 +75,51 @@ export const StudentCalculator: React.FC = () => {
   const [showDiscountSim, setShowDiscountSim] = useState(false);
   const [showManualOverride, setShowManualOverride] = useState(false);
 
-  // Multi-Child Family Calculator State
+  // Multi-Child Family Calculator State (Dynamic 2 to 5 Children)
   const [isMultiChildMode, setIsMultiChildMode] = useState(false);
-  const [child2Dob, setChild2Dob] = useState('');
-  const [child2ResetTrigger, setChild2ResetTrigger] = useState(0);
+  const [familyChildren, setFamilyChildren] = useState<FamilyChildState[]>([
+    { id: 'child-1', name: isAr ? 'الطفل 1' : 'Child 1', dob: '', termsCount: 2, resetTrigger: 0 },
+    { id: 'child-2', name: isAr ? 'الطفل 2' : 'Child 2', dob: '', termsCount: 2, resetTrigger: 0 },
+  ]);
+
+  const handleAddChild = () => {
+    if (familyChildren.length >= 5) {
+      showToast(isAr ? 'الحد الأقصى هو 5 أطفال' : 'Maximum is 5 children');
+      return;
+    }
+    const nextNum = familyChildren.length + 1;
+    setFamilyChildren((prev) => [
+      ...prev,
+      {
+        id: `child-${Date.now()}`,
+        name: isAr ? `الطفل ${nextNum}` : `Child ${nextNum}`,
+        dob: '',
+        termsCount: 2,
+        resetTrigger: 0,
+      },
+    ]);
+    showToast(isAr ? `✓ تمت إضافة طفل آخر (${nextNum})` : `✓ Added Child ${nextNum}`);
+  };
+
+  const handleRemoveChild = (id: string) => {
+    if (familyChildren.length <= 2) {
+      showToast(isAr ? 'يجب أن يكون هناك طفلان على الأقل لحساب الإخوة' : 'At least 2 children required');
+      return;
+    }
+    setFamilyChildren((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const handleUpdateChildDob = (id: string, newDob: string) => {
+    setFamilyChildren((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, dob: newDob } : c))
+    );
+  };
+
+  const handleUpdateChildTerms = (id: string, termsCount: number) => {
+    setFamilyChildren((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, termsCount } : c))
+    );
+  };
 
   // Refs for keyboard navigation and scrolling
   const levelSelectRef = useRef<HTMLSelectElement>(null);
@@ -81,35 +133,12 @@ export const StudentCalculator: React.FC = () => {
 
   const { showToast } = useToast();
 
-  // Calculate age info when DOB is filled
+  // Calculate age info when DOB is filled (Single student mode)
   const ageInfo = useMemo(() => {
     if (!dob) return null;
     const { years, months, days } = calculateAge(dob);
     return { years, months, days };
   }, [dob]);
-
-  // Child 2 age info
-  const ageInfo2 = useMemo(() => {
-    if (!child2Dob) return null;
-    const { years, months, days } = calculateAge(child2Dob);
-    return { years, months, days };
-  }, [child2Dob]);
-
-  // Determine who is younger between Child 1 and Child 2
-  const isChild2Younger = useMemo(() => {
-    if (!ageInfo || !ageInfo2) return false;
-    if (ageInfo2.years < ageInfo.years) return true;
-    if (ageInfo2.years === ageInfo.years && ageInfo2.months < ageInfo.months) return true;
-    return false;
-  }, [ageInfo, ageInfo2]);
-
-  const isChild1Younger = useMemo(() => {
-    if (!ageInfo || !ageInfo2) return false;
-    return !isChild2Younger;
-  }, [ageInfo, ageInfo2, isChild2Younger]);
-
-  const effectiveIsYoungest = isMultiChildMode ? isChild1Younger : isYoungestSibling;
-  const effectiveSiblingCount = isMultiChildMode ? 2 : siblingCount;
 
   // Determine effective program family
   const isAdultAuto = ageInfo ? ageInfo.years >= 18 : false;
@@ -144,7 +173,7 @@ export const StudentCalculator: React.FC = () => {
     return getAcademicLevelsForAge(ageInfo.years);
   }, [ageInfo, effectiveFamily, selectedAdultProduct]);
 
-  // Automatic live calculation result
+  // Single student evaluation
   const result: CalculationResult | null = useMemo(() => {
     if (!dob || !ageInfo) return null;
 
@@ -163,8 +192,8 @@ export const StudentCalculator: React.FC = () => {
       registrationType,
       existingLevel: existingLevel || undefined,
       numberOfTerms: terms,
-      siblingCount: effectiveSiblingCount,
-      isYoungestSibling: effectiveIsYoungest,
+      siblingCount,
+      isYoungestSibling,
       isManualOverride: isManualOverrideActive,
       overrideProgramFamily: manualOverrideFamily,
     };
@@ -180,39 +209,114 @@ export const StudentCalculator: React.FC = () => {
     registrationType,
     existingLevel,
     terms,
-    effectiveSiblingCount,
-    effectiveIsYoungest,
+    siblingCount,
+    isYoungestSibling,
     isManualOverrideActive,
     manualOverrideFamily,
   ]);
 
-  // Child 2 evaluation
-  const result2: CalculationResult | null = useMemo(() => {
-    if (!isMultiChildMode || !child2Dob || !ageInfo2) return null;
+  // Dynamic Family evaluation (Shared terms rule strictly applied)
+  const calculatedFamilyChildren: CalculatedSiblingInfo[] = useMemo(() => {
+    if (!isMultiChildMode) return [];
 
-    const input: CalculationInput = {
-      dob: child2Dob,
-      selectedProgram: 'Winter Block',
-      registrationType,
-      numberOfTerms: terms,
-      siblingCount: 2,
-      isYoungestSibling: isChild2Younger,
-    };
+    const validChildren = familyChildren
+      .map((c) => {
+        if (!c.dob) return null;
+        const { years, months, days } = calculateAge(c.dob);
+        const totalMonths = years * 12 + months;
+        return {
+          ...c,
+          ageYears: years,
+          ageMonths: months,
+          totalMonths,
+        };
+      })
+      .filter((c): c is NonNullable<typeof c> => c !== null);
 
-    return evaluateStudent(input);
-  }, [isMultiChildMode, child2Dob, ageInfo2, registrationType, terms, isChild2Younger]);
+    if (validChildren.length < 2) return [];
+
+    // Sort descending by age: oldest child first
+    const sorted = [...validChildren].sort((a, b) => b.totalMonths - a.totalMonths);
+
+    return sorted.map((child, index) => {
+      const isEldest = index === 0;
+      const isEarlyYears = child.ageYears < 6;
+      const baseTermFee = isEarlyYears ? 6400 : 5800;
+      const rawBaseTotal = baseTermFee * child.termsCount;
+
+      let bundleDiscountPercent = 0;
+      if (child.termsCount === 2) bundleDiscountPercent = 5;
+      else if (child.termsCount === 3) bundleDiscountPercent = 10;
+      else if (child.termsCount === 4) bundleDiscountPercent = 15;
+
+      const bundleRate = bundleDiscountPercent / 100;
+      const bundleDiscountAmount = Math.round(rawBaseTotal * bundleRate);
+
+      let sharedTermsWithOlder = 0;
+      let nonSharedTerms = child.termsCount;
+      let siblingDiscountAmount = 0;
+
+      if (!isEldest) {
+        // Overlapping terms with older siblings:
+        const olderTerms = Math.max(...sorted.slice(0, index).map((o) => o.termsCount));
+        sharedTermsWithOlder = Math.min(child.termsCount, olderTerms);
+        nonSharedTerms = child.termsCount - sharedTermsWithOlder;
+        siblingDiscountAmount = Math.round(baseTermFee * sharedTermsWithOlder * 0.10);
+      }
+
+      const totalDiscountAmount = bundleDiscountAmount + siblingDiscountAmount;
+      const finalChildPrice = rawBaseTotal - totalDiscountAmount;
+
+      const y = child.ageYears;
+      let ageGroupDisplay = '';
+      if (y === 4) ageGroupDisplay = isAr ? 'مرحلة مبكرة 2 (4 سنين)' : 'Early Years 2 (4y)';
+      else if (y === 5) ageGroupDisplay = isAr ? 'مرحلة مبكرة 3 (5 سنين)' : 'Early Years 3 (5y)';
+      else if (y >= 6 && y <= 8) ageGroupDisplay = isAr ? 'ابتدائي أدنى (6–8)' : 'Lower Primary (6–8y)';
+      else if (y >= 9 && y <= 11) ageGroupDisplay = isAr ? 'ابتدائي أعلى (9–11)' : 'Upper Primary (9–11y)';
+      else if (y >= 12 && y <= 14) ageGroupDisplay = isAr ? 'إعدادي (12–14)' : 'Lower Secondary (12–14y)';
+      else if (y >= 15 && y <= 17) ageGroupDisplay = isAr ? 'ثانوي (15–17)' : 'Upper Secondary (15–17y)';
+      else ageGroupDisplay = isAr ? 'بالغ (18+)' : 'Adult (18+)';
+
+      return {
+        id: child.id,
+        name: child.name,
+        dob: child.dob,
+        ageYears: child.ageYears,
+        ageMonths: child.ageMonths,
+        ageGroupDisplay,
+        category: isEarlyYears ? 'Early Years' : 'Young Learner',
+        baseTermFee,
+        termsCount: child.termsCount,
+        isEldest,
+        sharedTermsWithOlder,
+        nonSharedTerms,
+        bundleDiscountPercent,
+        bundleDiscountAmount,
+        siblingDiscountAmount,
+        totalDiscountAmount,
+        rawBaseTotal,
+        finalChildPrice,
+        placementTestFee: 200,
+        placementTestRequired: !isEarlyYears,
+        level: child.level || (isEarlyYears ? (y === 4 ? 'Ducks' : 'Owls') : 'Level Assigned on Call'),
+      };
+    });
+  }, [familyChildren, isMultiChildMode, isAr]);
 
   // Sync current price for Installments page
   useEffect(() => {
-    const finalPrice = isMultiChildMode && result && result2
-      ? (result.finalPrice || 0) + (result2.finalPrice || 0)
-      : result?.finalPrice;
+    let finalPrice: number | undefined;
+    if (isMultiChildMode && calculatedFamilyChildren.length >= 2) {
+      finalPrice = calculatedFamilyChildren.reduce((acc, c) => acc + c.finalChildPrice, 0);
+    } else {
+      finalPrice = result?.finalPrice ?? undefined;
+    }
     if (finalPrice) {
       localStorage.setItem('bce_last_price', String(finalPrice));
     }
-  }, [isMultiChildMode, result, result2]);
+  }, [isMultiChildMode, calculatedFamilyChildren, result]);
 
-  // Global Hotkeys: Alt+N (Reset), Alt+C (Copy AR), Alt+E (Copy EN), Alt+S (Copy CRM)
+  // Global Hotkeys: Alt+N (Reset)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.altKey && (e.key === 'n' || e.key === 'N' || e.key === 'ى')) {
@@ -228,7 +332,10 @@ export const StudentCalculator: React.FC = () => {
   // Handle Reset / New Student
   const handleReset = () => {
     setDob('');
-    setChild2Dob('');
+    setFamilyChildren([
+      { id: 'child-1', name: isAr ? 'الطفل 1' : 'Child 1', dob: '', termsCount: 2, resetTrigger: Date.now() },
+      { id: 'child-2', name: isAr ? 'الطفل 2' : 'Child 2', dob: '', termsCount: 2, resetTrigger: Date.now() },
+    ]);
     setManualOverrideFamily('Auto');
     setSelectedSeason('Winter Block');
     setSelectedAdultProduct('bce');
@@ -239,7 +346,6 @@ export const StudentCalculator: React.FC = () => {
     setIsYoungestSibling(false);
     setRegistrationType('New');
     setResetTrigger((prev) => prev + 1);
-    setChild2ResetTrigger((prev) => prev + 1);
   };
 
   // Keyboard Enter flow: Advance from DOB input to Level select
@@ -484,76 +590,135 @@ export const StudentCalculator: React.FC = () => {
           )}
         </div>
       ) : (
-        /* Multi-Child Family Mode (Child 1 & Child 2 Side-by-Side) */
+        /* Dynamic Multi-Child Family Mode (Up to 5 Children) */
         <div className="space-y-3">
-          {/* Child 1 Input Card */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-xs font-black text-slate-900 flex items-center space-x-1.5 rtl:space-x-reverse">
-                <span className="w-5 h-5 rounded-md bg-bc-teal-100 text-[#062A67] flex items-center justify-center font-bold text-xs">1</span>
-                <span>{isAr ? 'تاريخ ميلاد الطفل الأول' : 'Child 1 Date of Birth'}</span>
-              </span>
-              {ageInfo && isChild1Younger && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                  👶 {isAr ? 'الأخ الأصغر (مستحق خصم 10%)' : 'Younger Sibling (10% Off)'}
-                </span>
-              )}
-            </div>
-            <DateOfBirthInput
-              value={dob}
-              onChange={setDob}
-              onEnterNext={handleDobEnterNext}
-              onCalculate={handleCalculate}
-              resetTrigger={resetTrigger}
-            />
-            {ageInfo && (
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-xl">
-                <span><strong>{isAr ? 'العمر:' : 'Age:'}</strong> {ageInfo.years} {isAr ? 'سنة' : 'years'}</span>
-                <span>•</span>
-                <span><strong>{isAr ? 'المرحلة:' : 'Stage:'}</strong> {ageGroupDisplay}</span>
+          {/* Multi-Child Header Bar */}
+          <div className="bg-amber-50/80 border border-amber-200/90 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-2 shadow-2xs">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black flex-shrink-0">
+                <Users className="w-4 h-4" />
               </div>
-            )}
+              <div>
+                <span className="text-xs font-black text-amber-950 block">
+                  {isAr ? 'حاسبة الإخوة المتعددين (Multi-Child Family)' : 'Multi-Child Family Calculator'}
+                </span>
+                <span className="text-[10px] text-amber-800 font-medium">
+                  {isAr
+                    ? 'يتم تطبيق خصم 10% للأصغر حصرياً على الترمات المشتركة مع إخوته الأكبر.'
+                    : '10% sibling discount applies to younger children strictly on shared terms with older siblings.'}
+                </span>
+              </div>
+            </div>
+
+            {/* Add Another Child Button */}
+            <button
+              type="button"
+              onClick={handleAddChild}
+              disabled={familyChildren.length >= 5}
+              className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-xl text-xs font-black border transition-all ${
+                familyChildren.length >= 5
+                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                  : 'bg-amber-400 hover:bg-amber-500 text-slate-950 border-amber-500 shadow-2xs'
+              }`}
+              title={familyChildren.length >= 5 ? (isAr ? 'الحد الأقصى 5 أطفال' : 'Max 5 children') : (isAr ? 'إضافة طفل آخر' : 'Add sibling')}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{isAr ? '+ طفل آخر' : '+ Add Sibling'}</span>
+              <span className="text-[10px] opacity-75">({familyChildren.length}/5)</span>
+            </button>
           </div>
 
-          {/* Child 2 Input Card */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-xs font-black text-slate-900 flex items-center space-x-1.5 rtl:space-x-reverse">
-                <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-900 flex items-center justify-center font-bold text-xs">2</span>
-                <span>{isAr ? 'تاريخ ميلاد الطفل الثاني (الأخ / الأخت)' : 'Child 2 Date of Birth (Sibling)'}</span>
-              </span>
-              {ageInfo2 && isChild2Younger && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                  👶 {isAr ? 'الأخ الأصغر (مستحق خصم 10%)' : 'Younger Sibling (10% Off)'}
-                </span>
-              )}
-            </div>
-            <DateOfBirthInput
-              value={child2Dob}
-              onChange={setChild2Dob}
-              onCalculate={handleCalculate}
-              resetTrigger={child2ResetTrigger}
-            />
-            {ageInfo2 && (
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-xl">
-                <span><strong>{isAr ? 'العمر:' : 'Age:'}</strong> {ageInfo2.years} {isAr ? 'سنة' : 'years'}</span>
-                <span>•</span>
-                <span><strong>{isAr ? 'المرحلة:' : 'Stage:'}</strong> {result2?.ageGroup.value}</span>
-              </div>
-            )}
+          {/* Children Cards Grid */}
+          <div className={`grid grid-cols-1 ${familyChildren.length === 2 ? 'md:grid-cols-2' : familyChildren.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'} gap-3`}>
+            {familyChildren.map((child, index) => {
+              const calcInfo = calculatedFamilyChildren.find((c) => c.id === child.id);
+              return (
+                <div key={child.id} className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                      <span className="w-5 h-5 rounded-md bg-[#062A67] text-white flex items-center justify-center font-bold text-xs">
+                        {index + 1}
+                      </span>
+                      <span className="text-xs font-black text-slate-900">{child.name}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                      {calcInfo && (
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                            calcInfo.isEldest
+                              ? 'bg-slate-200 text-slate-800'
+                              : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          }`}
+                        >
+                          {calcInfo.isEldest ? (isAr ? 'الأكبر' : 'Eldest') : (isAr ? 'خصم أخوة' : 'Sibling')}
+                        </span>
+                      )}
+                      {familyChildren.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveChild(child.id)}
+                          className="text-rose-500 hover:text-rose-700 p-1 rounded-lg hover:bg-rose-50 transition-colors"
+                          title={isAr ? 'حذف هذا الطفل' : 'Remove child'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <DateOfBirthInput
+                    value={child.dob}
+                    onChange={(val) => handleUpdateChildDob(child.id, val)}
+                    onCalculate={handleCalculate}
+                    resetTrigger={child.resetTrigger}
+                  />
+
+                  {/* Individual Terms Selector */}
+                  <div className="pt-1">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                      {isAr ? 'عدد الترمات:' : 'Terms:'}
+                    </span>
+                    <div className="grid grid-cols-4 gap-1">
+                      {[1, 2, 3, 4].map((tNum) => (
+                        <button
+                          key={tNum}
+                          type="button"
+                          onClick={() => handleUpdateChildTerms(child.id, tNum)}
+                          className={`py-1 text-xs font-black rounded-lg border transition-all ${
+                            child.termsCount === tNum
+                              ? 'bg-[#062A67] text-white border-[#062A67]'
+                              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {tNum} {isAr ? 'ترم' : 'T'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {calcInfo && (
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600 bg-slate-50 p-2 rounded-xl">
+                      <span><strong>{isAr ? 'العمر:' : 'Age:'}</strong> {calcInfo.ageYears} {isAr ? 'سنة' : 'y'}</span>
+                      <span>•</span>
+                      <span className="truncate max-w-[130px]" title={calcInfo.ageGroupDisplay}>
+                        <strong>{isAr ? 'المرحلة:' : 'Stage:'}</strong> {calcInfo.ageGroupDisplay}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* 4. RESULT CARD (Single or Multi-Child Family Card) */}
-      {isMultiChildMode && result && result2 ? (
+      {isMultiChildMode && calculatedFamilyChildren.length >= 2 ? (
         <div ref={resultRef} id="result-section">
           <FamilyResultCard
-            result1={result}
-            result2={result2}
-            selectedTerms={terms}
-            onSelectTerms={setTerms}
-            youngerIndex={isChild2Younger ? 2 : 1}
+            childrenData={calculatedFamilyChildren}
+            onUpdateChildTerms={handleUpdateChildTerms}
           />
         </div>
       ) : result ? (
