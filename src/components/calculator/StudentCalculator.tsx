@@ -126,11 +126,11 @@ export const StudentCalculator: React.FC = () => {
 
   // Refs for keyboard navigation and scrolling
   const levelSelectRef = useRef<HTMLSelectElement>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
+  const eligibilityRef = useRef<HTMLDivElement>(null);
 
   const handleCalculate = () => {
     setTimeout(() => {
-      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      eligibilityRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 40);
   };
 
@@ -455,7 +455,7 @@ export const StudentCalculator: React.FC = () => {
 
           {/* DYNAMIC ELIGIBILITY STRIP (Shown once DOB is valid) */}
           {ageInfo && (
-            <div className="pt-2 animate-fade-in space-y-3">
+            <div ref={eligibilityRef} className="pt-2 animate-fade-in space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {/* Age Card */}
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center space-x-3 rtl:space-x-reverse">
@@ -737,14 +737,14 @@ export const StudentCalculator: React.FC = () => {
 
       {/* 4. RESULT CARD (Single or Multi-Child Family Card) */}
       {isMultiChildMode && calculatedFamilyChildren.length >= 2 ? (
-        <div ref={resultRef} id="result-section">
+        <div id="result-section">
           <FamilyResultCard
             childrenData={calculatedFamilyChildren}
             onUpdateChildTerms={handleUpdateChildTerms}
           />
         </div>
       ) : result ? (
-        <div ref={resultRef} id="result-section" className="animate-fade-in">
+        <div id="result-section" className="animate-fade-in">
           <ResultCard
             result={result}
             selectedTerms={terms}

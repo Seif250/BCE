@@ -49,6 +49,8 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   const [copiedEn, setCopiedEn] = useState(false);
   const [copiedPrice, setCopiedPrice] = useState(false);
   const [copiedCrm, setCopiedCrm] = useState(false);
+  const [copiedInst6, setCopiedInst6] = useState(false);
+  const [copiedInst12, setCopiedInst12] = useState(false);
   const [showExplain, setShowExplain] = useState(false);
   const [showInstallments, setShowInstallments] = useState(true);
   const [showBranch, setShowBranch] = useState(false);
@@ -67,7 +69,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [result, isAr]);
 
-  const handleCopyText = async (text: string, type: 'ar' | 'en' | 'price' | 'crm') => {
+  const handleCopyText = async (text: string, type: 'ar' | 'en' | 'price' | 'crm' | 'inst6' | 'inst12') => {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
@@ -91,6 +93,14 @@ export const ResultCard: React.FC<ResultCardProps> = ({
       setCopiedPrice(true);
       showToast(isAr ? '✓ تم نسخ السعر' : '✓ Copied price');
       setTimeout(() => setCopiedPrice(false), 2000);
+    } else if (type === 'inst6') {
+      setCopiedInst6(true);
+      showToast(isAr ? '✓ تم نسخ عرض تقسيط 6 شهور' : '✓ Copied 6-Month installment quote');
+      setTimeout(() => setCopiedInst6(false), 2000);
+    } else if (type === 'inst12') {
+      setCopiedInst12(true);
+      showToast(isAr ? '✓ تم نسخ عرض تقسيط 12 شهر' : '✓ Copied 12-Month installment quote');
+      setTimeout(() => setCopiedInst12(false), 2000);
     } else {
       setCopiedCrm(true);
       showToast(isAr ? '✓ تم نسخ ملخص المكالمة للـ CRM' : '✓ Copied CRM Call Summary');
@@ -448,6 +458,17 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                         {isAr ? `وفر ${pkgDiscount.toLocaleString()} ج.م (خصم 10%)` : `Save ${pkgDiscount.toLocaleString()} EGP (10%)`}
                       </span>
                     )}
+                    {pkg.credits >= 40 && (
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded mt-0.5 inline-block ${
+                          isSelected
+                            ? 'bg-bc-teal-400/20 text-bc-teal-200 border border-bc-teal-400/30'
+                            : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        }`}
+                      >
+                        💳 {isAr ? 'متاح تقسيط 6 و 12 شهر' : '6M & 12M Installments'}
+                      </span>
+                    )}
                     <span
                       className={`text-[10px] block ${
                         isSelected ? 'text-slate-300' : 'text-slate-500'
@@ -642,30 +663,88 @@ export const ResultCard: React.FC<ResultCardProps> = ({
               </p>
 
               {result.installmentEligibility.options.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {result.installmentEligibility.options.map((opt, i) => (
-                    <div
-                      key={i}
-                      className="p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-between"
-                    >
-                      <div>
-                        <span className="text-xs font-black text-slate-900 block">
-                          {opt.tenureMonths} {isAr ? 'شهور' : 'Months'}
-                        </span>
-                        <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-0.5 inline-block">
-                          {isAr ? `مصاريف إدارية: ${opt.adminPercent}%` : `Admin fee: ${opt.adminPercent}%`}
-                        </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {result.installmentEligibility.options.map((opt, i) => {
+                    const is6M = opt.tenureMonths === 6;
+                    const planTitle = is6M
+                      ? (isAr ? 'تقسيط على 6 شهور' : '6-Month Plan')
+                      : (isAr ? 'تقسيط على 12 شهر' : '12-Month Plan');
+                    const isCopied = is6M ? copiedInst6 : copiedInst12;
+                    const quoteText = isAr
+                      ? `عرض تقسيط بالفيزا على ${opt.tenureMonths} شهور: بقسط شهري تقريبي ~${opt.monthlyPayment?.toLocaleString()} ج.م/شهر (إجمالي المبلغ شامل ${opt.adminPercent}% مصاريف إدارية: ${opt.totalWithAdmin?.toLocaleString()} ج.م).`
+                      : `Installment quote over ${opt.tenureMonths} months: ~${opt.monthlyPayment?.toLocaleString()} EGP/mo (Total including ${opt.adminPercent}% admin fee: ${opt.totalWithAdmin?.toLocaleString()} EGP).`;
+
+                    return (
+                      <div
+                        key={i}
+                        className={`p-3.5 rounded-2xl bg-white border transition-all shadow-xs flex flex-col justify-between space-y-3 ${
+                          is6M
+                            ? 'border-bc-teal-200/90 hover:border-bc-teal-400 hover:shadow-sm'
+                            : 'border-indigo-200/90 hover:border-indigo-400 hover:shadow-sm'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                          <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                            <CreditCard className={`w-4 h-4 ${is6M ? 'text-bc-teal-700' : 'text-indigo-700'}`} />
+                            <span className="text-xs sm:text-sm font-black text-slate-900">
+                              {planTitle}
+                            </span>
+                          </div>
+                          <span
+                            className={`text-[11px] font-black px-2 py-0.5 rounded-md border ${
+                              is6M
+                                ? 'bg-bc-teal-50 text-bc-teal-800 border-bc-teal-200'
+                                : 'bg-indigo-50 text-indigo-800 border-indigo-200'
+                            }`}
+                          >
+                            {isAr ? `${opt.adminPercent}% مصاريف إدارية` : `${opt.adminPercent}% Admin Fee`}
+                          </span>
+                        </div>
+
+                        {/* HIGHLIGHTED TOTAL PRICE (CLEAR & PROMINENT) */}
+                        <div className="bg-gradient-to-r from-slate-50 to-slate-100/70 p-3 rounded-xl border border-slate-200/80 flex items-center justify-between">
+                          <div>
+                            <span className="text-[11px] uppercase font-bold text-slate-500 block">
+                              {isAr ? 'إجمالي المبلغ (Total):' : 'Total Price (with Admin):'}
+                            </span>
+                            <div className="text-base sm:text-lg font-black text-emerald-800 tracking-tight">
+                              {opt.totalWithAdmin?.toLocaleString()}{' '}
+                              <span className="text-xs font-bold text-slate-600">{isAr ? 'ج.م' : 'EGP'}</span>
+                            </div>
+                          </div>
+                          <div className="text-right rtl:text-left">
+                            <span className="text-[11px] font-bold text-slate-500 block">
+                              {isAr ? 'القسط الشهري:' : 'Monthly Payment:'}
+                            </span>
+                            <div className="text-sm sm:text-base font-black text-[#062A67]">
+                              ~{opt.monthlyPayment?.toLocaleString()}{' '}
+                              <span className="text-[11px] font-bold text-slate-500">{isAr ? 'ج.م/شهر' : 'EGP/mo'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Copy Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleCopyText(quoteText, is6M ? 'inst6' : 'inst12')}
+                          className={`w-full py-1.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 rtl:space-x-reverse transition-all border ${
+                            is6M
+                              ? 'bg-bc-teal-50 hover:bg-bc-teal-100 text-bc-teal-900 border-bc-teal-200'
+                              : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-indigo-200'
+                          }`}
+                        >
+                          {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>
+                            {isCopied
+                              ? (isAr ? 'تم النسخ!' : 'Copied!')
+                              : (isAr
+                                ? `نسخ عرض الـ ${opt.tenureMonths} شهور للعميل`
+                                : `Copy ${opt.tenureMonths}-Month Quote`)}
+                          </span>
+                        </button>
                       </div>
-                      <div className="text-right rtl:text-left">
-                        <strong className="text-sm sm:text-base font-black text-[#062A67] block">
-                          ~{opt.monthlyPayment?.toLocaleString()} {isAr ? 'ج.م/شهر' : 'EGP/mo'}
-                        </strong>
-                        <span className="text-[10px] text-slate-400 block">
-                          {isAr ? `إجمالي: ${opt.totalWithAdmin?.toLocaleString()} ج.م` : `Total: ${opt.totalWithAdmin?.toLocaleString()} EGP`}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 

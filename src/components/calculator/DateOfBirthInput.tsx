@@ -264,7 +264,10 @@ export const DateOfBirthInput: React.FC<DateOfBirthInputProps> = ({
     setYear(val);
     setErrorMsg('');
     if (val.length === 4) {
-      updateAndEmit(day, month, val, true);
+      const ok = updateAndEmit(day, month, val, true);
+      if (ok) {
+        onCalculate?.();
+      }
     } else {
       if (value !== '') {
         lastEmittedIsoRef.current = '';

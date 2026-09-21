@@ -363,23 +363,40 @@ ${instLines}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* 6 Months Option */}
-              <div className="p-3 rounded-xl bg-white border border-bc-teal-200 shadow-2xs flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-black text-slate-900">
-                      {isAr ? 'تقسيط 6 شهور' : '6-Month Plan'}
-                    </span>
-                    <span className="text-[10px] font-bold bg-bc-teal-50 text-bc-teal-800 px-1.5 py-0.2 rounded border border-bc-teal-200">
-                      9%
+              <div className="p-3.5 rounded-2xl bg-white border border-bc-teal-200 shadow-xs flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                    <CreditCard className="w-4 h-4 text-bc-teal-700" />
+                    <span className="text-xs sm:text-sm font-black text-slate-900">
+                      {isAr ? 'تقسيط الأسرة على 6 شهور' : 'Family 6-Month Plan'}
                     </span>
                   </div>
-                  <div className="text-sm font-black text-bc-teal-800 mt-0.5">
-                    ~{inst6Monthly.toLocaleString()} {isAr ? 'ج.م/شهر' : 'EGP/mo'}
-                  </div>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">
-                    {isAr ? `إجمالي مع المصاريف: ${inst6Total.toLocaleString()} ج.م` : `Total: ${inst6Total.toLocaleString()} EGP`}
+                  <span className="text-[11px] font-black bg-bc-teal-50 text-bc-teal-800 px-2 py-0.5 rounded-md border border-bc-teal-200">
+                    9% {isAr ? 'مصاريف إدارية' : 'Admin'}
                   </span>
                 </div>
+
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between">
+                  <div>
+                    <span className="text-[11px] uppercase font-bold text-slate-500 block">
+                      {isAr ? 'إجمالي المبلغ (Total):' : 'Total Price:'}
+                    </span>
+                    <div className="text-base sm:text-lg font-black text-emerald-800 tracking-tight">
+                      {inst6Total.toLocaleString()}{' '}
+                      <span className="text-xs font-bold text-slate-600">{isAr ? 'ج.م' : 'EGP'}</span>
+                    </div>
+                  </div>
+                  <div className="text-right rtl:text-left">
+                    <span className="text-[11px] font-bold text-slate-500 block">
+                      {isAr ? 'القسط الشهري:' : 'Monthly:'}
+                    </span>
+                    <div className="text-sm sm:text-base font-black text-[#062A67]">
+                      ~{inst6Monthly.toLocaleString()}{' '}
+                      <span className="text-[11px] font-bold text-slate-500">{isAr ? 'ج.م/شهر' : 'EGP/mo'}</span>
+                    </div>
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={() =>
@@ -390,30 +407,48 @@ ${instLines}
                       'ar'
                     )
                   }
-                  className="px-2.5 py-1.5 rounded-lg bg-bc-teal-50 hover:bg-bc-teal-100 text-bc-teal-900 border border-bc-teal-200 text-xs font-bold transition-all"
+                  className="w-full py-1.5 px-3 rounded-xl bg-bc-teal-50 hover:bg-bc-teal-100 text-bc-teal-900 border border-bc-teal-200 text-xs font-bold flex items-center justify-center space-x-1.5 rtl:space-x-reverse transition-all"
                 >
                   <Copy className="w-3.5 h-3.5" />
+                  <span>{isAr ? 'نسخ عرض الـ 6 شهور للعميل' : 'Copy 6-Month Quote'}</span>
                 </button>
               </div>
 
               {/* 12 Months Option */}
-              <div className="p-3 rounded-xl bg-white border border-indigo-200 shadow-2xs flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-black text-slate-900">
-                      {isAr ? 'تقسيط 12 شهر' : '12-Month Plan'}
-                    </span>
-                    <span className="text-[10px] font-bold bg-indigo-50 text-indigo-800 px-1.5 py-0.2 rounded border border-indigo-200">
-                      15%
+              <div className="p-3.5 rounded-2xl bg-white border border-indigo-200 shadow-xs flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                    <CreditCard className="w-4 h-4 text-indigo-700" />
+                    <span className="text-xs sm:text-sm font-black text-slate-900">
+                      {isAr ? 'تقسيط الأسرة على 12 شهر' : 'Family 12-Month Plan'}
                     </span>
                   </div>
-                  <div className="text-sm font-black text-indigo-900 mt-0.5">
-                    ~{inst12Monthly.toLocaleString()} {isAr ? 'ج.م/شهر' : 'EGP/mo'}
-                  </div>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">
-                    {isAr ? `إجمالي مع المصاريف: ${inst12Total.toLocaleString()} ج.م` : `Total: ${inst12Total.toLocaleString()} EGP`}
+                  <span className="text-[11px] font-black bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded-md border border-indigo-200">
+                    15% {isAr ? 'مصاريف إدارية' : 'Admin'}
                   </span>
                 </div>
+
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between">
+                  <div>
+                    <span className="text-[11px] uppercase font-bold text-slate-500 block">
+                      {isAr ? 'إجمالي المبلغ (Total):' : 'Total Price:'}
+                    </span>
+                    <div className="text-base sm:text-lg font-black text-emerald-800 tracking-tight">
+                      {inst12Total.toLocaleString()}{' '}
+                      <span className="text-xs font-bold text-slate-600">{isAr ? 'ج.م' : 'EGP'}</span>
+                    </div>
+                  </div>
+                  <div className="text-right rtl:text-left">
+                    <span className="text-[11px] font-bold text-slate-500 block">
+                      {isAr ? 'القسط الشهري:' : 'Monthly:'}
+                    </span>
+                    <div className="text-sm sm:text-base font-black text-[#062A67]">
+                      ~{inst12Monthly.toLocaleString()}{' '}
+                      <span className="text-[11px] font-bold text-slate-500">{isAr ? 'ج.م/شهر' : 'EGP/mo'}</span>
+                    </div>
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={() =>
@@ -424,9 +459,10 @@ ${instLines}
                       'ar'
                     )
                   }
-                  className="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold transition-all"
+                  className="w-full py-1.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold flex items-center justify-center space-x-1.5 rtl:space-x-reverse transition-all"
                 >
                   <Copy className="w-3.5 h-3.5" />
+                  <span>{isAr ? 'نسخ عرض الـ 12 شهر للعميل' : 'Copy 12-Month Quote'}</span>
                 </button>
               </div>
             </div>
