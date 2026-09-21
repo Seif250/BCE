@@ -103,10 +103,10 @@ export const ResultCard: React.FC<ResultCardProps> = ({
 
   // Multi-term winter packages: [1, 2, 3, 4]
   const winterTermCards = [
-    { terms: 1, bundleDiscount: 0, label: isAr ? 'ترم واحد' : '1 Term', popular: false },
-    { terms: 2, bundleDiscount: 0.05, label: isAr ? 'ترمين (خصم 5%)' : '2 Terms (5% Off)', popular: false },
-    { terms: 3, bundleDiscount: 0.10, label: isAr ? '3 ترمات (خصم 10%)' : '3 Terms (10% Off)', popular: true },
-    { terms: 4, bundleDiscount: 0.15, label: isAr ? '4 ترمات (خصم 15%)' : '4 Terms (15% Off)', popular: false },
+    { terms: 1, bundleDiscount: 0, label: isAr ? 'ترم واحد' : '1 Term' },
+    { terms: 2, bundleDiscount: 0.05, label: isAr ? 'ترمين (خصم 5%)' : '2 Terms (5% Off)' },
+    { terms: 3, bundleDiscount: 0.10, label: isAr ? '3 ترمات (خصم 10%)' : '3 Terms (10% Off)' },
+    { terms: 4, bundleDiscount: 0.15, label: isAr ? '4 ترمات (خصم 15%)' : '4 Terms (15% Off)' },
   ].map((item) => {
     const rawTotal = baseTermFee * item.terms;
 
@@ -222,7 +222,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                 type="button"
                 onClick={() =>
                   handleCopyText(
-                    `${result.finalPrice?.toLocaleString()} ${isAr ? 'جنيه مصري' : 'EGP'} (${result.priceNote})`,
+                    String(result.finalPrice),
                     'price'
                   )
                 }
@@ -290,19 +290,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                   }`}
                 >
                   <div>
-                    {/* Subtle Best Value Badge */}
-                    {card.popular && (
-                      <span
-                        className={`inline-block mb-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md ${
-                          isSelected
-                            ? 'bg-amber-400 text-slate-950 shadow-xs'
-                            : 'bg-amber-100 text-amber-900 border border-amber-300'
-                        }`}
-                      >
-                        {isAr ? 'الأكثر طلباً • Best Value' : 'Best Value'}
-                      </span>
-                    )}
-
                     <span
                       className={`text-xs font-bold block ${
                         isSelected ? 'text-bc-teal-300' : 'text-slate-600'

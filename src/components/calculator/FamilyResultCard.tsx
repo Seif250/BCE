@@ -184,17 +184,6 @@ ${instLines}
             </p>
           </div>
         </div>
-
-        {/* Global CRM Copy Button */}
-        <button
-          type="button"
-          onClick={() => handleCopyText(generateFamilyCrm(), 'crm')}
-          className="inline-flex items-center justify-center space-x-1.5 rtl:space-x-reverse px-3.5 py-2 rounded-xl text-xs font-black bg-bc-teal-400 hover:bg-bc-teal-300 text-[#062A67] transition-all shadow-sm flex-shrink-0"
-          title="Copy English Family CRM Summary (Alt+S)"
-        >
-          {copiedCrm ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          <span>{copiedCrm ? '✓ Copied CRM' : '📋 نسخ ملخص الـ CRM (Alt+S)'}</span>
-        </button>
       </div>
 
       {/* 2. SIDE-BY-SIDE CHILDREN BREAKDOWN CARDS */}
