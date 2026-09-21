@@ -5,7 +5,6 @@ import {
   Calendar,
   AlertCircle,
   CreditCard,
-  Building,
   CheckCircle2,
   FileText,
   Clock,
@@ -48,19 +47,12 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   const [copiedAr, setCopiedAr] = useState(false);
   const [copiedEn, setCopiedEn] = useState(false);
   const [copiedPrice, setCopiedPrice] = useState(false);
-  const [copiedCrm, setCopiedCrm] = useState(false);
-  const [copiedInst6, setCopiedInst6] = useState(false);
-  const [copiedInst12, setCopiedInst12] = useState(false);
   const [showExplain, setShowExplain] = useState(false);
   const [showInstallments, setShowInstallments] = useState(true);
-  const [showBranch, setShowBranch] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey && (e.key === 's' || e.key === 'S' || e.key === 'س')) {
-        e.preventDefault();
-        handleCopyText(generateCrmSummary(), 'crm');
-      } else if (e.altKey && (e.key === 'c' || e.key === 'C' || e.key === 'ؤ')) {
+      if (e.altKey && (e.key === 'c' || e.key === 'C' || e.key === 'ؤ')) {
         e.preventDefault();
         handleCopyText(isAr ? result.quickCustomerAnswerAr : result.quickCustomerAnswerEn, isAr ? 'ar' : 'en');
       }
@@ -69,7 +61,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [result, isAr]);
 
-  const handleCopyText = async (text: string, type: 'ar' | 'en' | 'price' | 'crm' | 'inst6' | 'inst12') => {
+  const handleCopyText = async (text: string, type: 'ar' | 'en' | 'price') => {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
@@ -93,46 +85,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
       setCopiedPrice(true);
       showToast(isAr ? '✓ تم نسخ السعر' : '✓ Copied price');
       setTimeout(() => setCopiedPrice(false), 2000);
-    } else if (type === 'inst6') {
-      setCopiedInst6(true);
-      showToast(isAr ? '✓ تم نسخ عرض تقسيط 6 شهور' : '✓ Copied 6-Month installment quote');
-      setTimeout(() => setCopiedInst6(false), 2000);
-    } else if (type === 'inst12') {
-      setCopiedInst12(true);
-      showToast(isAr ? '✓ تم نسخ عرض تقسيط 12 شهر' : '✓ Copied 12-Month installment quote');
-      setTimeout(() => setCopiedInst12(false), 2000);
-    } else {
-      setCopiedCrm(true);
-      showToast(isAr ? '✓ تم نسخ ملخص المكالمة للـ CRM' : '✓ Copied CRM Call Summary');
-      setTimeout(() => setCopiedCrm(false), 2000);
     }
-  };
-
-  const generateCrmSummary = () => {
-    const ageStr = `${result.calculatedAge} yrs`;
-    const levelStr = result.academicLevel.value;
-    const ptStr = result.placementTest.required
-      ? `Placement Test: Completed / Passed (Level confirmed on call | Test fee: ${result.placementTest.fee} EGP if new test required)`
-      : `Placement Test: Not Required (Early Years 4–5)`;
-    const courseStr = result.recommendedCourse.value;
-    const termsStr = result.program.value === 'Winter Block' ? `${selectedTerms} Term(s)` : `${result.durationAndSessions}`;
-    const priceStr = `${result.finalPrice?.toLocaleString()} EGP`;
-    const discountStr = result.discountsApplied.length > 0
-      ? ` [Discounts: ${result.discountsApplied.map(d => d.name === 'Vario' ? 'Vario (deducted on SMS)' : `${d.name} (${d.percentage}%)`).join(', ')}]`
-      : ' [No Discounts]';
-
-    const instStr = result.installmentEligibility.eligible && result.installmentEligibility.options.length >= 2
-      ? `\n• Installments (Credit Card):\n  - 6 Months: ~${result.installmentEligibility.options[0]?.monthlyPayment?.toLocaleString()} EGP/mo (Total: ${result.installmentEligibility.options[0]?.totalWithAdmin?.toLocaleString()} EGP with 9% admin fee)\n  - 12 Months: ~${result.installmentEligibility.options[1]?.monthlyPayment?.toLocaleString()} EGP/mo (Total: ${result.installmentEligibility.options[1]?.totalWithAdmin?.toLocaleString()} EGP with 15% admin fee)`
-      : '';
-
-    return `=== BRITISH COUNCIL SALES CALL SUMMARY (CRM) ===
-• Student: Age ${ageStr} | Age Group: ${result.ageGroup.value}
-• Program: ${courseStr} | Booking: ${termsStr}
-• Assigned Level: ${levelStr}
-• Placement Test: ${ptStr}
-• Total Course Fee: ${priceStr}${discountStr}${instStr}
-• Status: Ready for booking / payment link
-=================================================`;
   };
 
   // Determine base term price for Winter Block
@@ -586,44 +539,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
         </div>
       </div>
 
-      {/* 3.5 CRM CALL SUMMARY ACTION STRIP */}
-      <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 rounded-2xl border border-slate-200/90 shadow-sm p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center space-x-2.5 rtl:space-x-reverse min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-[#062A67] text-bc-teal-300 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-2xs">
-            📋
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <span className="text-xs font-black text-slate-900">
-                {isAr ? 'ملخص المكالمة الجاهز للـ CRM' : 'CRM Call Summary (Salesforce)'}
-              </span>
-              <span className="text-[10px] font-mono font-bold bg-slate-200/70 text-slate-700 px-1.5 py-0.2 rounded">
-                Alt+S
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 truncate">
-              {isAr
-                ? 'ينسخ فوراً: السن، المرحلة، المستوى، موقف PT، السعر وخيارات التقسيط للصقها بالملاحظات'
-                : 'One-click copy of student profile, level, fees, PT status, and installments'}
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => handleCopyText(generateCrmSummary(), 'crm')}
-          className={`flex-shrink-0 inline-flex items-center justify-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-xl text-xs font-black shadow-sm transition-all ${
-            copiedCrm
-              ? 'bg-emerald-600 text-white'
-              : 'bg-[#062A67] hover:bg-[#041d48] text-white hover:scale-[1.02]'
-          }`}
-        >
-          {copiedCrm ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5 text-bc-teal-300" />}
-          <span>{copiedCrm ? (isAr ? 'تم نسخ ملخص الـ CRM!' : 'Copied!') : (isAr ? 'نسخ ملخص الـ CRM' : 'Copy CRM Summary')}</span>
-        </button>
-      </div>
-
-      {/* 4. COMPACT COLLAPSIBLE SECONDARY SECTIONS: Installments & Branches */}
+      {/* 4. COMPACT COLLAPSIBLE SECONDARY SECTIONS: Installments */}
       <div className="space-y-2 pt-1">
         {/* Installments Collapsible */}
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden text-xs">
@@ -669,10 +585,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                     const planTitle = is6M
                       ? (isAr ? 'تقسيط على 6 شهور' : '6-Month Plan')
                       : (isAr ? 'تقسيط على 12 شهر' : '12-Month Plan');
-                    const isCopied = is6M ? copiedInst6 : copiedInst12;
-                    const quoteText = isAr
-                      ? `عرض تقسيط بالفيزا على ${opt.tenureMonths} شهور: بقسط شهري تقريبي ~${opt.monthlyPayment?.toLocaleString()} ج.م/شهر (إجمالي المبلغ شامل ${opt.adminPercent}% مصاريف إدارية: ${opt.totalWithAdmin?.toLocaleString()} ج.م).`
-                      : `Installment quote over ${opt.tenureMonths} months: ~${opt.monthlyPayment?.toLocaleString()} EGP/mo (Total including ${opt.adminPercent}% admin fee: ${opt.totalWithAdmin?.toLocaleString()} EGP).`;
 
                     return (
                       <div
@@ -722,26 +634,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                             </div>
                           </div>
                         </div>
-
-                        {/* Copy Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleCopyText(quoteText, is6M ? 'inst6' : 'inst12')}
-                          className={`w-full py-1.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 rtl:space-x-reverse transition-all border ${
-                            is6M
-                              ? 'bg-bc-teal-50 hover:bg-bc-teal-100 text-bc-teal-900 border-bc-teal-200'
-                              : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-indigo-200'
-                          }`}
-                        >
-                          {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>
-                            {isCopied
-                              ? (isAr ? 'تم النسخ!' : 'Copied!')
-                              : (isAr
-                                ? `نسخ عرض الـ ${opt.tenureMonths} شهور للعميل`
-                                : `Copy ${opt.tenureMonths}-Month Quote`)}
-                          </span>
-                        </button>
                       </div>
                     );
                   })}
@@ -753,39 +645,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                   ? 'ملاحظة: الحسابات تقريبية وترجع للآلة الحاسبة البنكية الرسمية والشروط الخاصة بكل بنك مصدر للبطاقة.'
                   : result.installmentEligibility.notes}
               </p>
-            </div>
-          )}
-        </div>
-
-        {/* Branch Info Collapsible */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden text-xs">
-          <button
-            type="button"
-            onClick={() => setShowBranch(!showBranch)}
-            className="w-full p-3 flex items-center justify-between text-slate-700 font-bold hover:bg-slate-50 transition-colors"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <Building className="w-4 h-4 text-bc-teal-600" />
-              <span>{isAr ? 'بيانات الفرع ومواعيد العمل' : 'Branch & Center Information'}</span>
-            </div>
-            {showBranch ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </button>
-
-          {showBranch && (
-            <div className="p-3 bg-slate-50 border-t border-slate-200 space-y-1.5 text-slate-700">
-              {result.branchInfo ? (
-                <>
-                  <div className="font-bold text-slate-900">{isAr ? result.branchInfo.nameAr : result.branchInfo.name}</div>
-                  <div><strong>{isAr ? 'العنوان:' : 'Address:'}</strong> {isAr ? result.branchInfo.addressAr : result.branchInfo.address}</div>
-                  <div><strong>{isAr ? 'المواعيد:' : 'Hours:'}</strong> {isAr ? result.branchInfo.workingHoursAr : result.branchInfo.workingHours}</div>
-                  <div><strong>{isAr ? 'الأيام:' : 'Days:'}</strong> {isAr ? result.branchInfo.workingDaysAr : result.branchInfo.workingDays}</div>
-                </>
-              ) : (
-                <div className="text-slate-500 flex items-center space-x-1.5 rtl:space-x-reverse">
-                  <Info className="w-4 h-4 text-slate-400" />
-                  <span>{isAr ? 'اختر الفرع من الخيارات لرؤية مواعيده وعنوانه' : 'Select a branch to view address and hours'}</span>
-                </div>
-              )}
             </div>
           )}
         </div>

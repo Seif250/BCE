@@ -396,22 +396,6 @@ ${instLines}
                     </div>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleCopyText(
-                      isAr
-                        ? `تقسيط الأسرة على 6 شهور بالفيزا: بقسط شهري تقريبي ~${inst6Monthly.toLocaleString()} ج.م (إجمالي المبلغ مع 9% مصاريف إدارية: ${inst6Total.toLocaleString()} ج.م).`
-                        : `Family 6-month installment: ~${inst6Monthly.toLocaleString()} EGP/mo (Total with 9% admin fee: ${inst6Total.toLocaleString()} EGP).`,
-                      'ar'
-                    )
-                  }
-                  className="w-full py-1.5 px-3 rounded-xl bg-bc-teal-50 hover:bg-bc-teal-100 text-bc-teal-900 border border-bc-teal-200 text-xs font-bold flex items-center justify-center space-x-1.5 rtl:space-x-reverse transition-all"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{isAr ? 'نسخ عرض الـ 6 شهور للعميل' : 'Copy 6-Month Quote'}</span>
-                </button>
               </div>
 
               {/* 12 Months Option */}
@@ -448,22 +432,6 @@ ${instLines}
                     </div>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleCopyText(
-                      isAr
-                        ? `تقسيط الأسرة على 12 شهر بالفيزا: بقسط شهري تقريبي ~${inst12Monthly.toLocaleString()} ج.م (إجمالي المبلغ مع 15% مصاريف إدارية: ${inst12Total.toLocaleString()} ج.م).`
-                        : `Family 12-month installment: ~${inst12Monthly.toLocaleString()} EGP/mo (Total with 15% admin fee: ${inst12Total.toLocaleString()} EGP).`,
-                      'ar'
-                    )
-                  }
-                  className="w-full py-1.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold flex items-center justify-center space-x-1.5 rtl:space-x-reverse transition-all"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{isAr ? 'نسخ عرض الـ 12 شهر للعميل' : 'Copy 12-Month Quote'}</span>
-                </button>
               </div>
             </div>
           </div>

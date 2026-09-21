@@ -76,7 +76,6 @@ export const StudentCalculator: React.FC = () => {
 
   // Collapsible Sections
   const [showDiscountSim, setShowDiscountSim] = useState(false);
-  const [showManualOverride, setShowManualOverride] = useState(false);
 
   // Multi-Child Family Calculator State (Dynamic 2 to 5 Children)
   const [isMultiChildMode, setIsMultiChildMode] = useState(false);
@@ -802,97 +801,6 @@ export const StudentCalculator: React.FC = () => {
         </div>
 
 
-        {/* Manual Override Collapsible */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowManualOverride(!showManualOverride)}
-            className="w-full p-3.5 flex items-center justify-between text-slate-800 font-bold hover:bg-slate-50 transition-colors text-xs sm:text-sm"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <span>{isAr ? '▸ لوحة التعديل اليدوي (Manual Override)' : '▸ Manual Override Controls'}</span>
-              {isManualOverrideActive && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300">
-                  {manualOverrideFamily}
-                </span>
-              )}
-            </div>
-            {showManualOverride ? (
-              <ChevronUp className="w-4 h-4 text-slate-400" />
-            ) : (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
-            )}
-          </button>
-
-          {showManualOverride && (
-            <div className="p-3.5 border-t border-slate-200 bg-slate-50/70 space-y-2">
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
-                  {isAr ? 'تجاوز نوع البرنامج يدويًا:' : 'Override Program Family:'}
-                </label>
-                <div className="flex space-x-2 rtl:space-x-reverse">
-                  {(['Auto', 'Adult', 'Young Learner'] as const).map((family) => (
-                    <button
-                      key={family}
-                      type="button"
-                      onClick={() => setManualOverrideFamily(family)}
-                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold border transition-all ${
-                        manualOverrideFamily === family
-                          ? 'bg-bc-navy-900 text-white border-bc-navy-900 shadow-2xs ring-1 ring-bc-navy-800'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      {family === 'Auto'
-                        ? (isAr ? 'تلقائي (Auto)' : 'Auto Detect')
-                        : family === 'Adult'
-                        ? (isAr ? 'بالغ (Adult)' : 'Adult')
-                        : (isAr ? 'صغار السن (Young Learner)' : 'Young Learner')}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {effectiveFamily === 'Young Learner' && (
-                <div className="space-y-1.5 pt-2 border-t border-slate-200">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
-                    {isAr ? 'تغيير الموسم (لبرامج الصغار):' : 'Override Season (YL):'}
-                  </label>
-                  <div className="flex space-x-2 rtl:space-x-reverse">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSeason('Winter Block')}
-                      className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold border transition-all ${
-                        selectedSeason === 'Winter Block'
-                          ? 'bg-bc-navy-900 text-white border-bc-navy-900 shadow-2xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      ❄️ {isAr ? 'الشتوي الأساسي (Winter Block)' : 'Winter Block (Default)'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSeason('Summer School')}
-                      className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold border transition-all ${
-                        selectedSeason === 'Summer School'
-                          ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      ☀️ {isAr ? 'المدرسة الصيفية (Summer School)' : 'Summer School'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <p className="text-[11px] text-slate-500 pt-1">
-                {isAr
-                  ? 'ملاحظة: النظام يحدد البرنامج والموسم تلقائياً حسب السن (صغار السن + شتوي افتراضياً). استخدم هذه اللوحة فقط في الحالات الاستثنائية.'
-                  : 'Note: System determines family and season automatically from age (defaulting to Winter Block for YL). Use this panel only for exceptions.'}
-              </p>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
