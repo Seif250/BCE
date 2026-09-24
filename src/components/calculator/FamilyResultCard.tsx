@@ -86,15 +86,15 @@ export const FamilyResultCard: React.FC<FamilyResultCardProps> = ({
 
     if (type === 'ar') {
       setCopiedAr(true);
-      showToast(isAr ? '✓ تم نسخ رد العرض للعميل (بالعربي)' : '✓ Copied Arabic family answer');
+      showToast(isAr ? 'تم نسخ رد العرض للعميل (بالعربي)' : 'Copied Arabic family answer');
       setTimeout(() => setCopiedAr(false), 2000);
     } else if (type === 'en') {
       setCopiedEn(true);
-      showToast(isAr ? '✓ تم نسخ رد العرض (بالإنجليزي)' : '✓ Copied English family answer');
+      showToast(isAr ? 'تم نسخ رد العرض (بالإنجليزي)' : 'Copied English family answer');
       setTimeout(() => setCopiedEn(false), 2000);
     } else {
       setCopiedCrm(true);
-      showToast('✓ Copied Family CRM Summary (English)');
+      showToast('Copied Family CRM Summary (English)');
       setTimeout(() => setCopiedCrm(false), 2000);
     }
   };
@@ -173,8 +173,9 @@ ${instLines}
               <h2 className="text-lg sm:text-xl font-black">
                 {isAr ? `حساب حزمة الأسرة (${childrenData.length} أطفال)` : `Family Sibling Calculation (${childrenData.length} Children)`}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-400 text-[#062A67]">
-                ✓ {isAr ? 'خصم الأخ الأصغر 10% مطبق على الترمات المشتركة' : '10% Sibling Discount on Shared Terms'}
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-400 text-[#062A67] inline-flex items-center gap-1">
+                <Check className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                <span>{isAr ? 'خصم الأخ الأصغر 10% مطبق على الترمات المشتركة' : '10% Sibling Discount on Shared Terms'}</span>
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
@@ -295,7 +296,7 @@ ${instLines}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
               {isAr ? 'الإجمالي المطلوب لكامل الأسرة' : 'Combined Family Total'}
             </span>
             <div className="flex items-baseline space-x-2 rtl:space-x-reverse mt-0.5">
@@ -303,7 +304,7 @@ ${instLines}
                 {totalFinal.toLocaleString()} {isAr ? 'جنيه مصري' : 'EGP'}
               </span>
               {totalDiscount > 0 && (
-                <span className="text-xs text-slate-400 line-through">
+                <span className="text-xs text-slate-500 line-through">
                   {totalBase.toLocaleString()} {isAr ? 'ج.م' : 'EGP'}
                 </span>
               )}
@@ -388,15 +389,15 @@ ${instLines}
               </div>
 
               {/* 12 Months Option */}
-              <div className="p-3.5 rounded-2xl bg-white border border-indigo-200 shadow-xs flex flex-col justify-between space-y-3">
+              <div className="p-3.5 rounded-xl bg-white border border-bc-navy-200 shadow-xs flex flex-col justify-between space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                    <CreditCard className="w-4 h-4 text-indigo-700" />
+                    <CreditCard className="w-4 h-4 text-bc-navy-800" />
                     <span className="text-xs sm:text-sm font-black text-slate-900">
                       {isAr ? 'تقسيط الأسرة على 12 شهر' : 'Family 12-Month Plan'}
                     </span>
                   </div>
-                  <span className="text-[11px] font-black bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded-md border border-indigo-200">
+                  <span className="text-[11px] font-black bg-bc-navy-50 text-bc-navy-900 px-2 py-0.5 rounded-md border border-bc-navy-200">
                     15% {isAr ? 'مصاريف إدارية' : 'Admin'}
                   </span>
                 </div>
@@ -425,8 +426,8 @@ ${instLines}
             </div>
           </div>
         ) : (
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-slate-400 flex-shrink-0" />
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-slate-500 flex-shrink-0" aria-hidden="true" />
             <span>
               {isAr
                 ? 'التقسيط متاح عند حجز ترمين أو أكثر لأي من الأطفال.'

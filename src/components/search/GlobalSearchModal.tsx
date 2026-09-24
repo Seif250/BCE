@@ -184,14 +184,20 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 md:p-20 flex justify-center">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 md:p-20 flex justify-center"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={language === 'ar' ? 'البحث الشامل' : 'Global Search'}
+    >
       <div
         className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-fade-in flex flex-col max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header Input */}
         <div className="relative border-b border-slate-200 p-4 bg-slate-50 flex items-center">
-          <Search className="w-5 h-5 text-bc-teal-600 mr-3 rtl:mr-0 rtl:ml-3 flex-shrink-0" />
+          <Search className="w-5 h-5 text-bc-teal-600 mr-3 rtl:mr-0 rtl:ml-3 flex-shrink-0" aria-hidden="true" />
           <input
             type="text"
             autoFocus
@@ -204,8 +210,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             <button
               onClick={() => setQuery('')}
               className="p-1 text-slate-400 hover:text-slate-600"
+              aria-label={language === 'ar' ? 'مسح البحث' : 'Clear search'}
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           )}
           <kbd className="ml-2 rtl:ml-0 rtl:mr-2 hidden sm:inline-block px-2 py-0.5 text-xs font-mono bg-white border border-slate-300 rounded text-slate-500 shadow-sm">
@@ -216,10 +223,25 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         {/* Results List */}
         <div className="flex-1 overflow-y-auto p-2 divide-y divide-slate-100">
           {filteredItems.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-sm">
-              {language === 'ar'
-                ? `لا توجد نتائج مطابقة لـ "${query}"`
-                : `No results found for "${query}"`}
+            <div className="py-10 px-4 text-center space-y-3">
+              <p className="text-slate-600 text-sm font-semibold">
+                {language === 'ar'
+                  ? `لا توجد نتائج مطابقة لـ "${query}"`
+                  : `No results found for "${query}"`}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+                <span className="text-xs text-slate-500">{language === 'ar' ? 'جرب البحث عن:' : 'Try searching:'}</span>
+                {['Adults', 'Young Learner', 'تقسيط', 'فروع', 'Summer', 'IELTS'].map((kw) => (
+                  <button
+                    key={kw}
+                    type="button"
+                    onClick={() => setQuery(kw)}
+                    className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 hover:bg-bc-teal-50 text-slate-700 hover:text-bc-teal-900 border border-slate-200 transition-colors"
+                  >
+                    {kw}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             filteredItems.map((item) => {

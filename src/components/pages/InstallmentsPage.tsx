@@ -92,7 +92,7 @@ export const InstallmentsPage: React.FC = () => {
         : `Course fee: ${amountNumber.toLocaleString()} EGP. ${months}-month credit card installment is approx ~${monthly.toLocaleString()} EGP/month (Total with admin fee: ${total.toLocaleString()} EGP).`;
     navigator.clipboard.writeText(text);
     setCopiedPlan(`plan-${months}`);
-    showToast(language === 'ar' ? `✓ تم نسخ عرض تقسيط ${months} شهور` : `✓ Copied ${months}-month quote`);
+    showToast(language === 'ar' ? `تم نسخ عرض تقسيط ${months} شهور` : `Copied ${months}-month quote`);
     setTimeout(() => setCopiedPlan(null), 2000);
   };
 
@@ -123,11 +123,11 @@ export const InstallmentsPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-indigo-200 bg-indigo-50/40 shadow-sm">
-          <span className="text-[11px] font-bold text-indigo-900 uppercase tracking-wider block mb-0.5">
+        <div className="bg-white p-4 rounded-xl border border-bc-navy-200 bg-bc-navy-50/30 shadow-xs">
+          <span className="text-[11px] font-bold text-bc-navy-900 uppercase tracking-wider block mb-0.5">
             {pt.quickHighlights.months12Title}
           </span>
-          <span className="text-xl font-black text-indigo-900 block">
+          <span className="text-xl font-black text-bc-navy-900 block">
             {pt.quickHighlights.months12Value}
           </span>
           <span className="text-[10px] text-slate-600 block mt-0.5">
@@ -135,11 +135,11 @@ export const InstallmentsPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-purple-200 bg-purple-50/40 shadow-sm">
-          <span className="text-[11px] font-bold text-purple-900 uppercase tracking-wider block mb-0.5">
+        <div className="bg-white p-4 rounded-xl border border-bc-teal-200 bg-bc-teal-50/30 shadow-xs">
+          <span className="text-[11px] font-bold text-bc-teal-900 uppercase tracking-wider block mb-0.5">
             {pt.quickHighlights.adultEligibleTitle}
           </span>
-          <span className="text-xl font-black text-purple-900 block">
+          <span className="text-xl font-black text-bc-teal-800 block">
             {pt.quickHighlights.adultEligibleValue}
           </span>
           <span className="text-[10px] text-slate-600 block mt-0.5">
@@ -168,7 +168,7 @@ export const InstallmentsPage: React.FC = () => {
             <h2 className="text-sm font-extrabold text-bc-navy-900 uppercase tracking-wider">
               {language === 'ar' ? 'شروط تقسيط كورسات الكبار' : 'Adult Installment Policy'}
             </h2>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded border border-indigo-200">
+            <span className="text-[10px] font-bold bg-bc-navy-50 text-bc-navy-800 px-2 py-0.5 rounded border border-bc-navy-200">
               {language === 'ar' ? 'باقات 40 و 60 فقط' : '40 & 60 Credits'}
             </span>
           </div>
@@ -286,17 +286,18 @@ export const InstallmentsPage: React.FC = () => {
                   setCustomAmount(String(lastCalculatedPrice));
                   showToast(
                     language === 'ar'
-                      ? `⚡ تم استيراد سعر الطالب: ${lastCalculatedPrice.toLocaleString()} ج.م`
-                      : `⚡ Auto-filled student price: ${lastCalculatedPrice.toLocaleString()} EGP`
+                      ? `تم استيراد سعر الطالب: ${lastCalculatedPrice.toLocaleString()} ج.م`
+                      : `Auto-filled student price: ${lastCalculatedPrice.toLocaleString()} EGP`
                   );
                 }}
-                className={`px-3 py-1.5 text-xs font-black rounded-lg border transition-all ${
+                className={`px-3 py-1.5 text-xs font-black rounded-lg border transition-all inline-flex items-center gap-1.5 ${
                   selectedPreset === 'last-calc'
                     ? 'bg-emerald-700 text-white border-emerald-800 shadow-sm ring-2 ring-emerald-500/30'
                     : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 shadow-sm'
                 }`}
               >
-                {language === 'ar' ? '⚡ حساب التقسيط لهذا المبلغ الآن' : '⚡ Calculate Installments for This Price'}
+                <Zap className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
+                <span>{language === 'ar' ? 'حساب التقسيط لهذا المبلغ الآن' : 'Calculate Installments for This Price'}</span>
               </button>
             </div>
           )}
@@ -389,11 +390,11 @@ export const InstallmentsPage: React.FC = () => {
           </div>
 
           {/* 12 Months Option */}
-          <div className="p-5 rounded-xl border border-indigo-200 bg-indigo-50/40 space-y-3 flex flex-col justify-between">
+          <div className="p-5 rounded-xl border border-bc-navy-200 bg-bc-navy-50/20 space-y-3 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-extrabold text-bc-navy-950">{pt.plan12Title}</span>
-                <span className="px-2 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-800">
+                <span className="px-2 py-0.5 rounded text-xs font-bold bg-bc-navy-100 text-bc-navy-900 border border-bc-navy-200">
                   15% {language === 'ar' ? 'مصاريف' : 'Admin'}
                 </span>
               </div>
@@ -403,17 +404,17 @@ export const InstallmentsPage: React.FC = () => {
                   <span>{pt.baseAmount}</span>
                   <span className="font-semibold">{amountNumber.toLocaleString()} {language === 'ar' ? 'جنيه' : 'EGP'}</span>
                 </div>
-                <div className="flex justify-between text-indigo-900 font-medium">
+                <div className="flex justify-between text-bc-navy-900 font-medium">
                   <span>{pt.adminFee} (15%):</span>
                   <span>+{admin12.toLocaleString()} {language === 'ar' ? 'جنيه' : 'EGP'}</span>
                 </div>
-                <div className="flex justify-between font-bold text-slate-900 pt-1 border-t border-indigo-200/60">
+                <div className="flex justify-between font-bold text-slate-900 pt-1 border-t border-bc-navy-200/60">
                   <span>{pt.totalWithAdmin}</span>
                   <span>{total12.toLocaleString()} {language === 'ar' ? 'جنيه' : 'EGP'}</span>
                 </div>
               </div>
 
-              <div className="p-3.5 bg-white rounded-xl border border-indigo-300 text-center shadow-sm relative">
+              <div className="p-3.5 bg-white rounded-xl border border-bc-navy-300 text-center shadow-xs relative">
                 <span className="absolute top-2 right-2 rtl:right-auto rtl:left-2 px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-200">
                   ≈ {language === 'ar' ? 'تقريبي' : 'Approximate'}
                 </span>

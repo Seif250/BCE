@@ -11,6 +11,7 @@ import {
   Copy,
   Check,
   Search,
+  Zap,
 } from 'lucide-react';
 import {
   SUMMER_CAMPS,
@@ -98,7 +99,7 @@ export const SummerPage: React.FC = () => {
         : `British Council Summer School 2026: 3 camps, 30 hours over 2 weeks (3 hrs/day Sun-Thu). Camp 1: 5-16 Jul, Camp 2: 26 Jul-6 Aug, Camp 3: 9-20 Aug. 10% discount on 2nd camp.`;
     navigator.clipboard.writeText(text);
     setCopiedSummary(true);
-    showToast(language === 'ar' ? '✓ تم نسخ ملخص المدرسة الصيفية والمواعيد' : '✓ Copied summer camp summary');
+    showToast(language === 'ar' ? 'تم نسخ ملخص المدرسة الصيفية والمواعيد' : 'Copied summer camp summary');
     setTimeout(() => setCopiedSummary(false), 2000);
   };
 
@@ -234,7 +235,7 @@ export const SummerPage: React.FC = () => {
                         isSelected ? 'bg-amber-600 text-white shadow-xs' : 'border border-slate-300 text-transparent'
                       }`}
                     >
-                      ✓
+                      {isSelected ? <Check className="w-3 h-3 text-white" aria-hidden="true" /> : null}
                     </span>
                   </div>
 
@@ -368,10 +369,13 @@ export const SummerPage: React.FC = () => {
 
         {/* Interactive Instant Equivalence Finder */}
         <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200 space-y-2.5">
-          <label className="block text-xs font-bold text-amber-950">
-            {language === 'ar'
-              ? '⚡ اختر مستوى الطالب الحالي في الشتاء لمعرفة المعادل الصيفي فوراً:'
-              : '⚡ Select current winter level to get instant summer mapping:'}
+          <label className="block text-xs font-bold text-amber-950 flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" aria-hidden="true" />
+            <span>
+              {language === 'ar'
+                ? 'اختر مستوى الطالب الحالي في الشتاء لمعرفة المعادل الصيفي فوراً:'
+                : 'Select current winter level to get instant summer mapping:'}
+            </span>
           </label>
           <div className="flex flex-col sm:flex-row gap-2">
             <select
@@ -426,8 +430,8 @@ export const SummerPage: React.FC = () => {
                     navigator.clipboard.writeText(text);
                     showToast(
                       language === 'ar'
-                        ? `✓ تم نسخ معادلة المستوى (${lvl.name} ⬅️ ${lvl.summerMapping})`
-                        : `✓ Copied mapping (${lvl.name} ⬅️ ${lvl.summerMapping})`
+                        ? `تم نسخ معادلة المستوى (${lvl.name} ⬅️ ${lvl.summerMapping})`
+                        : `Copied mapping (${lvl.name} ⬅️ ${lvl.summerMapping})`
                     );
                   }}
                   className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm transition-all whitespace-nowrap"

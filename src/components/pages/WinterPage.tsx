@@ -91,7 +91,7 @@ export const WinterPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-gradient-to-br from-bc-navy-900 to-indigo-900 text-white p-4 rounded-xl shadow-sm border border-bc-navy-700">
+        <div className="bg-bc-navy-900 text-white p-4 rounded-xl shadow-xs border border-bc-navy-800">
           <span className="text-[11px] font-bold text-bc-teal-300 uppercase tracking-wider block mb-0.5">
             {pt.quickHighlights.ieltsTeensTitle}
           </span>
@@ -191,7 +191,7 @@ export const WinterPage: React.FC = () => {
       </div>
 
       {/* IELTS for Teens Dedicated Card */}
-      <div className="bg-gradient-to-r from-bc-navy-900 to-indigo-950 text-white rounded-xl shadow-sm p-5 border border-bc-navy-800">
+      <div className="bg-bc-navy-900 text-white rounded-xl shadow-xs p-5 border border-bc-navy-800">
         <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-bc-navy-700">
           <div>
             <span className="text-xs font-mono font-bold text-bc-teal-300 uppercase tracking-wider">

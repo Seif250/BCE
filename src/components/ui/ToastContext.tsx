@@ -29,7 +29,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {/* Toast Overlay */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center space-y-2 pointer-events-none px-4 max-w-md w-full">
+      <div
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center space-y-2 pointer-events-none px-4 max-w-md w-full"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {toasts.map((t) => (
           <div
             key={t.id}
@@ -37,9 +42,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             style={{ animationDuration: '200ms' }}
           >
             {t.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" aria-hidden="true" />
             ) : (
-              <Info className="w-4 h-4 text-bc-teal-300 flex-shrink-0" />
+              <Info className="w-4 h-4 text-bc-teal-300 flex-shrink-0" aria-hidden="true" />
             )}
             <span className="tracking-tight">{t.message}</span>
           </div>

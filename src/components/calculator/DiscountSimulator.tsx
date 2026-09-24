@@ -60,7 +60,7 @@ export const DiscountSimulator: React.FC<DiscountSimulatorProps> = ({
                   }`}
                 >
                   <div>{n} {isAr ? 'ترم' : 'Term'}</div>
-                  <div className={`text-[9px] ${terms === n ? 'text-bc-teal-300' : 'text-slate-400'}`}>
+                  <div className={`text-[9px] ${terms === n ? 'text-bc-teal-300 font-bold' : 'text-slate-500 font-semibold'}`}>
                     {discountText}
                   </div>
                 </button>

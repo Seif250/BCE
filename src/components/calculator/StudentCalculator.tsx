@@ -18,34 +18,21 @@ import { WINTER_PRICING } from '../../data/winterCourses';
 import { ResultCard } from './ResultCard';
 import { DiscountSimulator } from './DiscountSimulator';
 import { DateOfBirthInput } from './DateOfBirthInput';
+import { SingleStudentEligibilityStrip } from './SingleStudentEligibilityStrip';
+import { AdultProgramControls } from './AdultProgramControls';
+import { MultiChildFamilySection, FamilyChildItem } from './MultiChildFamilySection';
 import {
   RotateCcw,
   Sparkles,
   Sliders,
-  AlertTriangle,
   ChevronDown,
   ChevronUp,
-  CheckCircle2,
-  Calendar,
-  Layers,
-  GraduationCap,
-  Baby,
-
   Users,
-  Plus,
-  Trash2,
 } from 'lucide-react';
 import { FamilyResultCard, CalculatedSiblingInfo } from './FamilyResultCard';
 import { useToast } from '../ui/ToastContext';
 
-export interface FamilyChildState {
-  id: string;
-  name: string;
-  dob: string;
-  termsCount: number;
-  level?: string;
-  resetTrigger: number;
-}
+export type FamilyChildState = FamilyChildItem;
 
 export const StudentCalculator: React.FC = () => {
   const { t, language, isRTL } = useLanguage();
@@ -100,7 +87,7 @@ export const StudentCalculator: React.FC = () => {
         resetTrigger: 0,
       },
     ]);
-    showToast(isAr ? `✓ تمت إضافة طفل آخر (${nextNum})` : `✓ Added Child ${nextNum}`);
+    showToast(isAr ? `تمت إضافة طفل آخر (${nextNum})` : `Added Child ${nextNum}`);
   };
 
   const handleRemoveChild = (id: string) => {
@@ -360,7 +347,7 @@ export const StudentCalculator: React.FC = () => {
       if (e.altKey && (e.key === 'n' || e.key === 'N' || e.key === 'ى')) {
         e.preventDefault();
         handleReset();
-        showToast(isAr ? '✓ تم بدء طالب جديد (Alt+N)' : '✓ Started new student (Alt+N)');
+        showToast(isAr ? 'تم بدء طالب جديد (Alt+N)' : 'Started new student (Alt+N)');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -435,7 +422,7 @@ export const StudentCalculator: React.FC = () => {
             title={isAr ? 'إعادة تعيين وبدء حساب طالب جديد (Alt+N)' : 'Reset & Start New Student (Alt+N)'}
           >
             <RotateCcw className="w-3.5 h-3.5 group-hover:-rotate-90 transition-transform text-slate-500 group-hover:text-bc-navy-950" />
-            <span>[↻ {t.resetBtn || 'New Student'}]</span>
+            <span>{t.resetBtn || 'New Student'}</span>
           </button>
         </div>
       </div>
@@ -443,7 +430,7 @@ export const StudentCalculator: React.FC = () => {
       {/* 2. DATE OF BIRTH INPUT CARDS */}
       {!isMultiChildMode ? (
         /* Single Student Mode */
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
+        <div className="bg-white rounded-xl border border-slate-200/90 shadow-sm p-4 space-y-3">
           <DateOfBirthInput
             value={dob}
             onChange={setDob}
@@ -452,286 +439,51 @@ export const StudentCalculator: React.FC = () => {
             resetTrigger={resetTrigger}
           />
 
-          {/* DYNAMIC ELIGIBILITY STRIP (Shown once DOB is valid) */}
+          {/* DYNAMIC ELIGIBILITY STRIP & CONTROLS */}
           {ageInfo && (
-            <div ref={eligibilityRef} className="pt-2 animate-fade-in space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {/* Age Card */}
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center space-x-3 rtl:space-x-reverse">
-                  <div className="w-8 h-8 rounded-lg bg-bc-teal-100 text-bc-teal-800 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    {ageInfo.years}
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                      {isAr ? 'العمر المحسوب' : 'Calculated Age'}
-                    </span>
-                    <div className="text-sm font-black text-slate-900">
-                      {ageInfo.years} {t.yearsOld || (isAr ? 'سنة' : 'Years')}
-                    </div>
-                  </div>
-                </div>
+            <div ref={eligibilityRef} className="space-y-3">
+              <SingleStudentEligibilityStrip
+                ageInfo={ageInfo}
+                effectiveFamily={effectiveFamily}
+                ageGroupDisplay={ageGroupDisplay}
+                selectedSeason={selectedSeason}
+                isManualOverrideActive={isManualOverrideActive}
+                manualOverrideFamily={manualOverrideFamily}
+                onClearManualOverride={() => setManualOverrideFamily('Auto')}
+                isAr={isAr}
+                yearsOldLabel={t.yearsOld}
+              />
 
-                {/* Age Group Card */}
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center space-x-3 rtl:space-x-reverse">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center flex-shrink-0">
-                    {effectiveFamily === 'Adult' ? (
-                      <GraduationCap className="w-4 h-4" />
-                    ) : (
-                      <Baby className="w-4 h-4" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                      {isAr ? 'الفئة العمرية' : 'Age Group'}
-                    </span>
-                    <div className="text-xs font-black text-slate-900 truncate" title={ageGroupDisplay}>
-                      {ageGroupDisplay}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Inferred Program Card */}
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center space-x-3 rtl:space-x-reverse">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
-                    <Layers className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                      {isAr ? 'البرنامج المستنتج' : 'Inferred Program'}
-                    </span>
-                    <div className="text-xs font-black text-slate-900 truncate">
-                      {effectiveFamily === 'Adult'
-                        ? (isAr ? 'Adult • كورسات الكبار' : 'Adult English')
-                        : (isAr ? `Young Learner • ${selectedSeason}` : `Young Learner • ${selectedSeason}`)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Manual Override Active Badge */}
-              {isManualOverrideActive && (
-                <div className="p-2 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between text-xs text-amber-900 font-bold">
-                  <span className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    <span>
-                      {isAr
-                        ? `تعديل يدوي نشط: تم تحويل البرنامج إلى (${manualOverrideFamily})`
-                        : `Manual Override Active: Switched to (${manualOverrideFamily})`}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setManualOverrideFamily('Auto')}
-                    className="text-[11px] underline hover:text-amber-950"
-                  >
-                    {isAr ? 'إلغاء التعديل اليدوي' : 'Reset to Auto'}
-                  </button>
-                </div>
-              )}
-
-              {/* DYNAMIC PROGRAM CONTROLS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                {effectiveFamily === 'Adult' && (
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                      {isAr ? 'كورس الكبار (Product)' : 'Adult Product'}
-                    </label>
-                    <select
-                      value={selectedAdultProduct}
-                      onChange={(e) => setSelectedAdultProduct(e.target.value as any)}
-                      className="w-full text-xs font-bold py-2 px-3 border border-slate-300 rounded-xl bg-white text-slate-900 outline-none focus:ring-2 focus:ring-bc-teal-400"
-                    >
-                      <option value="beginner">Beginner Courses (المبتدئين)</option>
-                      <option value="bce">BCE - British Council English (العام)</option>
-                      <option value="ielts-coach">IELTS Coach (تحضير آيلتس)</option>
-                      <option value="english-online">English Online (أونلاين تفاعلي)</option>
-                    </select>
-                  </div>
-                )}
-
-                <div>
-                  <label
-                    htmlFor="level-select"
-                    className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block mb-1"
-                  >
-                    {t.existingLevelLabel || 'Current Level'} ({t.optional || 'Optional'})
-                  </label>
-                  <select
-                    ref={levelSelectRef}
-                    id="level-select"
-                    value={existingLevel}
-                    onChange={(e) => setExistingLevel(e.target.value)}
-                    className="w-full text-xs py-2 px-3 border border-slate-300 rounded-xl bg-white text-slate-900 outline-none focus:ring-2 focus:ring-bc-teal-400 font-medium"
-                  >
-                    <option value="">
-                      {t.noLevelPlaceholder || (isAr ? 'لم يتم تحديد المستوى — يمكن استخدام Placement Test' : 'No level specified — PT required')}
-                    </option>
-                    {availableLevels.map((lvl) => (
-                      <option key={lvl.id} value={lvl.name}>
-                        {lvl.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Quick Registration Pills (Adults Only) */}
-              {effectiveFamily === 'Adult' && (
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
-                  <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">
-                      {isAr ? 'نوع التسجيل:' : 'Registration:'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setRegistrationType('New')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        registrationType === 'New'
-                          ? 'bg-[#062A67] text-white border-[#062A67] shadow-2xs'
-                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      {isAr ? 'طالب جديد' : 'New'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRegistrationType('Re-registration')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        registrationType === 'Re-registration'
-                          ? 'bg-emerald-700 text-white border-emerald-700 shadow-2xs ring-1 ring-emerald-500'
-                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      🏷️ {isAr ? 'إعادة تسجيل (خصم 10%)' : 'Re-registration (10% Off)'}
-                    </button>
-                  </div>
-                </div>
-              )}
+              <AdultProgramControls
+                effectiveFamily={effectiveFamily}
+                selectedAdultProduct={selectedAdultProduct}
+                onSelectAdultProduct={setSelectedAdultProduct}
+                existingLevel={existingLevel}
+                onSelectExistingLevel={setExistingLevel}
+                availableLevels={availableLevels}
+                levelSelectRef={levelSelectRef}
+                registrationType={registrationType}
+                onSelectRegistrationType={setRegistrationType}
+                isAr={isAr}
+                existingLevelLabel={t.existingLevelLabel}
+                optionalLabel={t.optional}
+                noLevelPlaceholder={t.noLevelPlaceholder}
+              />
             </div>
           )}
         </div>
       ) : (
         /* Dynamic Multi-Child Family Mode (Up to 5 Children) */
-        <div className="space-y-3">
-          {/* Multi-Child Header Bar */}
-          <div className="bg-amber-50/80 border border-amber-200/90 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-2 shadow-2xs">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black flex-shrink-0">
-                <Users className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-xs font-black text-amber-950 block">
-                  {isAr ? 'حاسبة الإخوة المتعددين (Multi-Child Family)' : 'Multi-Child Family Calculator'}
-                </span>
-                <span className="text-[10px] text-amber-800 font-medium">
-                  {isAr
-                    ? 'يتم تطبيق خصم 10% للأصغر حصرياً على الترمات المشتركة مع إخوته الأكبر.'
-                    : '10% sibling discount applies to younger children strictly on shared terms with older siblings.'}
-                </span>
-              </div>
-            </div>
-
-            {/* Add Another Child Button */}
-            <button
-              type="button"
-              onClick={handleAddChild}
-              disabled={familyChildren.length >= 5}
-              className={`inline-flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-xl text-xs font-black border transition-all ${
-                familyChildren.length >= 5
-                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                  : 'bg-amber-400 hover:bg-amber-500 text-slate-950 border-amber-500 shadow-2xs'
-              }`}
-              title={familyChildren.length >= 5 ? (isAr ? 'الحد الأقصى 5 أطفال' : 'Max 5 children') : (isAr ? 'إضافة طفل آخر' : 'Add sibling')}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{isAr ? '+ طفل آخر' : '+ Add Sibling'}</span>
-              <span className="text-[10px] opacity-75">({familyChildren.length}/5)</span>
-            </button>
-          </div>
-
-          {/* Children Cards Grid */}
-          <div className={`grid grid-cols-1 ${familyChildren.length === 2 ? 'md:grid-cols-2' : familyChildren.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'} gap-3`}>
-            {familyChildren.map((child, index) => {
-              const calcInfo = calculatedFamilyChildren.find((c) => c.id === child.id);
-              return (
-                <div key={child.id} className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                      <span className="w-5 h-5 rounded-md bg-[#062A67] text-white flex items-center justify-center font-bold text-xs">
-                        {index + 1}
-                      </span>
-                      <span className="text-xs font-black text-slate-900">{child.name}</span>
-                    </div>
-
-                    <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-                      {calcInfo && (
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                            calcInfo.isEldest
-                              ? 'bg-slate-200 text-slate-800'
-                              : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                          }`}
-                        >
-                          {calcInfo.isEldest ? (isAr ? 'الأكبر' : 'Eldest') : (isAr ? 'خصم أخوة' : 'Sibling')}
-                        </span>
-                      )}
-                      {familyChildren.length > 2 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveChild(child.id)}
-                          className="text-rose-500 hover:text-rose-700 p-1 rounded-lg hover:bg-rose-50 transition-colors"
-                          title={isAr ? 'حذف هذا الطفل' : 'Remove child'}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <DateOfBirthInput
-                    value={child.dob}
-                    onChange={(val) => handleUpdateChildDob(child.id, val)}
-                    onCalculate={handleCalculate}
-                    resetTrigger={child.resetTrigger}
-                  />
-
-                  {/* Individual Terms Selector */}
-                  <div className="pt-1">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                      {isAr ? 'عدد الترمات:' : 'Terms:'}
-                    </span>
-                    <div className="grid grid-cols-4 gap-1">
-                      {[1, 2, 3, 4].map((tNum) => (
-                        <button
-                          key={tNum}
-                          type="button"
-                          onClick={() => handleUpdateChildTerms(child.id, tNum)}
-                          className={`py-1 text-xs font-black rounded-lg border transition-all ${
-                            child.termsCount === tNum
-                              ? 'bg-[#062A67] text-white border-[#062A67]'
-                              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {tNum} {isAr ? 'ترم' : 'T'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {calcInfo && (
-                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600 bg-slate-50 p-2 rounded-xl">
-                      <span><strong>{isAr ? 'العمر:' : 'Age:'}</strong> {calcInfo.ageYears} {isAr ? 'سنة' : 'y'}</span>
-                      <span>•</span>
-                      <span className="truncate max-w-[130px]" title={calcInfo.ageGroupDisplay}>
-                        <strong>{isAr ? 'المرحلة:' : 'Stage:'}</strong> {calcInfo.ageGroupDisplay}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <MultiChildFamilySection
+          familyChildren={familyChildren}
+          calculatedFamilyChildren={calculatedFamilyChildren}
+          onAddChild={handleAddChild}
+          onRemoveChild={handleRemoveChild}
+          onUpdateChildDob={handleUpdateChildDob}
+          onUpdateChildTerms={handleUpdateChildTerms}
+          onCalculate={handleCalculate}
+          isAr={isAr}
+        />
       )}
 
       {/* 4. RESULT CARD (Single or Multi-Child Family Card) */}
@@ -760,7 +512,7 @@ export const StudentCalculator: React.FC = () => {
       {/* 5. COLLAPSIBLE SECONDARY TOOLS (Discount Simulator & Manual Override) */}
       <div className="space-y-2 pt-1">
         {/* Discount Simulator Collapsible */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200/90 shadow-sm overflow-hidden">
           <button
             type="button"
             onClick={() => setShowDiscountSim(!showDiscountSim)}
@@ -768,7 +520,7 @@ export const StudentCalculator: React.FC = () => {
           >
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Sliders className="w-4 h-4 text-bc-teal-600" />
-              <span>{isAr ? '▸ محاكي الخصومات والحزم (Discount Simulator)' : '▸ Discount & Bundle Simulator'}</span>
+              <span>{isAr ? 'محاكي الخصومات والحزم (Discount Simulator)' : 'Discount & Bundle Simulator'}</span>
               {(terms > 1 || (effectiveFamily === 'Adult' && registrationType === 'Re-registration') || varioTiming !== 'none') && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
                   {isAr ? 'خصومات مفعلة' : 'Discounts Active'}
@@ -776,9 +528,9 @@ export const StudentCalculator: React.FC = () => {
               )}
             </div>
             {showDiscountSim ? (
-              <ChevronUp className="w-4 h-4 text-slate-400" />
+              <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />
             )}
           </button>
 

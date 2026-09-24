@@ -5,6 +5,23 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* British Council Brand Tokens */
+    --color-primary: #00205B;
+    --color-primary-hover: #19488a;
+    --color-on-primary: #ffffff;
+    --color-secondary: #00A3B5;
+    --color-secondary-hover: #068b9d;
+    --color-on-secondary: #ffffff;
+    --color-accent: #00A3B5;
+    --color-background: #F7F9FC;
+    --color-surface: #FFFFFF;
+    --color-border: #E6EAF0;
+    --color-text-main: #0F172A;
+    --color-text-muted: #475569;
+    --color-ring: #00A3B5;
+  }
+
   body {
     @apply bg-[#F7F9FC] text-slate-900 font-sans antialiased selection:bg-bc-teal-200 selection:text-bc-teal-900;
   }
@@ -12,6 +29,25 @@
   body.font-arabic {
     font-family: 'IBM Plex Sans Arabic', 'Cairo', 'Segoe UI', Tahoma, -apple-system, BlinkMacSystemFont, sans-serif;
     letter-spacing: -0.01em;
+  }
+
+  /* ui-ux-pro-max requirement: cursor-pointer on all clickable elements */
+  button, 
+  [role="button"], 
+  select,
+  summary {
+    cursor: pointer;
+  }
+
+  /* ui-ux-pro-max requirement: visible keyboard focus states */
+  :focus-visible {
+    outline: 2px solid var(--color-ring, #00A3B5);
+    outline-offset: 2px;
+  }
+
+  /* Remove default outline when mouse clicking */
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
@@ -23,10 +59,10 @@
     @apply text-[17px] sm:text-[19px] font-bold text-slate-900 tracking-tight;
   }
   .app-body {
-    @apply text-[14px] sm:text-[15px] text-slate-700 leading-relaxed;
+    @apply text-[14px] sm:text-[15px] text-slate-800 leading-relaxed;
   }
   .app-secondary {
-    @apply text-[12px] sm:text-[13px] text-slate-500;
+    @apply text-[12px] sm:text-[13px] text-slate-600;
   }
 }
 
@@ -54,4 +90,16 @@
 
 .animate-fade-in {
   animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* ui-ux-pro-max requirement: respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
