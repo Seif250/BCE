@@ -9,6 +9,7 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  AlertTriangle,
 } from 'lucide-react';
 import { CalculationResult, RegistrationType } from '../../data/types';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -18,6 +19,7 @@ import { ADULT_COURSES } from '../../data/adultCourses';
 import { CallScriptsDualCard } from './CallScriptsDualCard';
 import { InstallmentsCollapsible } from './InstallmentsCollapsible';
 import { WinterTermsSelector, WinterTermCardData } from './WinterTermsSelector';
+import { formatDisplayDate } from '../../engine/ageCalculator';
 
 interface ResultCardProps {
   result: CalculationResult;
@@ -167,6 +169,83 @@ export const ResultCard: React.FC<ResultCardProps> = ({
           )}
         </div>
       </div>
+
+      {/* 1b. STAGE & TRANSITION PANEL */}
+      {result.calculatedAge >= 4 && (
+        <div
+          id="stage-transition-panel"
+          className="bg-white rounded-xl border border-slate-200/90 shadow-sm p-4 space-y-3"
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {isAr ? 'المرحلة الحالية' : 'Current Stage'}
+              </span>
+              <span className="font-bold text-slate-900">{result.ageGroup.value}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {isAr ? 'السن الفعلي' : 'Actual Age'}
+              </span>
+              <span className="font-bold text-slate-900">
+                {isAr
+                  ? `${result.ageYears} سنة، ${result.ageMonths} شهر، ${result.ageDays} يوم`
+                  : `${result.ageYears} years, ${result.ageMonths} months, ${result.ageDays} days`}
+              </span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {isAr ? 'المرحلة التالية' : 'Next Stage'}
+              </span>
+              <span className="font-bold text-slate-900">{result.nextStage ?? '—'}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {isAr ? 'المرحلة (بداية العام الدراسي)' : 'Academic-Year Stage'}
+              </span>
+              <span className="font-bold text-slate-900">{result.academicStage.stageName ?? '—'}</span>
+              <span className="block text-[10px] text-slate-500">
+                {isAr ? 'ابتداءً من' : 'as of'} {formatDisplayDate(result.academicStage.academicYearStart)}
+              </span>
+            </div>
+            {result.nextStage === 'Adult' && !result.adultTransition.isAdult && (
+              <div>
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  {isAr ? 'عيد الميلاد الـ 18' : '18th Birthday'}
+                </span>
+                <span className="font-bold text-slate-900">
+                  {formatDisplayDate(result.adultTransition.eighteenthBirthday)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {result.adultTransition.showAlert && (
+            <div
+              id="adult-transition-alert"
+              role="alert"
+              className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900"
+            >
+              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-600" aria-hidden="true" />
+              <div className="text-xs space-y-0.5">
+                <p className="font-extrabold">
+                  {isAr ? 'تنبيه داخلي: الانتقال لمرحلة الكبار' : 'Adult Transition Alert (internal)'}
+                </p>
+                <p>
+                  {isAr
+                    ? `الطالب هيكمل 18 سنة خلال ${result.adultTransition.daysUntilAdult} يوم تقريبًا (${formatDisplayDate(result.adultTransition.eighteenthBirthday)}).`
+                    : `Student turns 18 in approximately ${result.adultTransition.daysUntilAdult} day${result.adultTransition.daysUntilAdult === 1 ? '' : 's'} (${formatDisplayDate(result.adultTransition.eighteenthBirthday)}).`}
+                </p>
+                <p>
+                  {isAr
+                    ? 'ممكن تعرّف العميل بإمكانية الانتظار لحد ما يبقى مؤهل لكورسات الكبار، لو مناسب.'
+                    : 'Consider informing the customer about the option to wait for Adult course eligibility, if appropriate.'}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 2. DYNAMIC PRICING CARDS */}
       <div className="bg-white rounded-xl border border-slate-200/90 shadow-sm p-4 space-y-3">

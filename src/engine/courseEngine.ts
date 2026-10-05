@@ -30,6 +30,11 @@ import {
 import { BRANCHES } from '../data/branches';
 import { ADULT_INSTALLMENT_RULES, YL_INSTALLMENT_RULES } from '../data/installments';
 import { calculateAge, formatDisplayDate } from './ageCalculator';
+import {
+  getAcademicStageInfo,
+  getNextStage,
+  getAdultTransitionStatus,
+} from './academicStage';
 
 /**
  * Determines age category based on exact calendar years.
@@ -619,8 +624,14 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     terms: input.numberOfTerms || 1,
   });
 
+  // 7b. Academic-year stage (1 Sep), next stage & Adult transition (internal)
+  const academicStageInfo = getAcademicStageInfo(input.dob, input.referenceDate);
+  const nextStageConfig = getNextStage(ageGroupConfig);
+  const adultTransition = getAdultTransitionStatus(input.dob, ageGroupConfig, input.referenceDate);
+
   // 8. Quick Customer Answer Generation (Bilingual: English & Egyptian Arabic)
   const quickCustomerAnswerEn = generateQuickCustomerAnswer({
+    approachingAdult: adultTransition.showAlert,
     effectiveAge,
     ageGroupName,
     program,
@@ -635,6 +646,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
   });
 
   const quickCustomerAnswerAr = generateQuickCustomerAnswerAr({
+    approachingAdult: adultTransition.showAlert,
     effectiveAge,
     ageGroupName,
     program,
@@ -683,6 +695,13 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     quickCustomerAnswerAr,
     sourceSheet,
     isManualOverrideActive,
+    academicStage: {
+      academicYearStart: academicStageInfo.academicYearStart,
+      ageAtAcademicYearStart: academicStageInfo.ageAtAcademicYearStart,
+      stageName: academicStageInfo.academicStage?.name ?? null,
+    },
+    nextStage: nextStageConfig?.name ?? null,
+    adultTransition,
   };
 }
 
@@ -789,6 +808,7 @@ function evaluateInstallments(params: {
  * Does NOT include confidential internal codes or CRM links.
  */
 function generateQuickCustomerAnswer(params: {
+  approachingAdult?: boolean;
   effectiveAge: number;
   ageGroupName: string;
   program: ProgramType;
@@ -851,6 +871,13 @@ function generateQuickCustomerAnswer(params: {
     parts.push('Eligible for Vario discount (deduction applied on SMS).');
   }
 
+  // Customer-facing (no internal wording) suggestion when close to 18
+  if (params.approachingAdult) {
+    parts.push(
+      'The student will be turning 18 soon, so you may also consider waiting until they become eligible for our Adult courses.'
+    );
+  }
+
   // Branch
   if (params.branchInfo) {
     parts.push(
@@ -866,6 +893,7 @@ function generateQuickCustomerAnswer(params: {
  * Ideal for reading to Egyptian parents on calls or copying directly to WhatsApp.
  */
 function generateQuickCustomerAnswerAr(params: {
+  approachingAdult?: boolean;
   effectiveAge: number;
   ageGroupName: string;
   program: ProgramType;
@@ -941,6 +969,12 @@ function generateQuickCustomerAnswerAr(params: {
   // Vario note
   if (params.vario && params.vario.eligible) {
     parts.push('مؤهل لخصم فاريو (يتم تحديد وخصم المبلغ عبر رسائل SMS).');
+  }
+
+  if (params.approachingAdult) {
+    parts.push(
+      'الطالب هيكمل 18 سنة قريب، فممكن كمان تستنوا لحد ما يبقى مؤهل لكورسات الكبار.'
+    );
   }
 
   // Branch

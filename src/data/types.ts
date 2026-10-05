@@ -240,5 +240,22 @@ export interface CalculationResult {
   quickCustomerAnswerEn: string;
   sourceSheet: string;
   isManualOverrideActive: boolean;
+
+  /** Academic-year (1 Sep) stage classification — does NOT alter chronological age. */
+  academicStage: {
+    academicYearStart: string;
+    ageAtAcademicYearStart: number | null;
+    stageName: string | null;
+  };
+  /** Stage that follows the current (chronological) stage, e.g. Upper Secondary → Adult. */
+  nextStage: string | null;
+  /** Internal-only Adult transition info (never copied into the Quick Answer). */
+  adultTransition: {
+    eighteenthBirthday: string;
+    isAdult: boolean;
+    daysUntilAdult: number;
+    thresholdMonths: number;
+    showAlert: boolean;
+  };
 }
 
