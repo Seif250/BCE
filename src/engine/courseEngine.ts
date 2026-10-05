@@ -265,14 +265,23 @@ export function evaluateVarioRule(params: {
 export function evaluateStudent(input: CalculationInput): CalculationResult {
   // 1. Calculate Age
   const ageCalc = calculateAge(input.dob, input.referenceDate);
-  const effectiveAge = ageCalc.years;
+  const effectiveAge = ageCalc.years; // chronological age — displayed, never replaced
 
-  // True calculated age classification — NEVER overridden by manual override
-  const ageCategory = getAgeCategory(effectiveAge);
-  const ageGroupConfig = getAgeGroup(effectiveAge);
+  // Academic-year stage (1 Sep is a general rule). For Young Learners, all
+  // stage-dependent decisions (stage, level, placement test, base term fee)
+  // use the completed age on the academic-year start date. Adult status
+  // (18+) remains chronological.
+  const academicStageInfo = getAcademicStageInfo(input.dob, input.referenceDate);
+  const stageAge =
+    effectiveAge >= 18
+      ? effectiveAge
+      : academicStageInfo.ageAtAcademicYearStart ?? effectiveAge;
+
+  const ageCategory = getAgeCategory(stageAge);
+  const ageGroupConfig = getAgeGroup(stageAge);
   const ageGroupName = ageGroupConfig
     ? ageGroupConfig.name
-    : effectiveAge >= 18
+    : stageAge >= 18
     ? 'Adult'
     : 'Unsupported / outside configured range';
 
@@ -308,7 +317,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
   }
 
   // 4. Placement Test rule
-  const ptRule = getPlacementTestRule(effectiveAge, program, input.selectedAdultProduct);
+  const ptRule = getPlacementTestRule(stageAge, program, input.selectedAdultProduct);
 
   // 5. Academic level & course recommendations
   let academicLevel = 'Exact course/level requires current level or placement confirmation.';
@@ -344,13 +353,13 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     operationalNotes.push(...WINTER_OPERATIONAL_NOTES);
 
     // Level assignment
-    if (effectiveAge === 4) {
+    if (stageAge === 4) {
       academicLevel = 'Early Years 2 (Ducks)';
       academicLevelStatus = 'confirmed';
       recommendedCourse = 'Early Years 2 (Ducks) – Winter Block';
       eligibleCourses = ['Early Years 2 (Ducks)'];
       summerMapping = 'Ducks';
-    } else if (effectiveAge === 5) {
+    } else if (stageAge === 5) {
       academicLevel = 'Early Years 3 (Owls)';
       academicLevelStatus = 'confirmed';
       recommendedCourse = 'Early Years 3 (Owls) – Winter Block';
@@ -366,7 +375,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
       academicLevel = 'Exact course/level requires current level or placement confirmation.';
       academicLevelStatus = 'needs_confirmation';
       recommendedCourse = `${ageGroupName} Winter Block Course`;
-      eligibleCourses = getAcademicLevelsForAge(effectiveAge).map((lvl) => lvl.name);
+      eligibleCourses = getAcademicLevelsForAge(stageAge).map((lvl) => lvl.name);
       summerMapping = null;
     }
 
@@ -376,9 +385,9 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     const terms = input.numberOfTerms && input.numberOfTerms > 0 ? input.numberOfTerms : 1;
     let termFee = WINTER_PRICING.primaryAndSecondaryTermFee; // default 5800
 
-    if (effectiveAge >= 4 && effectiveAge < 6) {
+    if (stageAge >= 4 && stageAge < 6) {
       termFee = WINTER_PRICING.earlyYearsTermFee; // 6400
-    } else if (effectiveAge >= 15 && effectiveAge <= 17 && input.existingLevel === 'IELTS for Teens') {
+    } else if (stageAge >= 15 && stageAge <= 17 && input.existingLevel === 'IELTS for Teens') {
       termFee = WINTER_PRICING.ieltsTeensTermFee; // 5600
       durationAndSessions = '18 hours in winter (Class duration: 2 hours, can only be attended once)';
     }
@@ -449,13 +458,13 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     operationalNotes.push(...SUMMER_OPERATIONAL_NOTES);
 
     // Level assignment
-    if (effectiveAge === 4) {
+    if (stageAge === 4) {
       academicLevel = 'Ducks';
       academicLevelStatus = 'confirmed';
       recommendedCourse = 'Summer Camp – Ducks';
       eligibleCourses = ['Ducks'];
       summerMapping = 'Ducks';
-    } else if (effectiveAge === 5) {
+    } else if (stageAge === 5) {
       academicLevel = 'Owls';
       academicLevelStatus = 'confirmed';
       recommendedCourse = 'Summer Camp – Owls';
@@ -480,7 +489,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
       academicLevel = 'Exact course/level requires current level or placement confirmation.';
       academicLevelStatus = 'needs_confirmation';
       recommendedCourse = `${ageGroupName} Summer Camp`;
-      eligibleCourses = getAcademicLevelsForAge(effectiveAge)
+      eligibleCourses = getAcademicLevelsForAge(stageAge)
         .map((lvl) => lvl.summerMapping)
         .filter((lvl): lvl is string => Boolean(lvl));
       summerMapping = null;
@@ -624,8 +633,7 @@ export function evaluateStudent(input: CalculationInput): CalculationResult {
     terms: input.numberOfTerms || 1,
   });
 
-  // 7b. Academic-year stage (1 Sep), next stage & Adult transition (internal)
-  const academicStageInfo = getAcademicStageInfo(input.dob, input.referenceDate);
+  // 7b. Next stage & Adult transition (internal)
   const nextStageConfig = getNextStage(ageGroupConfig);
   const adultTransition = getAdultTransitionStatus(input.dob, ageGroupConfig, input.referenceDate);
 

@@ -65,9 +65,10 @@ export const ResultCard: React.FC<ResultCardProps> = ({
     setTimeout(() => setCopiedPrice(false), 2000);
   };
 
-  // Determine base term price for Winter Block
-  const isEarlyYears = result.calculatedAge >= 4 && result.calculatedAge <= 5;
-  const isIeltsTeens = result.calculatedAge >= 15 && result.academicLevel.value.includes('IELTS');
+  // Determine base term price for Winter Block — follows the academic-year stage (1 Sep rule)
+  const isEarlyYears = result.ageCategory.value === 'Early Years';
+  const isIeltsTeens =
+    result.ageGroup.value === 'Upper Secondary' && result.academicLevel.value.includes('IELTS');
   const baseTermFee = isEarlyYears
     ? WINTER_PRICING.earlyYearsTermFee
     : isIeltsTeens

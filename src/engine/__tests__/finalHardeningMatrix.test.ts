@@ -31,7 +31,7 @@ describe('Final Hardening Matrix — 60 Critical Edge Cases', () => {
   // 2. Age 4 → Ducks → no PT
   it('2. Age 4 → Ducks → no PT', () => {
     const res = evaluateStudent({
-      dob: '2022-09-14', // 4 years old
+      dob: '2022-09-01', // 4 years old (birthday on/before 1 Sep → academic stage = 4)
       referenceDate: ref,
       selectedProgram: 'Winter Block',
       registrationType: 'New',
@@ -46,7 +46,7 @@ describe('Final Hardening Matrix — 60 Critical Edge Cases', () => {
   // 3. Age 5 → Owls → no PT
   it('3. Age 5 → Owls → no PT', () => {
     const res = evaluateStudent({
-      dob: '2021-09-14', // 5 years old
+      dob: '2021-09-01', // 5 years old (academic stage = 5)
       referenceDate: ref,
       selectedProgram: 'Winter Block',
       registrationType: 'New',
@@ -61,7 +61,7 @@ describe('Final Hardening Matrix — 60 Critical Edge Cases', () => {
   // 4. Age 6 → Lower Primary → PT logic applies
   it('4. Age 6 → Lower Primary → PT logic applies', () => {
     const res = evaluateStudent({
-      dob: '2020-09-14', // 6 years old
+      dob: '2020-09-01', // 6 years old (academic stage = 6)
       referenceDate: ref,
       selectedProgram: 'Winter Block',
       registrationType: 'New',
@@ -87,7 +87,7 @@ describe('Final Hardening Matrix — 60 Critical Edge Cases', () => {
   // 6. Age 9 → Upper Primary
   it('6. Age 9 → Upper Primary', () => {
     const res = evaluateStudent({
-      dob: '2017-09-14',
+      dob: '2017-09-01',
       referenceDate: ref,
       selectedProgram: 'Winter Block',
       registrationType: 'New',
@@ -111,7 +111,7 @@ describe('Final Hardening Matrix — 60 Critical Edge Cases', () => {
   // 8. Age 12 → Lower Secondary
   it('8. Age 12 → Lower Secondary', () => {
     const res = evaluateStudent({
-      dob: '2014-09-14',
+      dob: '2014-09-01',
       referenceDate: ref,
       selectedProgram: 'Winter Block',
       registrationType: 'New',
@@ -135,7 +135,7 @@ describe('Final Hardening Matrix — 60 Critical Edge Cases', () => {
   // 10. Age 15 → Upper Secondary
   it('10. Age 15 → Upper Secondary', () => {
     const res = evaluateStudent({
-      dob: '2011-09-14',
+      dob: '2011-09-01',
       referenceDate: ref,
       selectedProgram: 'Winter Block',
       registrationType: 'New',

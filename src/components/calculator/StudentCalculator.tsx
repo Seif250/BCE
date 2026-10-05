@@ -13,6 +13,7 @@ import {
   getAcademicLevelsForAge,
 } from '../../engine/courseEngine';
 import { calculateAge } from '../../engine/ageCalculator';
+import { getAcademicStageInfo } from '../../engine/academicStage';
 import { ADULT_COURSES } from '../../data/adultCourses';
 import { WINTER_PRICING } from '../../data/winterCourses';
 import { ResultCard } from './ResultCard';
@@ -126,7 +127,10 @@ export const StudentCalculator: React.FC = () => {
   const ageInfo = useMemo(() => {
     if (!dob) return null;
     const { years, months, days } = calculateAge(dob);
-    return { years, months, days };
+    // Academic-year (1 Sep) stage age — used for stage label & level options only
+    const stageYears =
+      years >= 18 ? years : getAcademicStageInfo(dob).ageAtAcademicYearStart ?? years;
+    return { years, months, days, stageYears };
   }, [dob]);
 
   // Determine effective program family
@@ -175,7 +179,7 @@ export const StudentCalculator: React.FC = () => {
   // Get age group title
   const ageGroupDisplay = useMemo(() => {
     if (!ageInfo) return '';
-    const y = ageInfo.years;
+    const y = ageInfo.stageYears;
     if (y < 4) return isAr ? 'أقل من 4 سنوات (خارج النطاق)' : 'Under 4y (Outside Range)';
     if (y === 4) return isAr ? 'مرحلة مبكرة 2 (Early Years 2)' : 'Early Years 2 (4y)';
     if (y === 5) return isAr ? 'مرحلة مبكرة 3 (Early Years 3)' : 'Early Years 3 (5y)';
@@ -193,7 +197,7 @@ export const StudentCalculator: React.FC = () => {
       const prod = ADULT_COURSES.find((p) => p.id === selectedAdultProduct) || ADULT_COURSES[1];
       return prod.levels.map((lvl) => ({ id: lvl, name: lvl }));
     }
-    return getAcademicLevelsForAge(ageInfo.years);
+    return getAcademicLevelsForAge(ageInfo.stageYears);
   }, [ageInfo, effectiveFamily, selectedAdultProduct]);
 
   // Single student evaluation
@@ -248,10 +252,14 @@ export const StudentCalculator: React.FC = () => {
         if (!c.dob) return null;
         const { years, months, days } = calculateAge(c.dob);
         const totalMonths = years * 12 + months;
+        // Academic-year (1 Sep) stage age drives stage/price; actual age stays for display & ordering
+        const stageAge =
+          years >= 18 ? years : getAcademicStageInfo(c.dob).ageAtAcademicYearStart ?? years;
         return {
           ...c,
           ageYears: years,
           ageMonths: months,
+          stageAge,
           totalMonths,
         };
       })
@@ -264,7 +272,7 @@ export const StudentCalculator: React.FC = () => {
 
     return sorted.map((child, index) => {
       const isEldest = index === 0;
-      const isEarlyYears = child.ageYears < 6;
+      const isEarlyYears = child.stageAge < 6;
       const baseTermFee = isEarlyYears
         ? WINTER_PRICING.earlyYearsTermFee
         : WINTER_PRICING.primaryAndSecondaryTermFee;
@@ -291,7 +299,7 @@ export const StudentCalculator: React.FC = () => {
       const totalDiscountAmount = bundleDiscountAmount + siblingDiscountAmount;
       const finalChildPrice = rawBaseTotal - totalDiscountAmount;
 
-      const y = child.ageYears;
+      const y = child.stageAge;
       let ageGroupDisplay = '';
       if (y === 4) ageGroupDisplay = isAr ? 'مرحلة مبكرة 2 (4 سنين)' : 'Early Years 2 (4y)';
       else if (y === 5) ageGroupDisplay = isAr ? 'مرحلة مبكرة 3 (5 سنين)' : 'Early Years 3 (5y)';
