@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Sparkles,
   X,
+  FlaskConical,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -23,7 +24,8 @@ export type NavSection =
   | 'branches'
   | 'installments'
   | 'links'
-  | 'quick-ref';
+  | 'quick-ref'
+  | 'social-lab';
 
 interface SidebarProps {
   currentSection: NavSection;
@@ -104,6 +106,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: language === 'ar' ? 'روابط النظام' : 'System Portals',
       shortLabel: language === 'ar' ? 'الروابط' : 'Links',
       icon: ExternalLink,
+    },
+    {
+      id: 'social-lab',
+      label: language === 'ar' ? 'مختبر المنصات' : 'Social Lab',
+      shortLabel: language === 'ar' ? 'المنصات' : 'Lab',
+      icon: FlaskConical,
     },
   ];
 
