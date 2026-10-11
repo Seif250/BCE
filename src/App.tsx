@@ -11,7 +11,6 @@ import { BranchesPage } from './components/pages/BranchesPage';
 import { InstallmentsPage } from './components/pages/InstallmentsPage';
 import { ImportantLinksPage } from './components/pages/ImportantLinksPage';
 import { QuickReferencePage } from './components/pages/QuickReferencePage';
-import { SocialLabPage } from './components/pages/SocialLabPage';
 import { GlobalSearchModal } from './components/search/GlobalSearchModal';
 import { Menu } from 'lucide-react';
 
@@ -101,7 +100,6 @@ function MainApp() {
             {currentSection === 'installments' && <InstallmentsPage />}
             {currentSection === 'links' && <ImportantLinksPage />}
             {currentSection === 'quick-ref' && <QuickReferencePage />}
-            {currentSection === 'social-lab' && <SocialLabPage />}
           </div>
         </main>
       </div>
